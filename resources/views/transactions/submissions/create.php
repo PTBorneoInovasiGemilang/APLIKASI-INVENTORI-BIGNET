@@ -74,7 +74,7 @@ if (empty($_SESSION['csrf_token'])) {
     const warehouses = <?php echo json_encode($warehouses); ?>;
     let warehouseOptions = '<option value="">Pilih Gudang...</option>';
     warehouses.forEach(wh => {
-        warehouseOptions += '<option value="' + wh.id + '">Gudang #' + wh.id + ' — ' + wh.name + '</option>';
+        warehouseOptions += '<option value="' + wh.id + '">' + wh.name + '</option>';
     });
 
     let rowCount = 0;
