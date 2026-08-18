@@ -1,0 +1,59 @@
+name: One-time report No column fix
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix-report-no-column:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Patch report table No column
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('resources/views/reports/report_viewer.php')
+          s = path.read_text(encoding='utf-8')
+
+          if '.report-data-table th:nth-child(2)' not in s:
+              marker = '.report-data-table th {\n'
+              css = '''/* Keep the report row-number column readable: never wrap "No" into N/O. */
+              .report-data-table th:nth-child(2),
+              .report-data-table td:nth-child(2) {
+                  width: 56px !important;
+                  min-width: 56px !important;
+                  max-width: 56px !important;
+                  padding-left: 8px !important;
+                  padding-right: 8px !important;
+                  white-space: nowrap !important;
+                  word-break: normal !important;
+                  overflow-wrap: normal !important;
+              }
+
+              .report-data-table th {
+              '''
+              if marker not in s:
+                  raise SystemExit('Expected report table CSS marker was not found.')
+              s = s.replace(marker, css, 1)
+              path.write_text(s, encoding='utf-8', newline='\n')
+
+      - name: Commit and remove one-time workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add resources/views/reports/report_viewer.php .github/workflows/fix-report-no-column.yml
+          git rm .github/workflows/fix-report-no-column.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix report No column wrapping [skip ci]"
+          git push origin main
