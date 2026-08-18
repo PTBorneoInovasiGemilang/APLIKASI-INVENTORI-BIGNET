@@ -92,7 +92,14 @@ class TransferController {
         \App\Helpers\AuthHelper::requireRole('ADMIN');
         $pdo = Database::getInstance()->getConnection();
         $warehouses = $pdo->query("SELECT * FROM warehouses WHERE is_active = 1")->fetchAll();
-        $items = $pdo->query("SELECT id, kode_barang, nama, is_serialized FROM master_items WHERE is_active = 1")->fetchAll();
+
+        // Only expose items that actually have stock in an active warehouse.
+        // The UI will filter these rows again based on the selected source warehouse.
+        $items = $pdo->query("SELECT s.warehouse_id, s.master_item_id AS id, m.kode_barang, m.nama, m.is_serialized, s.quantity AS stock_quantity
+                              FROM stocks s
+                              JOIN master_items m ON m.id = s.master_item_id
+                              WHERE m.is_active = 1 AND s.quantity > 0
+                              ORDER BY m.nama ASC, s.warehouse_id ASC")->fetchAll();
         
         require __DIR__ . '/../../resources/views/transactions/transfers/create.php';
     }
