@@ -30,20 +30,22 @@ if (empty($_SESSION['csrf_token'])) {
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 border-b dark:border-gray-700 pb-2">Detail Transfer</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gudang Asal</label>
-                    <select name="source_warehouse_id" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        <option value="">Pilih Gudang Asal</option>
+                    <label for="source_warehouse_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gudang Asal</label>
+                    <select id="source_warehouse_id" name="source_warehouse_id" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">Pilih Gudang Asal...</option>
                         <?php foreach ($warehouses as $wh): ?>
-                            <option value="<?= $wh['id'] ?>"><?= htmlspecialchars($wh['name']) ?></option>
+                            <?php $whLabel = ($wh['code'] ?? '') . ' — ' . $wh['name'] . (!empty($wh['address']) ? ' — ' . $wh['address'] : ''); ?>
+                            <option value="<?= $wh['id'] ?>"><?= htmlspecialchars(trim($whLabel, ' —')) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gudang Tujuan</label>
-                    <select name="destination_warehouse_id" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        <option value="">Pilih Gudang Tujuan</option>
+                    <label for="destination_warehouse_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gudang Tujuan</label>
+                    <select id="destination_warehouse_id" name="destination_warehouse_id" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">Pilih Gudang Tujuan...</option>
                         <?php foreach ($warehouses as $wh): ?>
-                            <option value="<?= $wh['id'] ?>"><?= htmlspecialchars($wh['name']) ?></option>
+                            <?php $whLabel = ($wh['code'] ?? '') . ' — ' . $wh['name'] . (!empty($wh['address']) ? ' — ' . $wh['address'] : ''); ?>
+                            <option value="<?= $wh['id'] ?>"><?= htmlspecialchars(trim($whLabel, ' —')) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -52,6 +54,7 @@ if (empty($_SESSION['csrf_token'])) {
                     <textarea name="notes" rows="2" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
                 </div>
             </div>
+            <p id="warehouseHint" class="mt-3 text-xs text-gray-500 dark:text-gray-400">Pilih gudang asal terlebih dahulu. Gudang tujuan akan otomatis mengecualikan gudang asal.</p>
         </div>
 
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
@@ -87,6 +90,55 @@ if (empty($_SESSION['csrf_token'])) {
 
 <script>
     const itemsData = <?php echo json_encode($items); ?>;
+    const warehousesData = <?php echo json_encode(array_map(function ($wh) {
+        return [
+            'id' => (int)$wh['id'],
+            'code' => $wh['code'] ?? '',
+            'name' => $wh['name'] ?? '',
+            'address' => $wh['address'] ?? '',
+        ];
+    }, $warehouses)); ?>;
+
+    const sourceWarehouse = document.getElementById('source_warehouse_id');
+    const destinationWarehouse = document.getElementById('destination_warehouse_id');
+    const warehouseHint = document.getElementById('warehouseHint');
+
+    function warehouseLabel(wh) {
+        return [wh.code, wh.name, wh.address].filter(Boolean).join(' — ');
+    }
+
+    function refreshDestinationOptions() {
+        const sourceId = sourceWarehouse.value;
+        const currentDestination = destinationWarehouse.value;
+
+        destinationWarehouse.innerHTML = '<option value="">Pilih Gudang Tujuan...</option>';
+
+        warehousesData.forEach(wh => {
+            if (String(wh.id) === String(sourceId)) return;
+            const option = document.createElement('option');
+            option.value = wh.id;
+            option.textContent = warehouseLabel(wh);
+            destinationWarehouse.appendChild(option);
+        });
+
+        if (currentDestination && String(currentDestination) !== String(sourceId)) {
+            destinationWarehouse.value = currentDestination;
+        } else {
+            destinationWarehouse.value = '';
+        }
+
+        if (sourceId && destinationWarehouse.options.length === 1) {
+            warehouseHint.textContent = 'Tidak ada gudang tujuan lain yang tersedia selain gudang asal.';
+        } else if (sourceId) {
+            warehouseHint.textContent = 'Gudang tujuan tidak dapat sama dengan gudang asal.';
+        } else {
+            warehouseHint.textContent = 'Pilih gudang asal terlebih dahulu. Gudang tujuan akan otomatis mengecualikan gudang asal.';
+        }
+    }
+
+    sourceWarehouse.addEventListener('change', refreshDestinationOptions);
+    refreshDestinationOptions();
+
     let rowCount = 0;
     
     function addItemRow() {
