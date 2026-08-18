@@ -124,7 +124,7 @@ class DashboardController {
             // ===== Alerts / anomaly =====
             $alerts = [];
             if ($stats['low_stock'] > 0) {
-                $alerts[] = ['level' => 'danger', 'icon' => 'fa-exclamation-triangle', 'title' => 'Stok Rendah', 'desc' => $stats['low_stock'] . ' item di bawah/ sama dengan batas minimum.', 'url' => url('/stocks?filter=low_stock')];
+                $alerts[] = ['level' => 'danger', 'icon' => 'fa-exclamation-triangle', 'title' => 'Stok Rendah', 'desc' => $stats['low_stock'] . ' jenis barang memiliki stok di bawah/sama dengan batas minimum.', 'url' => url('/stocks?filter=low_stock')];
             }
             if ($overdueCount > 0) {
                 $alerts[] = ['level' => 'danger', 'icon' => 'fa-clock', 'title' => 'Peminjaman Terlambat', 'desc' => $overdueCount . ' peminjaman melewati jatuh tempo.', 'url' => url('/loans')];
