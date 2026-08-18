@@ -74,7 +74,7 @@ if (empty($_SESSION['csrf_token'])) {
     const warehouses = <?php echo json_encode($warehouses); ?>;
     let warehouseOptions = '<option value="">Pilih Gudang...</option>';
     warehouses.forEach(wh => {
-        warehouseOptions += '<option value="' + wh.id + '">' + wh.name + '</option>';
+        warehouseOptions += '<option value="' + wh.id + '">Gudang #' + wh.id + ' — ' + wh.name + '</option>';
     });
 
     let rowCount = 0;
@@ -176,7 +176,7 @@ if (empty($_SESSION['csrf_token'])) {
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     <input type="text" name="manual_specs[]" placeholder="Spesifikasi/Tipe (Ops)" class="col-span-2 w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-3 text-gray-700 dark:text-white dark:bg-gray-700 text-sm focus:outline-none min-h-[44px]">
-                    <input type="text" name="manual_units[]" placeholder="Satuan (Pcs/Roll)" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-3 text-gray-700 dark:bg-gray-700 text-sm focus:outline-none min-h-[44px]">
+                    <input type="text" name="manual_units[]" placeholder="Satuan (Pcs/Roll)" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-3 text-gray-700 dark:text-white dark:bg-gray-700 text-sm focus:outline-none min-h-[44px]">
                 </div>
             </div>
 
