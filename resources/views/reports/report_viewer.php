@@ -23,8 +23,21 @@ ob_start();
     vertical-align: top;
 }
 
-.report-data-table th {
-    line-height: 1.25;
+/* Keep the report row-number column readable: never wrap "No" into N/O. */
+    .report-data-table th:nth-child(2),
+    .report-data-table td:nth-child(2) {
+        width: 56px !important;
+        min-width: 56px !important;
+        max-width: 56px !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        white-space: nowrap !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+    }
+
+    .report-data-table th {
+        line-height: 1.25;
 }
 
 .report-data-table td {
