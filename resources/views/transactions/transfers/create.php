@@ -42,9 +42,6 @@ if (empty($_SESSION['csrf_token'])) {
                     <label for="destination_warehouse_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gudang Tujuan</label>
                     <select id="destination_warehouse_id" name="destination_warehouse_id" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="">Pilih Gudang Tujuan...</option>
-                        <?php foreach ($warehouses as $wh): ?>
-                            <option value="<?= $wh['id'] ?>"><?= htmlspecialchars($wh['name']) ?></option>
-                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="md:col-span-2">
@@ -57,7 +54,10 @@ if (empty($_SESSION['csrf_token'])) {
 
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-2">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Daftar Barang yang Ditransfer</h2>
+                <div>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Daftar Barang yang Ditransfer</h2>
+                    <p id="itemHint" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih gudang asal untuk melihat barang yang tersedia di gudang tersebut.</p>
+                </div>
                 <button type="button" onclick="addItemRow()" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium">
                     <i class="fas fa-plus"></i> Tambah Barang
                 </button>
@@ -98,30 +98,28 @@ if (empty($_SESSION['csrf_token'])) {
     const sourceWarehouse = document.getElementById('source_warehouse_id');
     const destinationWarehouse = document.getElementById('destination_warehouse_id');
     const warehouseHint = document.getElementById('warehouseHint');
+    const itemHint = document.getElementById('itemHint');
 
-    function warehouseLabel(wh) {
-        return wh.name || '';
+    function getSourceItems() {
+        const sourceId = String(sourceWarehouse.value || '');
+        if (!sourceId) return [];
+
+        return itemsData.filter(item =>
+            String(item.warehouse_id) === sourceId && Number(item.stock_quantity) > 0
+        );
     }
 
     function refreshDestinationOptions() {
         const sourceId = sourceWarehouse.value;
-        const currentDestination = destinationWarehouse.value;
-
         destinationWarehouse.innerHTML = '<option value="">Pilih Gudang Tujuan...</option>';
 
         warehousesData.forEach(wh => {
             if (String(wh.id) === String(sourceId)) return;
             const option = document.createElement('option');
             option.value = wh.id;
-            option.textContent = warehouseLabel(wh);
+            option.textContent = wh.name;
             destinationWarehouse.appendChild(option);
         });
-
-        if (currentDestination && String(currentDestination) !== String(sourceId)) {
-            destinationWarehouse.value = currentDestination;
-        } else {
-            destinationWarehouse.value = '';
-        }
 
         if (sourceId && destinationWarehouse.options.length === 1) {
             warehouseHint.textContent = 'Tidak ada gudang tujuan lain yang tersedia selain gudang asal.';
@@ -132,7 +130,96 @@ if (empty($_SESSION['csrf_token'])) {
         }
     }
 
-    sourceWarehouse.addEventListener('change', refreshDestinationOptions);
+    function itemLabel(item) {
+        return `${item.nama} (${item.kode_barang})`;
+    }
+
+    function populateItemSelect(selectElem) {
+        const currentValue = selectElem.value;
+        const sourceItems = getSourceItems();
+
+        selectElem.innerHTML = '';
+
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = sourceWarehouse.value
+            ? (sourceItems.length ? 'Pilih Barang' : 'Tidak ada barang tersedia di gudang ini')
+            : 'Pilih Gudang Asal Terlebih Dahulu';
+        selectElem.appendChild(placeholder);
+
+        sourceItems.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.dataset.serialized = item.is_serialized;
+            option.dataset.stock = item.stock_quantity;
+            option.textContent = itemLabel(item);
+            selectElem.appendChild(option);
+        });
+
+        selectElem.disabled = !sourceWarehouse.value || sourceItems.length === 0;
+
+        const stillAvailable = sourceItems.some(item => String(item.id) === String(currentValue));
+        if (stillAvailable) {
+            selectElem.value = currentValue;
+        } else {
+            selectElem.value = '';
+            resetRowSerialState(selectElem.closest('tr'));
+        }
+    }
+
+    function refreshItemOptions() {
+        const sourceItems = getSourceItems();
+        document.querySelectorAll('.item-select').forEach(selectElem => {
+            populateItemSelect(selectElem);
+        });
+
+        if (!sourceWarehouse.value) {
+            itemHint.textContent = 'Pilih gudang asal untuk melihat barang yang tersedia di gudang tersebut.';
+        } else if (sourceItems.length === 0) {
+            itemHint.textContent = 'Tidak ada barang dengan stok tersedia di gudang asal yang dipilih.';
+        } else {
+            itemHint.textContent = `Menampilkan ${sourceItems.length} barang yang memiliki stok di gudang asal.`;
+        }
+    }
+
+    function resetRowSerialState(tr) {
+        if (!tr) return;
+        const snContainer = tr.querySelector('[id^="sn-container-"]');
+        const snDisabled = tr.querySelector('[id^="sn-disabled-"]');
+        const snInput = tr.querySelector('[id^="sn-input-"]');
+        const qtyInput = tr.querySelector('.qty-input');
+
+        if (snContainer) snContainer.classList.add('hidden');
+        if (snDisabled) snDisabled.classList.remove('hidden');
+        if (snInput) {
+            snInput.removeAttribute('required');
+            snInput.value = '';
+        }
+        if (qtyInput) {
+            qtyInput.removeAttribute('max');
+            qtyInput.value = 1;
+        }
+    }
+
+    function updateQuantityLimit(selectElem, rowIndex) {
+        const option = selectElem.options[selectElem.selectedIndex];
+        const tr = selectElem.closest('tr');
+        const qtyInput = tr ? tr.querySelector('.qty-input') : null;
+        const stock = option && option.dataset.stock ? Number(option.dataset.stock) : 0;
+
+        if (qtyInput && stock > 0) {
+            qtyInput.max = stock;
+            if (Number(qtyInput.value) > stock) qtyInput.value = stock;
+        }
+
+        handleItemChange(selectElem, rowIndex);
+    }
+
+    sourceWarehouse.addEventListener('change', () => {
+        refreshDestinationOptions();
+        refreshItemOptions();
+    });
+
     refreshDestinationOptions();
 
     let rowCount = 0;
@@ -144,15 +231,12 @@ if (empty($_SESSION['csrf_token'])) {
         const tr = document.createElement('tr');
         tr.dataset.index = rowIndex;
         
-        let selectHtml = `<select name="item_ids[]" required class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm item-select" onchange="handleItemChange(this, ${rowIndex})">
-            <option value="">Pilih Barang</option>`;
-        itemsData.forEach(item => {
-            selectHtml += `<option value="${item.id}" data-serialized="${item.is_serialized}">${item.nama} (${item.kode_barang})</option>`;
-        });
-        selectHtml += `</select>`;
-        
         tr.innerHTML = `
-            <td class="px-4 py-3 align-top">${selectHtml}</td>
+            <td class="px-4 py-3 align-top">
+                <select name="item_ids[]" required disabled class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm item-select" onchange="updateQuantityLimit(this, ${rowIndex})">
+                    <option value="">Pilih Gudang Asal Terlebih Dahulu</option>
+                </select>
+            </td>
             <td class="px-4 py-3 align-top">
                 <input type="number" name="quantities[]" min="1" value="1" required class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm text-center qty-input" onchange="validateQty(this, ${rowIndex})" onkeyup="validateQty(this, ${rowIndex})">
             </td>
@@ -172,16 +256,19 @@ if (empty($_SESSION['csrf_token'])) {
         `;
         
         tbody.appendChild(tr);
+        populateItemSelect(tr.querySelector('.item-select'));
     }
 
     function handleItemChange(selectElem, rowIndex) {
         const option = selectElem.options[selectElem.selectedIndex];
-        const isSerialized = option.getAttribute('data-serialized') == '1';
+        const isSerialized = option && option.getAttribute('data-serialized') === '1';
         
         const snContainer = document.getElementById(`sn-container-${rowIndex}`);
         const snDisabled = document.getElementById(`sn-disabled-${rowIndex}`);
         const snInput = document.getElementById(`sn-input-${rowIndex}`);
         
+        if (!snContainer || !snDisabled || !snInput) return;
+
         if (isSerialized) {
             snContainer.classList.remove('hidden');
             snDisabled.classList.add('hidden');
@@ -196,6 +283,9 @@ if (empty($_SESSION['csrf_token'])) {
     }
 
     function validateQty(qtyElem, rowIndex) {
+        const max = parseInt(qtyElem.max || '0', 10);
+        const value = parseInt(qtyElem.value || '0', 10);
+        if (max > 0 && value > max) qtyElem.value = max;
         validateSnCount(rowIndex);
     }
 
@@ -206,9 +296,9 @@ if (empty($_SESSION['csrf_token'])) {
         const qtyInput = tr.querySelector('.qty-input');
         const snInput = document.getElementById(`sn-input-${rowIndex}`);
         const counter = document.getElementById(`sn-counter-${rowIndex}`);
+        if (!qtyInput || !snInput || !counter) return;
         
         const expectedQty = parseInt(qtyInput.value) || 0;
-        
         const rawText = snInput.value;
         const snArray = rawText.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
         const actualQty = snArray.length;
