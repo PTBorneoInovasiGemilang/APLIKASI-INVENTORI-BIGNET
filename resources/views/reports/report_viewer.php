@@ -3,6 +3,67 @@ $pageTitle = $config['title'];
 ob_start();
 ?>
 
+<style>
+/* Shared report table: long values must wrap instead of being clipped/truncated. */
+.report-data-wrap {
+    overflow-x: auto;
+}
+
+.report-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.report-data-table th,
+.report-data-table td {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    vertical-align: top;
+}
+
+.report-data-table th {
+    line-height: 1.25;
+}
+
+.report-data-table td {
+    line-height: 1.35;
+}
+
+@media print {
+    .report-data-wrap {
+        overflow: visible !important;
+    }
+
+    .report-data-table {
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed !important;
+        font-size: 8px !important;
+    }
+
+    .report-data-table th,
+    .report-data-table td {
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+        padding: 4px 5px !important;
+        line-height: 1.25 !important;
+        vertical-align: top !important;
+    }
+
+    .report-data-table thead {
+        display: table-header-group;
+    }
+
+    .report-data-table tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+}
+</style>
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 fade-in">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-gray-200 dark:border-gray-800 pb-4">
@@ -165,8 +226,8 @@ ob_start();
         </div>
 
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-            <div class="overflow-x-auto">
-                <table class="w-full <?= count($headers) >= 6 ? 'min-w-[1000px]' : 'min-w-full' ?> divide-y divide-gray-200 dark:divide-gray-700">
+            <div class="report-data-wrap">
+                <table class="report-data-table w-full <?= count($headers) >= 6 ? 'min-w-[1000px]' : 'min-w-full' ?> divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-900/50">
                         <tr>
                             <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12 no-print">
@@ -184,15 +245,14 @@ ob_start();
                         foreach ($data as $row): 
                         ?>
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400 no-print">
+                                <td class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400 no-print">
                                     <input type="checkbox" name="selected_ids[]" form="selectionForm" value="<?= (int)($row['id'] ?? 0) ?>" class="row-check rounded border-gray-300 dark:border-gray-600">
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
+                                <td class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
                                 <?php foreach ($columns as $col): ?>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                                         <?php 
                                             $val = $row[$col] ?? '-';
-                                            // Handle dates
                                             if (($col === 'created_at' || $col === 'sent_at' || $col === 'received_at' || $col === 'installed_at' || $col === 'loan_date_display') && $val !== '-') {
                                                 echo date('d M Y, H:i', strtotime($val));
                                             } else {
