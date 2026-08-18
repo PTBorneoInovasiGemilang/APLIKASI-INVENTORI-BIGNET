@@ -1,0 +1,53 @@
+/vendor/
+/node_modules/
+
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/testing/*
+
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Database dumps / backups
+*.sql
+storage/backups/
+
+# Temporary diagnostic files
+public/tmp_*
+tests/tmp_*
+
+# Generated analysis/cache
+graphify-out/
+
+# Playwright CLI generated artifacts
+.playwright-cli/
+
+# Generated analysis / AI tooling
+graphify-out/
+.playwright-cli/
+.freebuff/
+.claude/
+
+# Runtime / environment
+storage/database/installed.lock
+storage/private_uploads/
+
+# Generated reports
+*.pdf
+
+# Generated screenshots
+screenshots/
+
+# Test runtime output
+test-results/
+tests/artifacts/
+tests/cookie.txt
+tests/create_admin_session.php
+
+# Test fixture binaries
+tests/fixtures/*.png
+tests/playwright/dummy_evidence.png
