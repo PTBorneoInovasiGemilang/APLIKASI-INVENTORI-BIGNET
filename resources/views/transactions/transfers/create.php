@@ -34,8 +34,7 @@ if (empty($_SESSION['csrf_token'])) {
                     <select id="source_warehouse_id" name="source_warehouse_id" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="">Pilih Gudang Asal...</option>
                         <?php foreach ($warehouses as $wh): ?>
-                            <?php $whLabel = ($wh['code'] ?? '') . ' — ' . $wh['name'] . (!empty($wh['address']) ? ' — ' . $wh['address'] : ''); ?>
-                            <option value="<?= $wh['id'] ?>"><?= htmlspecialchars(trim($whLabel, ' —')) ?></option>
+                            <option value="<?= $wh['id'] ?>"><?= htmlspecialchars($wh['name']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -44,8 +43,7 @@ if (empty($_SESSION['csrf_token'])) {
                     <select id="destination_warehouse_id" name="destination_warehouse_id" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="">Pilih Gudang Tujuan...</option>
                         <?php foreach ($warehouses as $wh): ?>
-                            <?php $whLabel = ($wh['code'] ?? '') . ' — ' . $wh['name'] . (!empty($wh['address']) ? ' — ' . $wh['address'] : ''); ?>
-                            <option value="<?= $wh['id'] ?>"><?= htmlspecialchars(trim($whLabel, ' —')) ?></option>
+                            <option value="<?= $wh['id'] ?>"><?= htmlspecialchars($wh['name']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -93,9 +91,7 @@ if (empty($_SESSION['csrf_token'])) {
     const warehousesData = <?php echo json_encode(array_map(function ($wh) {
         return [
             'id' => (int)$wh['id'],
-            'code' => $wh['code'] ?? '',
             'name' => $wh['name'] ?? '',
-            'address' => $wh['address'] ?? '',
         ];
     }, $warehouses)); ?>;
 
@@ -104,7 +100,7 @@ if (empty($_SESSION['csrf_token'])) {
     const warehouseHint = document.getElementById('warehouseHint');
 
     function warehouseLabel(wh) {
-        return [wh.code, wh.name, wh.address].filter(Boolean).join(' — ');
+        return wh.name || '';
     }
 
     function refreshDestinationOptions() {
