@@ -1,0 +1,111 @@
+name: Fix search results UI
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'resources/views/search/index.php'
+      - '.github/workflows/search-ui-fix.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply search UI polish
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('resources/views/search/index.php')
+          s = p.read_text(encoding='utf-8')
+          marker = 'BIGNET_SEARCH_RESULTS_UI_2026_08_19'
+          if marker not in s:
+              style = r'''
+<style>
+/* BIGNET_SEARCH_RESULTS_UI_2026_08_19 */
+#searchResults .search-results-table {
+    width: 100%;
+    min-width: 1120px;
+    table-layout: auto;
+}
+#searchResults .search-results-table thead th {
+    white-space: nowrap;
+    vertical-align: middle;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+}
+#searchResults .search-results-table tbody td {
+    vertical-align: middle;
+    padding-top: .9rem;
+    padding-bottom: .9rem;
+}
+#searchResults .search-results-table tbody td:nth-child(1) {
+    width: 48px;
+}
+#searchResults .search-results-table tbody td:nth-child(2) {
+    min-width: 82px;
+}
+#searchResults .search-results-table tbody td:nth-child(3) {
+    min-width: 220px;
+}
+#searchResults .search-results-table tbody td:nth-child(4) {
+    min-width: 150px;
+}
+#searchResults .search-results-table tbody td:nth-child(5) {
+    min-width: 220px;
+}
+#searchResults .search-results-table tbody td:nth-child(6) {
+    min-width: 140px;
+}
+#searchResults .search-results-table tbody td:nth-child(7) {
+    min-width: 130px;
+}
+#searchResults .search-results-table tbody td:nth-child(8),
+#searchResults .search-results-table tbody td:nth-child(9) {
+    min-width: 150px;
+    white-space: nowrap;
+}
+#searchResults .search-results-table tbody td:last-child {
+    min-width: 92px;
+    white-space: nowrap;
+}
+#searchResults .search-results-table .stock-summary,
+#searchResults .search-results-table .stock-summary * {
+    white-space: nowrap;
+}
+#searchResults .search-results-table .stock-summary {
+    line-height: 1.35;
+}
+#searchResults .search-results-table tbody tr:hover {
+    background-color: rgba(59, 130, 246, .035);
+}
+@media (max-width: 900px) {
+    #searchResults .search-results-table {
+        min-width: 980px;
+    }
+}
+</style>
+'''
+              s = s.replace('<?php\n$pageTitle = \'Pencarian Barang\';\nob_start();\n?>', '<?php\n$pageTitle = \'Pencarian Barang\';\nob_start();\n?>\n' + style, 1)
+          s = s.replace('class="w-full min-w-[1100px] table-sticky divide-y divide-gray-200 dark:divide-gray-700"', 'class="w-full min-w-[1120px] search-results-table table-sticky divide-y divide-gray-200 dark:divide-gray-700"', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+          git config user.name "BIGNET UI Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add resources/views/search/index.php
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "fix: polish search results table layout"
+          git push origin main
+      - name: Remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin main
+          rm -f .github/workflows/search-ui-fix.yml
+          git add .github/workflows/search-ui-fix.yml
+          git commit -m "chore: remove temporary search UI workflow"
+          git push origin main
