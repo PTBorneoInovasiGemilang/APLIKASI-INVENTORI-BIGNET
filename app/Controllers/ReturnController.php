@@ -108,11 +108,11 @@ class ReturnController {
         $pdo = Database::getInstance()->getConnection();
         
         $user_id = AuthHelper::user()['id'];
-        $stmt = $pdo->prepare("SELECT id, transaction_code, borrower_id FROM loans WHERE status != 'RETURNED' AND borrower_id = ?");
+        $stmt = $pdo->prepare("SELECT id, transaction_code, borrower_id FROM loans WHERE status IN ('BORROWED','PARTIAL_RETURNED') AND borrower_id = ? ORDER BY id DESC");
         $stmt->execute([$user_id]);
         $loans = $stmt->fetchAll();
-        $warehouses = $pdo->query("SELECT * FROM warehouses WHERE is_active = 1")->fetchAll();
-        $items = $pdo->query("SELECT id, kode_barang, nama, is_serialized FROM master_items WHERE is_active = 1")->fetchAll();
+        $warehouses = $pdo->query("SELECT * FROM warehouses WHERE is_active = 1 ORDER BY name")->fetchAll();
+        $items = $pdo->query("SELECT id, kode_barang, nama, is_serialized FROM master_items WHERE is_active = 1 ORDER BY nama")->fetchAll();
 
         require __DIR__ . '/../../resources/views/transactions/returns/create.php';
     }
@@ -120,7 +120,6 @@ class ReturnController {
     public function store() {
         AuthHelper::requireRole(['TEKNISI_NOC']);
 
-        // FIX: database connection must exist before any prepare/query call.
         $pdo = Database::getInstance()->getConnection();
         $user_id = AuthHelper::user()['id'];
 
@@ -135,69 +134,138 @@ class ReturnController {
         $notes = trim($_POST['notes'] ?? '');
         
         $item_ids = $_POST['item_ids'] ?? [];
+        $item_types = $_POST['item_types'] ?? [];
         $quantities = $_POST['quantities'] ?? [];
         $sn_list = $_POST['sn_list'] ?? [];
 
+        $returnUrl = '/returns/create' . ($loan_id ? '?loan_id=' . $loan_id : '');
+
         if ($warehouse_id <= 0) {
             $_SESSION['error'] = "Gudang pengembalian wajib dipilih.";
-            header("Location: " . url('/returns/create' . ($loan_id ? '?loan_id=' . $loan_id : '')));
+            header("Location: " . url($returnUrl));
             exit;
         }
 
         if (empty($item_ids)) {
             $_SESSION['error'] = "Tidak ada barang yang dipilih.";
-            header("Location: " . url('/returns/create' . ($loan_id ? '?loan_id=' . $loan_id : '')));
+            header("Location: " . url($returnUrl));
             exit;
         }
 
-        if ($loan_id) {
-            $stmt = $pdo->prepare("SELECT id FROM loans WHERE id = ? AND borrower_id = ? AND status IN ('BORROWED','PARTIAL_RETURNED')");
-            $stmt->execute([$loan_id, $user_id]);
-            if (!$stmt->fetch()) {
-                $_SESSION['error'] = "Peminjaman tidak valid atau barang sudah tidak dapat dikembalikan.";
-                header("Location: " . url('/returns/create?loan_id=' . $loan_id));
-                exit;
-            }
+        if (!$loan_id) {
+            $_SESSION['error'] = "Peminjaman wajib dipilih untuk pengembalian.";
+            header("Location: " . url('/returns/create'));
+            exit;
         }
-
-        $transaction_code = \App\Helpers\TransactionHelper::generateCode('RET', 'returns');
 
         try {
             $pdo->beginTransaction();
 
+            $stmt = $pdo->prepare("SELECT id FROM loans WHERE id = ? AND borrower_id = ? AND status IN ('BORROWED','PARTIAL_RETURNED') FOR UPDATE");
+            $stmt->execute([$loan_id, $user_id]);
+            if (!$stmt->fetch()) {
+                throw new \Exception("Peminjaman tidak valid atau barang sudah tidak dapat dikembalikan.");
+            }
+
+            $transaction_code = \App\Helpers\TransactionHelper::generateCode('RET', 'returns');
             $stmt = $pdo->prepare("INSERT INTO returns (transaction_code, reference_type, reference_id, technician_id, warehouse_id, notes, status) VALUES (?, 'LOAN', ?, ?, ?, ?, 'PENDING')");
             $stmt->execute([$transaction_code, $loan_id, $user_id, $warehouse_id, $notes]);
-            $return_id = $pdo->lastInsertId();
+            $return_id = (int)$pdo->lastInsertId();
 
             $itemStmt = $pdo->prepare("INSERT INTO return_items (return_id, master_item_id, quantity, serial_number_id, condition_status, loan_item_id) VALUES (?, ?, ?, ?, 'GOOD', ?)");
+            $manualItemStmt = $pdo->prepare("INSERT INTO return_items (return_id, master_item_id, quantity, serial_number_id, condition_status, loan_item_id) VALUES (?, ?, ?, ?, 'GOOD', ?)");
 
-            foreach ($item_ids as $index => $item_id) {
+            $createdLines = 0;
+
+            foreach ($item_ids as $index => $item_id_value) {
+                $itemType = strtoupper(trim((string)($item_types[$index] ?? 'STOCK')));
+                $sourceId = (int)$item_id_value;
                 $qty = (int)($quantities[$index] ?? 0);
-                if ($qty <= 0) continue;
 
-                $master_item_id = (int)$item_id;
-                $loan_item_id_val = null;
-
-                if ($loan_id) {
-                    $loanItemStmt = $pdo->prepare("SELECT id, master_item_id, quantity, returned_quantity FROM loan_items WHERE loan_id = ? AND id = ? FOR UPDATE");
-                    $loanItemStmt->execute([$loan_id, $item_id]);
-                    $loanItem = $loanItemStmt->fetch();
-
-                    if (!$loanItem || $qty > ($loanItem['quantity'] - $loanItem['returned_quantity'])) {
-                        throw new \Exception("Jumlah pengembalian melebihi sisa barang yang masih dipinjam.");
-                    }
-                    $master_item_id = (int)$loanItem['master_item_id'];
-                    $loan_item_id_val = (int)$loanItem['id'];
+                if ($sourceId <= 0 || $qty <= 0) {
+                    continue;
                 }
 
-                $mItemStmt = $pdo->prepare("SELECT is_serialized FROM master_items WHERE id = ? AND is_active = 1");
-                $mItemStmt->execute([$master_item_id]);
-                $mItem = $mItemStmt->fetch();
+                if ($itemType === 'MANUAL') {
+                    $loanItemStmt = $pdo->prepare("SELECT id, master_item_id, quantity, returned_quantity FROM loan_manual_items WHERE loan_id = ? AND id = ? FOR UPDATE");
+                    $loanItemStmt->execute([$loan_id, $sourceId]);
+                    $loanItem = $loanItemStmt->fetch(PDO::FETCH_ASSOC);
 
-                if ($mItem && (int)$mItem['is_serialized'] === 1) {
+                    if (!$loanItem) {
+                        throw new \Exception("Barang manual pada peminjaman tidak ditemukan.");
+                    }
+
+                    $remaining = (int)$loanItem['quantity'] - (int)$loanItem['returned_quantity'];
+                    if ($qty > $remaining) {
+                        throw new \Exception("Jumlah pengembalian melebihi sisa barang yang masih dipinjam.");
+                    }
+
+                    $masterId = !empty($loanItem['master_item_id']) ? (int)$loanItem['master_item_id'] : null;
+                    if ($masterId <= 0) {
+                        throw new \Exception("Barang manual belum terhubung ke Master Barang. Hubungi Admin terlebih dahulu.");
+                    }
+
+                    $mItemStmt = $pdo->prepare("SELECT id, is_serialized, is_active FROM master_items WHERE id = ?");
+                    $mItemStmt->execute([$masterId]);
+                    $mItem = $mItemStmt->fetch(PDO::FETCH_ASSOC);
+                    if (!$mItem || (int)$mItem['is_active'] !== 1) {
+                        throw new \Exception("Master Barang untuk pengembalian tidak valid.");
+                    }
+
+                    if ((int)$mItem['is_serialized'] === 1) {
+                        $rawSn = $sn_list[$index] ?? '';
+                        $snArray = array_values(array_filter(array_map('trim', preg_split('/[\n,]+/', (string)$rawSn))));
+                        if (count($snArray) !== $qty) {
+                            throw new \Exception("Jumlah nomor seri tidak sesuai dengan jumlah barang yang dikembalikan.");
+                        }
+                        if (count($snArray) !== count(array_unique($snArray))) {
+                            throw new \Exception("Ada nomor seri yang sama pada pengembalian.");
+                        }
+
+                        foreach ($snArray as $sn) {
+                            $chk = $pdo->prepare("SELECT sn.id FROM serial_numbers sn JOIN loan_item_serials lis ON lis.serial_number_id = sn.id JOIN loan_items li ON li.id = lis.loan_item_id WHERE li.loan_id = ? AND li.master_item_id = ? AND sn.serial_number = ? AND lis.status IN ('PENDING','HANDED_OVER','RETURNED') LIMIT 1 FOR UPDATE");
+                            $chk->execute([$loan_id, $masterId, $sn]);
+                            $snId = $chk->fetchColumn();
+
+                            if (!$snId) {
+                                throw new \Exception("Nomor seri '$sn' bukan bagian dari barang yang dipinjamkan.");
+                            }
+
+                            $itemStmt->execute([$return_id, $masterId, 1, (int)$snId, null]);
+                            $createdLines++;
+                        }
+                    } else {
+                        $itemStmt->execute([$return_id, $masterId, $qty, null, null]);
+                        $createdLines++;
+                    }
+
+                    continue;
+                }
+
+                $loanItemStmt = $pdo->prepare("SELECT id, master_item_id, quantity, returned_quantity FROM loan_items WHERE loan_id = ? AND id = ? FOR UPDATE");
+                $loanItemStmt->execute([$loan_id, $sourceId]);
+                $loanItem = $loanItemStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$loanItem) {
+                    throw new \Exception("Barang dari stok pada peminjaman tidak ditemukan.");
+                }
+
+                $remaining = (int)$loanItem['quantity'] - (int)$loanItem['returned_quantity'];
+                if ($qty > $remaining) {
+                    throw new \Exception("Jumlah pengembalian melebihi sisa barang yang masih dipinjam.");
+                }
+
+                $master_item_id = (int)$loanItem['master_item_id'];
+                $mItemStmt = $pdo->prepare("SELECT id, is_serialized, is_active FROM master_items WHERE id = ?");
+                $mItemStmt->execute([$master_item_id]);
+                $mItem = $mItemStmt->fetch(PDO::FETCH_ASSOC);
+                if (!$mItem || (int)$mItem['is_active'] !== 1) {
+                    throw new \Exception("Master Barang untuk pengembalian tidak valid.");
+                }
+
+                if ((int)$mItem['is_serialized'] === 1) {
                     $rawSn = $sn_list[$index] ?? '';
-                    $snArray = array_values(array_filter(array_map('trim', preg_split('/[\n,]+/', $rawSn))));
-                    
+                    $snArray = array_values(array_filter(array_map('trim', preg_split('/[\n,]+/', (string)$rawSn))));
                     if (count($snArray) !== $qty) {
                         throw new \Exception("Jumlah nomor seri tidak sesuai dengan jumlah barang yang dikembalikan.");
                     }
@@ -206,26 +274,24 @@ class ReturnController {
                     }
 
                     foreach ($snArray as $sn) {
-                        $chk = $pdo->prepare("SELECT id, status FROM serial_numbers WHERE serial_number = ? FOR UPDATE");
-                        $chk->execute([$sn]);
-                        $snRow = $chk->fetch();
-                        
-                        if (!$snRow) {
-                            throw new \Exception("Nomor seri '$sn' tidak ditemukan.");
-                        }
-                        if ($loan_item_id_val) {
-                            $chkLoan = $pdo->prepare("SELECT lis.id, lis.status FROM loan_item_serials lis WHERE lis.loan_item_id = ? AND lis.serial_number_id = ?");
-                            $chkLoan->execute([$loan_item_id_val, $snRow['id']]);
-                            if (!$chkLoan->fetch()) {
-                                throw new \Exception("Nomor seri '$sn' bukan bagian dari peminjaman ini.");
-                            }
+                        $chk = $pdo->prepare("SELECT sn.id FROM serial_numbers sn JOIN loan_item_serials lis ON lis.serial_number_id = sn.id WHERE lis.loan_item_id = ? AND sn.serial_number = ? AND lis.status IN ('PENDING','HANDED_OVER') LIMIT 1 FOR UPDATE");
+                        $chk->execute([(int)$loanItem['id'], $sn]);
+                        $snId = $chk->fetchColumn();
+                        if (!$snId) {
+                            throw new \Exception("Nomor seri '$sn' bukan bagian dari peminjaman ini atau sudah dikembalikan.");
                         }
 
-                        $itemStmt->execute([$return_id, $master_item_id, 1, $snRow['id'], $loan_item_id_val]);
+                        $itemStmt->execute([$return_id, $master_item_id, 1, (int)$snId, (int)$loanItem['id']]);
+                        $createdLines++;
                     }
                 } else {
-                    $itemStmt->execute([$return_id, $master_item_id, $qty, null, $loan_item_id_val]);
+                    $itemStmt->execute([$return_id, $master_item_id, $qty, null, (int)$loanItem['id']]);
+                    $createdLines++;
                 }
+            }
+
+            if ($createdLines === 0) {
+                throw new \Exception("Tidak ada barang yang valid untuk dikembalikan.");
             }
 
             $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'CREATE', 'returns', ?)");
@@ -233,10 +299,12 @@ class ReturnController {
 
             $pdo->commit();
             $_SESSION['success'] = "Pengajuan pengembalian barang berhasil dikirim dan menunggu pemeriksaan Admin.";
-        } catch (\Exception $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             $_SESSION['error'] = "Gagal mengajukan pengembalian: " . $e->getMessage();
-            header("Location: " . url('/returns/create' . ($loan_id ? '?loan_id=' . $loan_id : '')));
+            header("Location: " . url($returnUrl));
             exit;
         }
 
@@ -249,7 +317,7 @@ class ReturnController {
                 'info',
                 '/returns/show?id=' . $return_id
             );
-        } catch (\Exception $notifEx) {
+        } catch (\Throwable $notifEx) {
             error_log('[BIGNET] Notification gagal (return create #' . $return_id . '): ' . $notifEx->getMessage());
         }
 
@@ -293,6 +361,10 @@ class ReturnController {
             $itemsStmt = $pdo->prepare("SELECT ri.*, m.is_serialized FROM return_items ri JOIN master_items m ON ri.master_item_id = m.id WHERE ri.return_id = ?");
             $itemsStmt->execute([$id]);
             $items = $itemsStmt->fetchAll();
+
+            if (!$items) {
+                throw new \Exception("Tidak ada barang pada pengembalian ini.");
+            }
 
             $conditions = $_POST['conditions'] ?? [];
 
@@ -341,35 +413,79 @@ class ReturnController {
                     $updLoan = $pdo->prepare("UPDATE loan_items SET returned_quantity = returned_quantity + ? WHERE id = ?");
                     $updLoan->execute([$qty, $item['loan_item_id']]);
                 } elseif ($item['loan_item_id'] && $item['is_serialized']) {
-                    $updLoan = $pdo->prepare("UPDATE loan_items SET returned_quantity = returned_quantity + 1 WHERE id = ?");
-                    $updLoan->execute([$item['loan_item_id']]);
+                    $pdo->prepare("UPDATE loan_items SET returned_quantity = LEAST(quantity, returned_quantity + ?) WHERE id = ?")->execute([$qty, $item['loan_item_id']]);
                 }
             }
 
-            if ($loan_id) {
-                $chk = $pdo->prepare("SELECT SUM(quantity) as total_qty, SUM(returned_quantity) as total_returned FROM loan_items WHERE loan_id = ?");
-                $chk->execute([$loan_id]);
-                $loanStats = $chk->fetch();
-                if ($loanStats && (int)$loanStats['total_returned'] >= (int)$loanStats['total_qty']) {
-                    $pdo->prepare("UPDATE loans SET status = 'RETURNED' WHERE id = ?")->execute([$loan_id]);
-                } else {
-                    $pdo->prepare("UPDATE loans SET status = 'PARTIAL_RETURNED' WHERE id = ?")->execute([$loan_id]);
-                }
-            }
+            $statusStmt = $pdo->prepare("SELECT COALESCE(SUM(quantity),0) total_qty, COALESCE(SUM(returned_quantity),0) total_returned FROM loan_items WHERE loan_id = ?");
+            $statusStmt->execute([$loan_id]);
+            $loanTotals = $statusStmt->fetch(PDO::FETCH_ASSOC);
+            $totalQty = (int)($loanTotals['total_qty'] ?? 0);
+            $totalReturned = (int)($loanTotals['total_returned'] ?? 0);
 
-            $pdo->prepare("UPDATE returns SET status = 'COMPLETED', processed_by = ? WHERE id = ?")->execute([$user_id, $id]);
+            $manualTotalsStmt = $pdo->prepare("SELECT COALESCE(SUM(quantity),0) total_qty, COALESCE(SUM(returned_quantity),0) total_returned FROM loan_manual_items WHERE loan_id = ?");
+            $manualTotalsStmt->execute([$loan_id]);
+            $manualTotals = $manualTotalsStmt->fetch(PDO::FETCH_ASSOC);
+            $totalQty += (int)($manualTotals['total_qty'] ?? 0);
+            $totalReturned += (int)($manualTotals['total_returned'] ?? 0);
 
-            $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'UPDATE', 'returns', ?)");
+            $newLoanStatus = $totalQty > 0 && $totalReturned >= $totalQty ? 'RETURNED' : 'PARTIAL_RETURNED';
+            $pdo->prepare("UPDATE loans SET status = ?, processed_by = ? WHERE id = ?")->execute([$newLoanStatus, $user_id, $loan_id]);
+
+            $pdo->prepare("UPDATE returns SET status = 'COMPLETED', processed_by = ?, processed_at = NOW() WHERE id = ?")->execute([$user_id, $id]);
+
+            $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'PROCESS', 'returns', ?)");
             $auditStmt->execute([$user_id, $id]);
 
             $pdo->commit();
-            $_SESSION['success'] = "Pengembalian berhasil diproses dan stok telah diperbarui.";
-        } catch (\Exception $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
+            $_SESSION['success'] = "Pengembalian berhasil diproses.";
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             $_SESSION['error'] = "Gagal memproses pengembalian: " . $e->getMessage();
         }
 
         header("Location: " . url('/returns/show?id=' . $id));
+        exit;
+    }
+
+    public function reject() {
+        AuthHelper::requireRole(['ADMIN']);
+        AuthHelper::denySuperadminWrite();
+        $id = (int)($_POST['id'] ?? 0);
+        $reason = trim($_POST['reason'] ?? '');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
+            $_SESSION['error'] = 'Permintaan tidak valid.';
+            header('Location: ' . url('/returns'));
+            exit;
+        }
+
+        if ($reason === '') {
+            $_SESSION['error'] = 'Alasan penolakan wajib diisi.';
+            header('Location: ' . url('/returns/show?id=' . $id));
+            exit;
+        }
+
+        $pdo = Database::getInstance()->getConnection();
+        try {
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare("SELECT * FROM returns WHERE id = ? FOR UPDATE");
+            $stmt->execute([$id]);
+            $return = $stmt->fetch();
+            if (!$return || $return['status'] !== 'PENDING') {
+                throw new \Exception('Pengembalian tidak valid atau sudah diproses.');
+            }
+            $pdo->prepare("UPDATE returns SET status='REJECTED', processed_by=?, processed_at=NOW(), notes=CONCAT(COALESCE(notes,''), CASE WHEN COALESCE(notes,'')='' THEN '' ELSE '\n' END, 'Ditolak: ', ?) WHERE id=?")->execute([AuthHelper::user()['id'], $reason, $id]);
+            $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'REJECT', 'returns', ?)")->execute([AuthHelper::user()['id'], $id]);
+            $pdo->commit();
+            $_SESSION['success'] = 'Pengajuan pengembalian ditolak.';
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $_SESSION['error'] = 'Gagal menolak pengembalian: ' . $e->getMessage();
+        }
+        header('Location: ' . url('/returns/show?id=' . $id));
         exit;
     }
 }
