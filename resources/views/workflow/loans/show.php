@@ -27,6 +27,9 @@ $badge=$labels[$loan['status']]??[$loan['status'],'gray'];
 .dark .loan-ui .bg-yellow-50{background:#332a0b!important}.dark .loan-ui .border-yellow-200{border-color:#715d16!important}.dark .loan-ui .text-yellow-700{color:#fde68a!important}
 .dark .loan-ui .bg-orange-50{background:#3c210d!important}.dark .loan-ui .border-orange-200{border-color:#8a4a13!important}.dark .loan-ui .text-orange-700{color:#fdba74!important}
 .dark .loan-ui .hover\:bg-gray-50:hover{background:#1a273b!important}
+.review-serial-wrap{display:none}.review-serial-wrap.is-visible{display:block}
+.review-serial-loading{font-size:.75rem;color:#64748b;margin-top:.35rem}
+.review-serial-error{font-size:.75rem;color:#dc2626;margin-top:.35rem}
 </style>
 <div class="loan-ui max-w-6xl mx-auto px-4 py-8">
   <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
@@ -54,7 +57,7 @@ $badge=$labels[$loan['status']]??[$loan['status'],'gray'];
     <input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>"><input type="hidden" name="id" value="<?=$loan['id']?>">
     <div class="mb-4"><h2 class="font-semibold text-lg">Review Admin</h2><p class="text-sm text-gray-600 mt-1">Admin wajib menentukan barang yang benar-benar diberikan. Untuk permintaan manual, wajib dipetakan ke Master Barang terlebih dahulu. Serah terima belum membuat pengeluaran stok sampai tombol <strong>Proses & Serahkan</strong> dijalankan.</p></div>
     <div class="space-y-4">
-    <?php foreach($items as $it): $isManual=($it['source_type']??'')==='MANUAL'; $key=$isManual?'m'.$it['id']:$it['id']; $requested=(int)$it['requested_quantity']; $serialChoices=$availableSerials[$key]??[]; ?>
+    <?php foreach($items as $it): $isManual=($it['source_type']??'')==='MANUAL'; $key=$isManual?'m'.$it['id']:$it['id']; $requested=(int)$it['requested_quantity']; ?>
       <div class="bg-white rounded-lg border p-4">
         <div class="grid lg:grid-cols-12 gap-4 items-start">
           <div class="lg:col-span-4">
@@ -64,11 +67,18 @@ $badge=$labels[$loan['status']]??[$loan['status'],'gray'];
           <div class="lg:col-span-6">
             <?php if($isManual): ?>
               <label class="block text-xs font-semibold mb-1">Mapping ke Master Barang</label>
-              <select name="mapped_master_item[<?=$it['id']?>]" class="review-master w-full border rounded-lg px-3 py-2" data-key="<?=$key?>"><option value="">Pilih barang inventory...</option><?php foreach($masterItems as $mi):?><option value="<?=$mi['id']?>" <?=((int)($it['master_item_id']??0)===(int)$mi['id'])?'selected':''?>><?=htmlspecialchars($mi['nama'])?></option><?php endforeach;?></select>
-              <?php if(!empty($it['mapped_name'])):?><div class="text-xs text-gray-500 mt-1">Saat ini dipetakan ke: <?=htmlspecialchars($it['mapped_name'])?></div><?php endif;?>
-              <?php if(!empty($serialChoices)): ?><label class="block text-xs font-semibold mt-3 mb-1">Pilih Serial</label><select name="approved_serials[<?=$key?>][]" multiple size="4" class="review-serial w-full border rounded-lg px-3 py-2" data-key="<?=$key?>"><?php foreach($serialChoices as $sn):?><option value="<?=$sn['id']?>"><?=htmlspecialchars($sn['serial_number'])?></option><?php endforeach;?></select><div class="text-xs text-gray-500 mt-1">Hanya serial yang tersedia di gudang yang muncul.</div><?php endif; ?>
+              <select name="mapped_master_item[<?=$it['id']?>]" class="review-master w-full border rounded-lg px-3 py-2" data-key="<?=$key?>" data-initial-master="<?=htmlspecialchars((string)($it['master_item_id']??''))?>"><option value="">Pilih barang inventory...</option><?php foreach($masterItems as $mi):?><option value="<?=$mi['id']?>" <?=((int)($it['master_item_id']??0)===(int)$mi['id'])?'selected':''?>><?=htmlspecialchars($mi['nama'])?></option><?php endforeach;?></select>
+              <div class="review-serial-wrap mt-3" data-key="<?=$key?>" data-master-id="<?=htmlspecialchars((string)($it['master_item_id']??''))?>">
+                <label class="block text-xs font-semibold mb-1">Pilih Serial yang Diberikan</label>
+                <select multiple size="4" class="review-serial w-full border rounded-lg px-3 py-2" data-key="<?=$key?>" disabled></select>
+                <div class="review-serial-loading">Pilih Master Barang untuk memuat serial yang tersedia.</div>
+              </div>
             <?php elseif((int)$it['is_serialized']===1): ?>
-              <label class="block text-xs font-semibold mb-1">Pilih Serial yang Diberikan</label><select name="approved_serials[<?=$key?>][]" multiple size="4" class="review-serial w-full border rounded-lg px-3 py-2" data-key="<?=$key?>"><?php foreach($serialChoices as $sn):?><option value="<?=$sn['id']?>"><?=htmlspecialchars($sn['serial_number'])?></option><?php endforeach;?></select><div class="text-xs text-gray-500 mt-1">Jumlah serial harus sama dengan jumlah diberikan.</div>
+              <div class="review-serial-wrap is-visible mt-3" data-key="<?=$key?>" data-master-id="<?=htmlspecialchars((string)($it['master_item_id']??''))?>">
+                <label class="block text-xs font-semibold mb-1">Pilih Serial yang Diberikan</label>
+                <select multiple size="4" class="review-serial w-full border rounded-lg px-3 py-2" data-key="<?=$key?>" disabled></select>
+                <div class="review-serial-loading">Memuat serial yang tersedia...</div>
+              </div>
             <?php else: ?>
               <div class="text-sm text-gray-500 pt-6">Barang bulk: Admin cukup menentukan jumlah. Stok dicek ulang saat proses Barang Keluar.</div>
             <?php endif; ?>
@@ -103,11 +113,77 @@ $badge=$labels[$loan['status']]??[$loan['status'],'gray'];
   <?php require __DIR__.'/../../components/audit_timeline.php'; ?>
 </div>
 <script>
+async function loadLoanSerials(masterId,key){
+  const wrap=document.querySelector('.review-serial-wrap[data-key="'+CSS.escape(String(key))+'"]');
+  if(!wrap)return false;
+  const select=wrap.querySelector('.review-serial');
+  const note=wrap.querySelector('.review-serial-loading');
+  const normalizedMaster=parseInt(masterId||0,10);
+  select.innerHTML='';
+  select.disabled=true;
+  wrap.classList.remove('is-visible');
+  if(!normalizedMaster){
+    if(note)note.textContent='Pilih Master Barang untuk memuat serial yang tersedia.';
+    return true;
+  }
+  wrap.classList.add('is-visible');
+  if(note)note.textContent='Memuat serial yang tersedia...';
+  try{
+    const warehouseId=<?=json_encode((int)($loan['warehouse_id']??0))?>;
+    const res=await fetch('<?=url('/api/stock')?>?item_id='+normalizedMaster+'&warehouse_id='+warehouseId,{headers:{'Accept':'application/json'}});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(!Array.isArray(data.serials) || data.serials.length===0){
+      if(note)note.textContent='Tidak ada serial AVAILABLE untuk Master Barang ini di gudang tersebut.';
+      return false;
+    }
+    data.serials.forEach(sn=>{
+      const option=document.createElement('option');
+      option.value=String(sn.id);
+      option.textContent=sn.serial_number+(sn.location_name?' · '+sn.location_name:'');
+      select.appendChild(option);
+    });
+    select.disabled=false;
+    if(note)note.textContent='Pilih serial sesuai jumlah yang diberikan.';
+    return true;
+  }catch(err){
+    if(note)note.textContent='Gagal memuat serial. Silakan refresh lalu coba lagi.';
+    return false;
+  }
+}
+
+function setupLoanSerialSelectors(){
+  document.querySelectorAll('.review-master').forEach(select=>{
+    select.addEventListener('change',()=>loadLoanSerials(select.value,select.dataset.key));
+    if(select.value)loadLoanSerials(select.value,select.dataset.key);
+  });
+  document.querySelectorAll('.review-serial-wrap.is-visible[data-master-id]').forEach(wrap=>{
+    const masterId=wrap.dataset.masterId;
+    if(masterId)loadLoanSerials(masterId,wrap.dataset.key);
+  });
+}
+
 function validateLoanApproval(){
   let ok=true;
-  document.querySelectorAll('.review-include').forEach(cb=>{if(!cb.checked)return;const key=cb.dataset.key;const qty=document.querySelector('.review-qty[data-key="'+key+'"]');if(!qty||parseInt(qty.value||0)<1)ok=false;const master=document.querySelector('.review-master[data-key="'+key+'"]');if(master&&parseInt(qty.value||0)>0&&!master.value)ok=false;const serial=document.querySelector('.review-serial[data-key="'+key+'"]');if(serial&&serial.options.length>0&&serial.selectedOptions.length!==parseInt(qty.value||0))ok=false;});
-  if(!ok){alert('Periksa barang, jumlah, mapping manual, dan nomor seri yang diberikan.');return false;}return true;
+  document.querySelectorAll('.review-include').forEach(cb=>{
+    if(!cb.checked)return;
+    const key=cb.dataset.key;
+    const qty=document.querySelector('.review-qty[data-key="'+CSS.escape(String(key))+'"]');
+    const quantity=parseInt(qty?.value||0,10);
+    if(quantity<1)ok=false;
+    const master=document.querySelector('.review-master[data-key="'+CSS.escape(String(key))+'"]');
+    if(master&&quantity>0&&!master.value)ok=false;
+    const wrap=document.querySelector('.review-serial-wrap[data-key="'+CSS.escape(String(key))+'"]');
+    const serial=wrap?.querySelector('.review-serial');
+    if(serial && !serial.disabled && serial.options.length!==0 && serial.selectedOptions.length!==quantity)ok=false;
+    if(serial && !serial.disabled && serial.options.length===0)ok=false;
+  });
+  if(!ok){alert('Periksa barang, jumlah, mapping manual, dan nomor seri yang diberikan. Untuk barang serialized, serial harus dipilih tepat sesuai jumlah.');return false;}
+  return true;
 }
+
 function rejectLoan(){const reason=prompt('Masukkan alasan penolakan:');if(!reason||!reason.trim())return false;document.getElementById('reject_notes').value=reason.trim();return true;}
+
+document.addEventListener('DOMContentLoaded',setupLoanSerialSelectors);
 </script>
 <?php $content=ob_get_clean(); require __DIR__.'/../../layouts/app.php'; ?>
