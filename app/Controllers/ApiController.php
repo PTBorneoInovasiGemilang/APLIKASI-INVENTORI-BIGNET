@@ -40,10 +40,11 @@ class ApiController {
 
         if ($isSerialized) {
             $stmtSn = $pdo->prepare("
-                SELECT sn.serial_number, l.name as location_name
+                SELECT sn.id, sn.serial_number, l.name as location_name
                 FROM serial_numbers sn
                 LEFT JOIN locations l ON sn.current_location_id = l.id
                 WHERE sn.master_item_id = ? AND sn.current_warehouse_id = ? AND sn.status = 'AVAILABLE'
+                ORDER BY sn.serial_number
             ");
             $stmtSn->execute([$itemId, $warehouseId]);
             $response['serials'] = $stmtSn->fetchAll(\PDO::FETCH_ASSOC);
