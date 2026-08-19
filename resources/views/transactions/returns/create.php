@@ -2,13 +2,6 @@
 $pageTitle = 'Pengembalian Baru';
 $title = 'Buat Pengembalian Barang';
 $selectedLoanId = (int)($_GET['loan_id'] ?? 0);
-$selectedLoanLabel = '';
-foreach ($loans as $loan) {
-    if ((int)$loan['id'] === $selectedLoanId) {
-        $selectedLoanLabel = 'Peminjaman tanggal ' . date('d M Y', strtotime($loan['created_at'] ?? 'now'));
-        break;
-    }
-}
 
 ob_start();
 if (empty($_SESSION['csrf_token'])) {
@@ -71,7 +64,7 @@ if (empty($_SESSION['csrf_token'])) {
 
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan Tambahan</label>
-                    <textarea name="notes" rows="2" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Contoh: Barang sudah selesai dipakai untuk pemasangan... "></textarea>
+                    <textarea name="notes" rows="2" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Contoh: Barang sudah selesai dipakai untuk pemasangan..."></textarea>
                 </div>
             </div>
         </div>
@@ -84,7 +77,7 @@ if (empty($_SESSION['csrf_token'])) {
                 </div>
                 <span id="returnSummary" class="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">0 barang dipilih</span>
             </div>
-            
+
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="itemsTable">
                     <thead>
@@ -103,134 +96,154 @@ if (empty($_SESSION['csrf_token'])) {
         </div>
 
         <div class="flex flex-col sm:flex-row justify-end gap-3">
-            <a href="<?= url('/loans') ?>" class="bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 py-2 px-6 rounded-md shadow-sm text-sm font-medium transition-colors text-center">Batal</a>
+            <a href="<?= url('/loans') ?>" class="bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 py-2 px-6 rounded-md shadow-sm text-center text-sm font-medium transition-colors">Batal</a>
             <button type="submit" id="submitReturnBtn" disabled class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 px-6 rounded-md shadow-sm text-sm font-medium transition-colors">Kirim Pengajuan Pengembalian</button>
         </div>
     </form>
 </div>
 
 <script>
-    const selectedLoanFromUrl = <?= (int)$selectedLoanId ?>;
-    let rowCount = 0;
+const selectedLoanFromUrl = <?= (int)$selectedLoanId ?>;
+let rowCount = 0;
 
-    function updateSummary(){
-        const selected = document.querySelectorAll('.return-check:checked').length;
-        document.getElementById('returnSummary').innerText = `${selected} barang dipilih`;
-        document.getElementById('submitReturnBtn').disabled = selected === 0;
+function updateSummary() {
+    const selected = document.querySelectorAll('.return-check:checked').length;
+    document.getElementById('returnSummary').innerText = `${selected} barang dipilih`;
+}
+
+function setSubmitEnabled(enabled) {
+    document.getElementById('submitReturnBtn').disabled = !enabled;
+}
+
+function handleLoanChange(loanId) {
+    const tbody = document.getElementById('itemsBody');
+    tbody.innerHTML = '';
+    rowCount = 0;
+    setSubmitEnabled(false);
+    updateSummary();
+
+    if (!loanId) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500 dark:text-gray-400">Pilih peminjaman terlebih dahulu.</td></tr>';
+        return;
     }
 
-    function handleLoanChange(loanId) {
-        const tbody = document.getElementById('itemsBody');
-        tbody.innerHTML = '';
-        rowCount = 0;
-        updateSummary();
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500 dark:text-gray-400">Memuat barang yang masih dipinjam...</td></tr>';
 
-        if (!loanId) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500 dark:text-gray-400">Pilih peminjaman terlebih dahulu.</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500 dark:text-gray-400">Memuat barang yang masih dipinjam...</td></tr>';
-
-        fetch('<?= url('/loans/api/items?id=') ?>' + encodeURIComponent(loanId))
-            .then(response => response.json())
-            .then(data => {
-                tbody.innerHTML = '';
-                if (!Array.isArray(data) || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500 dark:text-gray-400">Tidak ada barang yang masih perlu dikembalikan.</td></tr>';
-                    updateSummary();
-                    return;
-                }
-                data.forEach(item => addSubItemRow(item));
+    fetch('<?= url('/loans/api/items?id=') ?>' + encodeURIComponent(loanId))
+        .then(response => {
+            if (!response.ok) throw new Error('Gagal mengambil data');
+            return response.json();
+        })
+        .then(data => {
+            tbody.innerHTML = '';
+            if (!Array.isArray(data) || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500 dark:text-gray-400">Tidak ada barang yang masih perlu dikembalikan.</td></tr>';
                 updateSummary();
-            })
-            .catch(() => {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-500">Gagal mengambil data barang yang dipinjam.</td></tr>';
-            });
-    }
-
-    function addSubItemRow(item) {
-        const tbody = document.getElementById('itemsBody');
-        const rowIndex = rowCount++;
-        const tr = document.createElement('tr');
-        tr.dataset.index = rowIndex;
-
-        const isSerialized = item.is_serialized == 1;
-        const maxQty = Math.max(0, Number(item.quantity || 0) - Number(item.returned_quantity || 0));
-        if (maxQty < 1) return;
-
-        tr.innerHTML = `
-            <td class="px-4 py-4 align-top text-center">
-                <input type="checkbox" class="return-check mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded" onchange="toggleReturnRow(${rowIndex})">
-                <input type="hidden" name="item_ids[]" value="${item.loan_item_id}" disabled id="item-id-${rowIndex}">
-                <input type="hidden" name="quantities[]" value="${maxQty}" disabled id="qty-hidden-${rowIndex}">
-                <input type="hidden" name="sn_list[]" value="" disabled id="sn-hidden-${rowIndex}">
-            </td>
-            <td class="px-4 py-4 align-top">
-                <div class="font-semibold text-gray-900 dark:text-gray-100">${escapeHtml(item.nama || '-')}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Dipinjam: ${Number(item.quantity||0)} · Sudah kembali: ${Number(item.returned_quantity||0)} · Sisa: ${maxQty}</div>
-            </td>
-            <td class="px-4 py-4 align-top">
-                <input type="number" min="1" max="${maxQty}" value="${maxQty}" id="qty-${rowIndex}" class="w-24 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-center" onchange="syncReturnRow(${rowIndex})" oninput="syncReturnRow(${rowIndex})">
-            </td>
-            <td class="px-4 py-4 align-top">
-                ${isSerialized ? `
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Nomor Seri yang Dikembalikan</label>
-                        <textarea id="sn-${rowIndex}" rows="2" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" placeholder="SN001\nSN002..." oninput="syncReturnRow(${rowIndex})"></textarea>
-                        <div id="sn-counter-${rowIndex}" class="text-xs font-semibold text-orange-500 mt-1">0 / ${maxQty} nomor seri</div>
-                    </div>
-                ` : '<span class="text-sm text-gray-500 dark:text-gray-400 italic">Barang tanpa nomor seri</span>'}
-            </td>
-        `;
-        tbody.appendChild(tr);
-    }
-
-    function toggleReturnRow(rowIndex){
-        const tr=document.querySelector(`tr[data-index="${rowIndex}"]`);
-        if(!tr)return;
-        const checked=tr.querySelector('.return-check').checked;
-        ['item-id-','qty-hidden-','sn-hidden-'].forEach(prefix=>{const el=document.getElementById(prefix+rowIndex);if(el)el.disabled=!checked;});
-        syncReturnRow(rowIndex);
-        updateSummary();
-    }
-
-    function syncReturnRow(rowIndex){
-        const tr=document.querySelector(`tr[data-index="${rowIndex}"]`);
-        if(!tr)return;
-        const checked=tr.querySelector('.return-check').checked;
-        const qty=Math.max(0,Number(document.getElementById('qty-'+rowIndex)?.value||0));
-        const qtyHidden=document.getElementById('qty-hidden-'+rowIndex);
-        if(qtyHidden)qtyHidden.value=qty;
-        const snText=document.getElementById('sn-'+rowIndex);
-        const snHidden=document.getElementById('sn-hidden-'+rowIndex);
-        const counter=document.getElementById('sn-counter-'+rowIndex);
-        if(snText){
-            const sns=snText.value.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
-            if(counter){counter.textContent=`${sns.length} / ${qty} nomor seri`;counter.className=`text-xs font-semibold mt-1 ${sns.length===qty?'text-green-600': 'text-orange-500'}`;}
-            if(snHidden)snHidden.value=sns.join('\n');
-            if(checked && sns.length!==qty){document.querySelector('.return-check')?.form?.querySelector('#submitReturnBtn')?.setAttribute('disabled','disabled');}
-        }
-        if(checked) updateSubmitState();
-    }
-
-    function updateSubmitState(){
-        const selected=[...document.querySelectorAll('.return-check:checked')];
-        let valid=selected.length>0;
-        selected.forEach(cb=>{
-            const tr=cb.closest('tr');
-            const qty=Number(tr.querySelector('.qty-input')?.value || document.getElementById('qty-'+tr.dataset.index)?.value || 0);
-            const sn=tr.querySelector('textarea')?.value.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean) || [];
-            const serialized=!!tr.querySelector('textarea');
-            if(qty<1)valid=false;
-            if(serialized && sn.length!==qty)valid=false;
+                return;
+            }
+            data.forEach(addSubItemRow);
+            updateSummary();
+            validateAllRows();
+        })
+        .catch(() => {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-500">Gagal mengambil data barang yang dipinjam.</td></tr>';
         });
-        document.getElementById('submitReturnBtn').disabled=!valid;
+}
+
+function addSubItemRow(item) {
+    const tbody = document.getElementById('itemsBody');
+    const rowIndex = rowCount++;
+    const tr = document.createElement('tr');
+    tr.dataset.index = rowIndex;
+
+    const sourceType = String(item.source_type || 'STOCK').toUpperCase() === 'MANUAL' ? 'MANUAL' : 'STOCK';
+    const isSerialized = Number(item.is_serialized || 0) === 1;
+    const maxQty = Math.max(0, Number(item.quantity || 0) - Number(item.returned_quantity || 0));
+    if (maxQty < 1) return;
+
+    tr.innerHTML = `
+        <td class="px-4 py-4 align-top text-center">
+            <input type="checkbox" class="return-check mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded" onchange="toggleReturnRow(${rowIndex})">
+            <input type="hidden" name="item_ids[]" value="${Number(item.loan_item_id || 0)}" disabled id="item-id-${rowIndex}">
+            <input type="hidden" name="item_types[]" value="${sourceType}" disabled id="item-type-${rowIndex}">
+            <input type="hidden" name="quantities[]" value="${maxQty}" disabled id="qty-hidden-${rowIndex}">
+            <input type="hidden" name="sn_list[]" value="" disabled id="sn-hidden-${rowIndex}">
+        </td>
+        <td class="px-4 py-4 align-top">
+            <div class="font-semibold text-gray-900 dark:text-gray-100">${escapeHtml(item.nama || '-')}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Dipinjam: ${Number(item.quantity || 0)} · Sudah kembali: ${Number(item.returned_quantity || 0)} · Sisa: ${maxQty}</div>
+        </td>
+        <td class="px-4 py-4 align-top">
+            <input type="number" min="1" max="${maxQty}" value="${maxQty}" id="qty-${rowIndex}" class="w-24 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-center" onchange="syncReturnRow(${rowIndex})" oninput="syncReturnRow(${rowIndex})">
+        </td>
+        <td class="px-4 py-4 align-top">
+            ${isSerialized ? `
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Nomor Seri yang Dikembalikan</label>
+                    <textarea id="sn-${rowIndex}" rows="2" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" placeholder="SN001\nSN002..." oninput="syncReturnRow(${rowIndex})"></textarea>
+                    <div id="sn-counter-${rowIndex}" class="text-xs font-semibold text-orange-500 mt-1">0 / ${maxQty} nomor seri</div>
+                </div>
+            ` : '<span class="text-sm text-gray-500 dark:text-gray-400 italic">Barang tanpa nomor seri</span>'}
+        </td>
+    `;
+    tbody.appendChild(tr);
+}
+
+function toggleReturnRow(rowIndex) {
+    const tr = document.querySelector(`tr[data-index="${rowIndex}"]`);
+    if (!tr) return;
+    const checked = tr.querySelector('.return-check').checked;
+    ['item-id-', 'item-type-', 'qty-hidden-', 'sn-hidden-'].forEach(prefix => {
+        const el = document.getElementById(prefix + rowIndex);
+        if (el) el.disabled = !checked;
+    });
+    syncReturnRow(rowIndex);
+    updateSummary();
+}
+
+function syncReturnRow(rowIndex) {
+    const tr = document.querySelector(`tr[data-index="${rowIndex}"]`);
+    if (!tr) return;
+    const checked = tr.querySelector('.return-check').checked;
+    const qty = Math.max(0, Number(document.getElementById('qty-' + rowIndex)?.value || 0));
+    const qtyHidden = document.getElementById('qty-hidden-' + rowIndex);
+    if (qtyHidden) qtyHidden.value = qty;
+
+    const snText = document.getElementById('sn-' + rowIndex);
+    const snHidden = document.getElementById('sn-hidden-' + rowIndex);
+    const counter = document.getElementById('sn-counter-' + rowIndex);
+    if (snText) {
+        const sns = snText.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+        if (counter) {
+            counter.textContent = `${sns.length} / ${qty} nomor seri`;
+            counter.className = `text-xs font-semibold mt-1 ${sns.length === qty ? 'text-green-600' : 'text-orange-500'}`;
+        }
+        if (snHidden) snHidden.value = sns.join('\n');
     }
 
-    function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[s]));}
+    if (checked) validateAllRows();
+}
 
-    if(selectedLoanFromUrl){handleLoanChange(String(selectedLoanFromUrl));}
+function validateAllRows() {
+    const selected = [...document.querySelectorAll('.return-check:checked')];
+    let valid = selected.length > 0;
+    selected.forEach(cb => {
+        const tr = cb.closest('tr');
+        const index = tr.dataset.index;
+        const qty = Number(document.getElementById('qty-' + index)?.value || 0);
+        const snText = tr.querySelector('textarea');
+        const sns = snText ? snText.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
+        if (qty < 1) valid = false;
+        if (snText && sns.length !== qty) valid = false;
+    });
+    setSubmitEnabled(valid);
+}
+
+function escapeHtml(v) {
+    return String(v ?? '').replace(/[&<>'\"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[s]));
+}
+
+if (selectedLoanFromUrl) handleLoanChange(String(selectedLoanFromUrl));
 </script>
 
 <?php
