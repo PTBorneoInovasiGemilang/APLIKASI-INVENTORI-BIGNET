@@ -423,3 +423,104 @@
     window.AppToast = AppToast;
     window.AppModal = AppModal;
 })(window, document);
+
+/* BIGNET GLOBAL UI RULE — INTERNAL/GENERATED CODES ARE NOT USER-FACING */
+(function (window, document) {
+    'use strict';
+
+    var INTERNAL_CODE_RE = /\b(?:KAT|GDG|UNT|REQ|TRF|LOC)-[A-Z0-9][A-Z0-9-]*\b/gi;
+    var CODE_LABEL_RE = /^\s*(?:kode(?:\s+barang|\s+gudang|\s+kategori|\s+satuan|\s+pengajuan|\s+transfer|\s+lokasi)?(?:\s*\/\s*SKU)?|kode\s*\/\s*sku)\s*$/i;
+
+    function cleanTextNode(node) {
+        if (!node || !node.nodeValue || !INTERNAL_CODE_RE.test(node.nodeValue)) return;
+        node.nodeValue = node.nodeValue
+            .replace(INTERNAL_CODE_RE, '')
+            .replace(/\s{2,}/g, ' ')
+            .replace(/\s+([—|-])/g, ' $1')
+            .replace(/([—|-])\s*([—|-])/g, '$1');
+    }
+
+    function isIdentifierCell(cell) {
+        var value = (cell.textContent || '').trim();
+        return INTERNAL_CODE_RE.test(value) || /^\[Auto Generated\]$/i.test(value);
+    }
+
+    function removeCodeFields(root) {
+        (root || document).querySelectorAll('label').forEach(function (label) {
+            var labelText = (label.textContent || '').replace(/\s+/g, ' ').trim();
+            if (!CODE_LABEL_RE.test(labelText)) return;
+
+            var block = label.closest('.mb-4, .mb-6, .form-group, .field');
+            if (!block) block = label.parentElement;
+            if (block) block.style.display = 'none';
+        });
+
+        (root || document).querySelectorAll('input[placeholder], textarea[placeholder]').forEach(function (el) {
+            var p = el.getAttribute('placeholder') || '';
+            if (/kode\b/i.test(p)) {
+                var cleaned = p.replace(/kode\s*/ig, '').replace(/\s*\/\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
+                el.setAttribute('placeholder', cleaned || 'Cari...');
+            }
+        });
+    }
+
+    function removeCodeColumns(root) {
+        (root || document).querySelectorAll('table').forEach(function (table) {
+            var rows = table.rows;
+            if (!rows || rows.length < 1) return;
+            var header = rows[0];
+            var indexes = [];
+            Array.prototype.forEach.call(header.cells, function (cell, idx) {
+                var label = (cell.textContent || '').replace(/\s+/g, ' ').trim();
+                if (/\bkode\b/i.test(label)) indexes.push(idx);
+            });
+            if (!indexes.length) return;
+            Array.prototype.forEach.call(rows, function (row) {
+                indexes.slice().sort(function (a, b) { return b - a; }).forEach(function (idx) {
+                    if (row.cells[idx] && row.cells.length > 1) row.deleteCell(idx);
+                });
+            });
+        });
+    }
+
+    function removeCodeGuideText(root) {
+        (root || document).querySelectorAll('li, small, p').forEach(function (el) {
+            var t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+            if (/^kode\b/i.test(t) || /kode\s+(?:dibuat|dibikin|dibentuk)/i.test(t) || /format\s+kode/i.test(t)) {
+                el.style.display = 'none';
+            }
+        });
+    }
+
+    function stripCodes(root) {
+        var walker = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT);
+        var nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+        nodes.forEach(cleanTextNode);
+    }
+
+    function applyCodePolicy(root) {
+        removeCodeFields(root);
+        removeCodeColumns(root);
+        removeCodeGuideText(root);
+        stripCodes(root || document.body);
+    }
+
+    function initCodePolicy() {
+        applyCodePolicy(document);
+        var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                Array.prototype.forEach.call(mutation.addedNodes, function (node) {
+                    if (node.nodeType === 1) applyCodePolicy(node);
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCodePolicy);
+    } else {
+        initCodePolicy();
+    }
+})(window, document);
