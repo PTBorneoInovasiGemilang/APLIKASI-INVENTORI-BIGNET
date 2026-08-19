@@ -3,42 +3,41 @@
 namespace App\Helpers;
 
 /**
- * PageGuideHelper — Sumber tunggal konten "Panduan Cepat" untuk seluruh halaman.
+ * Sumber tunggal konten "Panduan Cepat" untuk seluruh halaman.
  *
- * Pola: route -> [title, sections]. Dipakai otomatis oleh layout (layouts/app.php)
- * melalui komponen shared components/page_guide.php. Halaman tertentu dapat
- * meng-override dengan mengeset $guide (atau $guide_content legacy) sendiri.
+ * Panduan harus:
+ * - menggunakan bahasa Indonesia yang mudah dipahami;
+ * - mengikuti alur bisnis inventory terbaru;
+ * - tidak menampilkan istilah internal/kode database;
+ * - menjelaskan titik perubahan stok secara jelas.
  */
-class PageGuideHelper {
-
-    /**
-     * Daftar panduan per route. Prefix match: /categories/edit/3 -> /categories.
-     */
-    public static function all() {
+class PageGuideHelper
+{
+    public static function all(): array
+    {
         return [
             '/dashboard' => [
                 'title' => 'Panduan Dasbor',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Memantau kondisi stok dan pergerakan gudang secara real-time.',
+                        'Memantau kondisi stok, barang yang sedang dipinjam, dan aktivitas gudang.',
                     ]],
                     ['icon' => 'fa-chart-line', 'title' => 'Fungsi Utama', 'items' => [
-                        'KPI stok, trend 6 bulan, pergerakan stok, dan daftar anomaly (Perhatian).',
-                        'Aksi Cepat menyesuaikan peran Anda (Superadmin/Admin/Teknisi/NOC).',
+                        'Melihat ringkasan stok, barang masuk, barang keluar, peminjaman, pengajuan, dan peringatan.',
+                        'Tombol Aksi Cepat mengarahkan ke proses yang memang perlu ditindaklanjuti.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Semua angka berasal dari data transaksi nyata — bukan placeholder.',
-                        'Klik kartu/link untuk menindaklanjuti ke modul terkait.',
+                        'Angka dasbor berasal dari data transaksi yang tersimpan di sistem.',
+                        'Peminjaman tidak mengurangi stok fisik; barang yang dipinjam ditampilkan sebagai barang yang sedang dipinjam.',
                     ]],
-                    ['icon' => 'fa-user-shield', 'title' => 'Fokus Peran Anda', 'roles' => ['SUPERADMIN'], 'items' => [
-                        'Anda fokus monitoring & sistem: Pengguna, Pengaturan, Audit, Laporan, Timeline.',
-                        'Modul operasional bersifat baca-saja untuk Anda.',
+                    ['icon' => 'fa-user-gear', 'title' => 'Fokus Peran Anda', 'roles' => ['SUPERADMIN'], 'items' => [
+                        'Fokus pada pengaturan sistem, pengguna, audit, laporan, dan pemantauan.',
                     ]],
                     ['icon' => 'fa-warehouse', 'title' => 'Fokus Peran Anda', 'roles' => ['ADMIN'], 'items' => [
-                        'Anda menangani operasional gudang: incoming, outgoing, transfer, proses pengajuan, opname, insiden.',
+                        'Menangani operasional gudang: penerimaan, pengeluaran, pengajuan, peminjaman, transfer, pengembalian, opname, dan insiden.',
                     ]],
                     ['icon' => 'fa-user-gear', 'title' => 'Fokus Peran Anda', 'roles' => ['TEKNISI_NOC'], 'items' => [
-                        'Dashboard personal: pengajuan, pinjaman, instalasi, dan riwayat Anda.',
+                        'Mengajukan kebutuhan, meminjam barang, mengembalikan barang, melakukan instalasi, dan melihat riwayat barang yang menjadi tanggung jawab Anda.',
                     ]],
                 ],
             ],
@@ -47,15 +46,15 @@ class PageGuideHelper {
                 'title' => 'Panduan Pencarian',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mencari barang secara global: nomor seri, kode, atau nama.',
+                        'Mencari barang dan nomor seri dari seluruh data yang boleh Anda lihat.',
                     ]],
                     ['icon' => 'fa-search', 'title' => 'Fungsi Utama', 'items' => [
-                        'Kombinasikan kolom pencarian dan filter untuk mempersempit hasil.',
-                        'Tombol Reset mengembalikan tampilan ke kondisi awal.',
+                        'Gunakan pencarian dan filter secara bersamaan untuk mempersempit hasil.',
+                        'Gunakan tombol Reset untuk kembali ke kondisi awal.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Barang serialized ditelusuri sampai tingkat nomor seri (traceability).',
-                        'Teknisi hanya melihat barang yang pernah menjadi tanggung jawabnya.',
+                        'Barang dengan nomor seri dapat ditelusuri sampai nomor serinya.',
+                        'Teknisi hanya melihat barang yang memang pernah menjadi tanggung jawabnya.',
                     ]],
                 ],
             ],
@@ -64,18 +63,18 @@ class PageGuideHelper {
                 'title' => 'Panduan Kategori Barang',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengelola klasifikasi barang inventaris.',
+                        'Mengelola kelompok atau klasifikasi barang inventaris.',
                     ]],
                     ['icon' => 'fa-cogs', 'title' => 'Fungsi Utama', 'items' => [
-                        'Tambah, ubah, aktif/nonaktifkan kategori. Kode dibuat otomatis.',
+                        'Menambah, mengubah, mengaktifkan, atau menonaktifkan kategori.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Kategori yang sudah dipakai item tidak bisa dihapus; gunakan nonaktif.',
+                        'Kategori yang sudah digunakan barang tidak boleh dihapus; gunakan Nonaktifkan.',
                     ]],
-                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Hapus hanya untuk kategori yang belum pernah digunakan; yang sudah dipakai otomatis dilewati.',
-                        'Ubah diperbolehkan; kode kategori (KAT-xxxxxx) otomatis dan tidak berubah.',
-                        'Hanya ADMIN yang menambah/mengubah/menghapus; SUPERADMIN read-only.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Hapus hanya tersedia untuk kategori yang belum pernah digunakan.',
+                        'Kategori yang sudah dipakai tetap disimpan agar riwayat tidak rusak.',
+                        'Hanya Admin yang mengelola kategori; Superadmin bersifat baca saja.',
                     ]],
                 ],
             ],
@@ -84,17 +83,16 @@ class PageGuideHelper {
                 'title' => 'Panduan Satuan',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengelola satuan ukuran barang (pcs, meter, unit, dll).',
+                        'Mengelola satuan yang digunakan untuk jumlah barang, seperti pcs, unit, atau meter.',
                     ]],
                     ['icon' => 'fa-cogs', 'title' => 'Fungsi Utama', 'items' => [
-                        'Tambah dan ubah satuan beserta status aktifnya.',
+                        'Menambah dan mengubah satuan beserta status aktifnya.',
                     ]],
-                    ['icon' => 'fa-key', 'title' => 'Kode', 'items' => [
-                        'Kode satuan dibuat otomatis oleh sistem (format UNT-xxxxxx) dan tidak dapat diubah.',
+                    ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
+                        'Satuan yang sudah dipakai barang tidak boleh dihapus; gunakan Nonaktifkan.',
                     ]],
-                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Hapus hanya untuk satuan yang belum pernah digunakan oleh barang; yang sudah dipakai dilewati otomatis.',
-                        'Hanya ADMIN yang menambah/mengubah/menghapus; SUPERADMIN read-only.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Hanya Admin yang mengelola satuan; Superadmin bersifat baca saja.',
                     ]],
                 ],
             ],
@@ -103,21 +101,18 @@ class PageGuideHelper {
                 'title' => 'Panduan Gudang',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengelola master gudang tempat barang disimpan.',
+                        'Mengelola gudang tempat barang disimpan dan diproses.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow', 'items' => [
-                        'Gudang menjadi referensi untuk stok, incoming, outgoing, dan transfer.',
-                    ]],
-                    ['icon' => 'fa-key', 'title' => 'Kode', 'items' => [
-                        'Kode gudang dibuat otomatis oleh sistem (format GDG-xxxxxx) dan tidak berubah saat nama diubah.',
+                    ['icon' => 'fa-route', 'title' => 'Alur', 'items' => [
+                        'Gudang menjadi dasar untuk stok, barang masuk, barang keluar, peminjaman, dan transfer.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Transfer antar gudang dicatat sebagai perpindahan, bukan incoming/outgoing palsu.',
+                        'Perpindahan antar gudang dilakukan melalui Transfer Gudang, bukan dengan membuat barang masuk dan barang keluar palsu.',
                     ]],
-                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Hapus hanya untuk gudang yang belum pernah digunakan (stok/transaksi); yang sudah dipakai dilewati otomatis.',
-                        'Kode gudang stabil saat nama diubah; status Nonaktif menghentikan pemakaian baru.',
-                        'Hanya ADMIN yang menambah/mengubah/menghapus; SUPERADMIN read-only.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Gudang yang sudah dipakai transaksi tidak boleh dihapus.',
+                        'Gunakan Nonaktifkan untuk menghentikan pemakaian baru tanpa menghapus riwayat.',
+                        'Hanya Admin yang mengelola gudang; Superadmin bersifat baca saja.',
                     ]],
                 ],
             ],
@@ -126,17 +121,16 @@ class PageGuideHelper {
                 'title' => 'Panduan Lokasi',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengelola detail lokasi/penempatan di dalam gudang.',
+                        'Mengelola lokasi fisik atau area penempatan barang di dalam gudang.',
                     ]],
                     ['icon' => 'fa-map-marker-alt', 'title' => 'Fungsi Utama', 'items' => [
-                        'Catat posisi spesifik barang (rak/area) untuk memudahkan pencarian fisik.',
+                        'Mencatat rak, area, atau posisi barang agar mudah ditemukan secara fisik.',
                     ]],
-                    ['icon' => 'fa-key', 'title' => 'Kode', 'items' => [
-                        'Kode lokasi dibuat otomatis oleh sistem (format LOK-xxxxxx, unik global) dan tidak dapat diubah.',
+                    ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
+                        'Lokasi yang sudah digunakan tidak boleh dihapus karena masih terkait dengan riwayat barang.',
                     ]],
-                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Hapus hanya untuk lokasi yang belum pernah digunakan; yang sudah dipakai dilewati otomatis.',
-                        'Hanya ADMIN yang menambah/mengubah/menghapus; SUPERADMIN read-only.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Hanya Admin yang mengelola lokasi; Superadmin bersifat baca saja.',
                     ]],
                 ],
             ],
@@ -145,31 +139,30 @@ class PageGuideHelper {
                 'title' => 'Panduan Master Barang',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengelola identitas barang: kode, nama, kategori, satuan, serialized/non.',
-                    ]],
-                    ['icon' => 'fa-toggle-on', 'title' => 'Status Barang', 'items' => [
-                        'Aktif → barang dapat digunakan dalam transaksi baru sesuai aturan sistem.',
-                        'Nonaktif → barang tidak dapat digunakan dalam transaksi baru, tetapi data dan histori tetap tersimpan.',
+                        'Mengelola identitas barang yang menjadi dasar seluruh transaksi inventory.',
                     ]],
                     ['icon' => 'fa-list-check', 'title' => 'Cara Mengelola Barang', 'items' => [
-                        'Buat Barang untuk membuat master barang baru (kode dibuat otomatis).',
-                        'Ubah untuk memperbarui informasi master (tidak mengubah status).',
-                        'Nonaktifkan jika barang tidak ingin digunakan untuk transaksi baru.',
-                        'Barang tidak dapat dinonaktifkan jika masih memiliki stok fisik atau serial aktif.',
-                        'Aktifkan untuk mengembalikan barang Nonaktif menjadi Aktif.',
-                        'Hapus hanya untuk Master Barang yang belum pernah digunakan atau belum memiliki riwayat/relasi.',
+                        'Buat barang untuk menambah identitas barang baru.',
+                        'Ubah untuk memperbarui informasi master tanpa menghapus riwayat.',
+                        'Nonaktifkan untuk menghentikan penggunaan barang dalam transaksi baru.',
+                        'Aktifkan untuk mengembalikan barang yang sebelumnya dinonaktifkan.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow', 'items' => [
-                        'Barang serialized wajib dicatat nomor serinya saat pergerakan.',
-                        'Barang non-serialized dikelola berdasarkan quantity.',
+                    ['icon' => 'fa-tags', 'title' => 'Pelacakan Barang', 'items' => [
+                        'Pakai Nomor Seri: setiap unit dilacak satu per satu melalui nomor seri.',
+                        'Tanpa Nomor Seri: barang dikelola berdasarkan jumlah.',
                     ]],
-                    ['icon' => 'fa-exclamation-circle', 'title' => 'Perbedaan Penting', 'items' => [
-                        'Nonaktifkan ≠ Hapus — Nonaktif menghentikan pemakaian baru, Hapus menghilangkan record.',
-                        'Hapus ≠ Mengurangi Stok — mengurangi stok dilakukan melalui Barang Keluar.',
-                        'Memindahkan stok dilakukan melalui Transfer Gudang.',
-                        'Koreksi stok dilakukan melalui Penyesuaian Stok.',
-                        'Stok minimum (stok_minimum) memicu peringatan stok rendah.',
-                        'Nomor seri tidak boleh ter-assign ganda (double assignment).',
+                    ['icon' => 'fa-route', 'title' => 'Alur Inventory', 'items' => [
+                        'Barang Masuk menambah stok.',
+                        'Barang Keluar menjadi titik eksekusi pengeluaran barang dan mengurangi stok fisik untuk pengeluaran biasa.',
+                        'Peminjaman melalui Barang Keluar tidak mengurangi stok fisik, tetapi mengubah barang menjadi Barang Dipinjam.',
+                        'Transfer Gudang memindahkan stok antar gudang.',
+                        'Penyesuaian Stok digunakan untuk koreksi resmi dan dapat diaudit.',
+                        'Instalasi hanya boleh memakai barang yang memang sudah dikeluarkan atau sedang menjadi tanggung jawab teknisi.',
+                    ]],
+                    ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
+                        'Master Barang bukan tempat mengubah jumlah stok.',
+                        'Jangan menghapus master barang untuk mengurangi stok; gunakan Barang Keluar atau Penyesuaian Stok sesuai kebutuhan.',
+                        'Master Barang yang sudah memiliki riwayat atau stok aktif tidak dapat dihapus sembarangan.',
                     ]],
                 ],
             ],
@@ -178,18 +171,24 @@ class PageGuideHelper {
                 'title' => 'Panduan Stok Barang',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Melihat kondisi stok terkini per barang dan gudang.',
+                        'Melihat kondisi stok per barang dan gudang.',
+                    ]],
+                    ['icon' => 'fa-chart-column', 'title' => 'Cara Membaca Stok', 'items' => [
+                        'Stok Fisik adalah jumlah aset yang benar-benar dimiliki gudang.',
+                        'Tersedia adalah jumlah yang dapat digunakan saat ini.',
+                        'Dipinjam adalah jumlah barang yang sedang berada pada teknisi atau peminjam.',
+                        'Untuk barang dengan nomor seri, status setiap nomor seri menjadi sumber pemeriksaan paling rinci.',
+                    ]],
+                    ['icon' => 'fa-search', 'title' => 'Pencarian', 'items' => [
+                        'Gunakan pencarian untuk mencari nama barang.',
+                        'Buka Detail Barang untuk melihat daftar nomor seri dan mencari nomor seri tertentu.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Stok Barang adalah halaman monitoring stok.',
-                        'Stok Barang bukan tempat menghapus Master Barang.',
-                        'Jangan menghapus Master Barang dari halaman Stok.',
-                        'Status Master Barang dikelola melalui Master Data → Master Barang.',
-                        'Stok berkurang melalui transaksi Barang Keluar, bukan dengan menghapus stok.',
-                        'Perpindahan antar gudang menggunakan Transfer Gudang.',
-                        'Koreksi selisih menggunakan Penyesuaian Stok.',
-                        'Gunakan "Lihat" untuk membuka detail Inventory 360°.',
-                        'Invariant: Ending = Beginning + In - Out ± Transfer.',
+                        'Stok Barang adalah halaman monitoring, bukan tempat menghapus stok.',
+                        'Barang Keluar mengurangi stok fisik untuk pengeluaran biasa.',
+                        'Peminjaman tidak mengurangi stok fisik; jumlahnya tampil sebagai Dipinjam dan mengurangi jumlah Tersedia.',
+                        'Transfer Gudang digunakan untuk memindahkan stok antar gudang.',
+                        'Penyesuaian Stok digunakan untuk koreksi selisih yang sah.',
                     ]],
                 ],
             ],
@@ -198,20 +197,18 @@ class PageGuideHelper {
                 'title' => 'Panduan Nomor Seri',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Memantau nomor seri aset: status, lokasi, dan pemegang saat ini.',
+                        'Memantau barang yang menggunakan nomor seri, termasuk status, lokasi, dan pemegangnya.',
                     ]],
-                    ['icon' => 'fa-barcode', 'title' => 'Fungsi Utama', 'items' => [
-                        'Cari serial, lihat riwayat (timeline), dan telusuri pergerakannya.',
+                    ['icon' => 'fa-search', 'title' => 'Fungsi Utama', 'items' => [
+                        'Cari nomor seri atau nama barang.',
+                        'Buka perjalanan untuk melihat riwayat pergerakan nomor seri.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Satu serial tidak boleh berada di dua lokasi aktif sekaligus.',
+                        'Satu nomor seri tidak boleh berada pada dua lokasi aktif sekaligus.',
+                        'Status nomor seri berubah melalui transaksi resmi: masuk, keluar, pinjam, kembali, transfer, instalasi, insiden, atau penyesuaian.',
                     ]],
                     ['icon' => 'fa-user-gear', 'title' => 'Untuk Teknisi', 'roles' => ['TEKNISI_NOC'], 'items' => [
-                        'Hanya nomor seri yang pernah menjadi tanggung jawab Anda yang tampil.',
-                    ]],
-                    ['icon' => 'fa-lock', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Nomor Seri tidak memiliki Delete bebas: status berubah hanya melalui transaksi resmi (masuk, keluar, transfer, pinjam, kembali, instalasi, insiden, penyesuaian).',
-                        'Riwayat pergerakan serial tetap utuh dan dapat ditelusuri lewat Timeline.',
+                        'Yang tampil hanya nomor seri yang memang pernah menjadi tanggung jawab Anda.',
                     ]],
                 ],
             ],
@@ -220,17 +217,17 @@ class PageGuideHelper {
                 'title' => 'Panduan Timeline',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Melacak perjalanan barang dari hulu ke hilir (serial & bulk).',
+                        'Melacak perjalanan barang dari barang masuk sampai kondisi terakhirnya.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow', 'items' => [
-                        'Ketik SN / kode / nama, lalu klik "Lihat Perjalanan" untuk detail level 2.',
+                    ['icon' => 'fa-route', 'title' => 'Cara Menggunakan', 'items' => [
+                        'Cari berdasarkan nomor seri atau nama barang, lalu buka perjalanan untuk melihat detail.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Timeline hanya memuat event nyata dari transaksi sumber.',
-                        'Teknisi hanya melihat barang yang pernah ia pegang.',
+                        'Timeline hanya menampilkan kejadian yang benar-benar berasal dari transaksi.',
+                        'Riwayat tidak dihapus ketika barang berpindah, dipinjam, dipasang, dikembalikan, rusak, atau hilang.',
                     ]],
                     ['icon' => 'fa-user-gear', 'title' => 'Untuk Teknisi', 'roles' => ['TEKNISI_NOC'], 'items' => [
-                        'Riwayat yang tampil adalah perjalanan barang yang pernah Anda pegang.',
+                        'Riwayat yang Anda lihat dibatasi pada barang yang pernah menjadi tanggung jawab Anda.',
                     ]],
                 ],
             ],
@@ -239,23 +236,23 @@ class PageGuideHelper {
                 'title' => 'Panduan Pengajuan',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengelola pengajuan kebutuhan barang oleh teknisi.',
+                        'Mengelola permintaan kebutuhan barang sebelum barang benar-benar dikeluarkan.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow & Status', 'items' => [
-                        'Draft → Submit → Pending Approval → Approved/Rejected → Fulfilled.',
-                        'Penolakan wajib menyimpan aktor, waktu, dan alasan.',
+                    ['icon' => 'fa-route', 'title' => 'Alur & Status', 'items' => [
+                        'Teknisi membuat pengajuan → Menunggu Persetujuan → Admin meninjau → Disetujui/Disetujui Sebagian/Ditolak.',
+                        'Setelah disetujui, pemenuhan dilakukan melalui Barang Keluar.',
                     ]],
                     ['icon' => 'fa-user-gear', 'title' => 'Untuk Teknisi', 'roles' => ['TEKNISI_NOC'], 'items' => [
-                        'Buat pengajuan Anda lalu pantau statusnya di sini.',
+                        'Buat pengajuan sesuai kebutuhan dan pantau hasil keputusan Admin.',
                     ]],
                     ['icon' => 'fa-check-double', 'title' => 'Untuk Admin', 'roles' => ['ADMIN', 'SUPERADMIN'], 'items' => [
-                        'Tinjau pengajuan: setujui kuantitas atau tolak dengan alasan wajib.',
+                        'Periksa jumlah yang diminta, gudang pemenuhan, dan ketersediaan barang sebelum menentukan jumlah yang diberikan.',
+                        'Jika pengajuan sudah disetujui, lanjutkan ke Barang Keluar untuk benar-benar mengeluarkan barang.',
                     ]],
-                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Teknisi hanya dapat mengelola pengajuan miliknya sendiri — tidak bisa mengubah milik teknisi lain.',
-                        'Sebelum diputuskan Admin, pengajuan bersifat pending dan tidak memiliki tombol Edit/Delete (ubah = ajukan ulang).',
-                        'Setelah APPROVED / PARTIAL_APPROVED / REJECTED, record terkunci: tidak ada Edit dan tidak ada Delete.',
-                        'Histori keputusan (aktor, waktu, alasan penolakan) tidak dapat dihapus.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Pengajuan tidak mengurangi stok.',
+                        'Pengajuan yang sudah diputuskan tidak diubah diam-diam; koreksi dilakukan melalui proses baru yang sah.',
+                        'Riwayat keputusan tetap tersimpan.',
                     ]],
                 ],
             ],
@@ -264,23 +261,20 @@ class PageGuideHelper {
                 'title' => 'Panduan Buat Pengajuan',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan', 'items' => [
-                        'Mengajukan kebutuhan material untuk pekerjaan.',
+                        'Mengajukan kebutuhan barang untuk pekerjaan tertentu.',
                     ]],
                     ['icon' => 'fa-list-check', 'title' => 'Cara', 'items' => [
-                        'Pilih sumber barang: Dari Stok (Master Data) atau Manual (barang ad-hoc).',
-                        'Untuk barang Dari Stok, wajib memilih Gudang Pemenuhan — stok akan dicek dari gudang tersebut saat persetujuan dan pemenuhan.',
-                        'Pilih barang, masukkan jumlah, tambahkan catatan item jika perlu.',
-                        'Isi Keperluan Pengajuan, lalu kirim pengajuan.',
+                        'Pilih barang dari stok atau tulis barang manual/custom jika barang yang dibutuhkan belum dipetakan.',
+                        'Untuk barang dari stok, pilih gudang pemenuhan agar Admin memeriksa stok di gudang yang benar.',
+                        'Isi jumlah dan catatan bila diperlukan, lalu kirim pengajuan.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow', 'items' => [
-                        'Pengajuan dikirim → status Menunggu Persetujuan (PENDING).',
-                        'Admin melakukan persetujuan (setujui sebagian / tolak dengan alasan wajib).',
-                        'Setelah disetujui, proses pemenuhan dilakukan oleh gudang.',
+                    ['icon' => 'fa-route', 'title' => 'Alur', 'items' => [
+                        'Pengajuan dikirim → Menunggu Persetujuan → Admin memutuskan → Pemenuhan melalui Barang Keluar.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan', 'items' => [
-                        'Pengajuan BUKAN Barang Keluar — tidak langsung mengurangi stok.',
-                        'STOCK dan MANUAL bisa digabung dalam satu pengajuan.',
-                        'Barang berseri wajib memilih nomor seri saat pemenuhan.',
+                        'Pengajuan bukan Barang Keluar dan tidak langsung mengurangi stok.',
+                        'Barang manual/custom harus dipetakan ke Master Barang oleh Admin sebelum dikeluarkan dari stok.',
+                        'Barang yang menggunakan nomor seri akan dipilih nomor serinya saat pemenuhan.',
                     ]],
                 ],
             ],
@@ -289,25 +283,20 @@ class PageGuideHelper {
                 'title' => 'Panduan Detail Pengajuan',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Meninjau dan merespons pengajuan barang.',
+                        'Meninjau permintaan dan menentukan apa yang benar-benar akan diberikan.',
                     ]],
-                    ['icon' => 'fa-list-check', 'title' => 'Fungsi Utama (Admin)', 'roles' => ['ADMIN'], 'items' => [
-                        'Tentukan Qty Disetujui per item: penuh (Setujui Semua), sebagian (kurangi angka), atau 0 (Tolak).',
-                        'Qty disetujui tidak boleh melebihi qty diminta dan tidak boleh negatif.',
-                        'Penolakan item (Qty 0) wajib mencantumkan alasan.',
-                        'Sistem mengecek STOK AKTUAL di backend saat keputusan — dicek per Gudang Pemenuhan (master_item_id + warehouse_id), bukan gabungan semua gudang. Jika stok tidak cukup, proses ditolak dengan pesan “Stok Tidak Mencukupi”.',
+                    ['icon' => 'fa-list-check', 'title' => 'Untuk Admin', 'roles' => ['ADMIN', 'SUPERADMIN'], 'items' => [
+                        'Periksa stok pada gudang pemenuhan yang dipilih.',
+                        'Tentukan jumlah yang disetujui; boleh penuh, sebagian, atau nol.',
+                        'Barang manual/custom wajib dipetakan ke Master Barang sebelum dipenuhi.',
+                        'Jika barang menggunakan nomor seri, nomor seri yang benar-benar diberikan dipilih saat proses Barang Keluar.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow & Status', 'items' => [
-                        'Teknisi mengirim pengajuan → status Menunggu (PENDING) → Admin memberi keputusan.',
-                        'Detail menampilkan Gudang Pemenuhan + stok tersedia di gudang tersebut per item.',
-                        'Keputusan Admin: APPROVED / PARTIAL_APPROVED / REJECTED — tercatat aktor + waktu + alasan di riwayat.',
-                        'Setelah APPROVED/PARTIAL_APPROVED, Admin melanjutkan ke Barang Keluar (tombol “Proses Barang Keluar”) — gudang otomatis mengikuti Gudang Pemenuhan pengajuan; gudang berbeda ditolak.',
-                        'Barang Keluar → stok berkurang sesuai qty yang diproses, tepat satu kali (master_item_id + warehouse_id yang sama).',
-                        'Jika stok tidak mencukupi saat proses Barang Keluar, transaksi dibatalkan dan stok tidak berubah.',
+                    ['icon' => 'fa-route', 'title' => 'Alur Setelah Disetujui', 'items' => [
+                        'Pengajuan disetujui → Admin memilih barang dan jumlah yang akan dikeluarkan → Proses Barang Keluar → stok berubah satu kali.',
+                        'Gudang pemenuhan tetap menjadi acuan; pengeluaran dari gudang lain tidak diperbolehkan.',
                     ]],
                     ['icon' => 'fa-bell', 'title' => 'Notifikasi', 'items' => [
-                        'Teknisi mengirim pengajuan → Admin menerima notifikasi “Pengajuan Barang Baru”.',
-                        'Keputusan Admin → Teknisi pemilik menerima notifikasi hasil (disetujui / sebagian / ditolak + alasan).',
+                        'Teknisi menerima pemberitahuan ketika keputusan atas pengajuannya berubah.',
                     ]],
                 ],
             ],
@@ -316,18 +305,18 @@ class PageGuideHelper {
                 'title' => 'Panduan Barang Masuk',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Gunakan halaman ini untuk menambah stok melalui transaksi penerimaan barang.',
+                        'Mencatat penerimaan barang agar stok resmi bertambah.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow', 'items' => [
-                        'Source/Vendor → Receive → Validate → Inventory Increase → Timeline.',
+                    ['icon' => 'fa-route', 'title' => 'Alur', 'items' => [
+                        'Barang diterima → diperiksa → dicatat → stok bertambah → riwayat tersimpan.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Barang serialized wajib mencatat nomor seri pada penerimaan.',
+                        'Barang yang menggunakan nomor seri wajib dicatat nomor serinya saat diterima.',
+                        'Transaksi yang sudah diproses tidak diedit atau dihapus untuk membetulkan histori.',
                     ]],
-                    ['icon' => 'fa-lock', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Barang Masuk yang sudah diproses memengaruhi stok & ledger → immutable: tidak ada Edit/Delete.',
-                        'Koreksi salah input tidak dilakukan dengan menghapus histori; gunakan Penyesuaian Stok / workflow koreksi yang sah.',
-                        'Hanya ADMIN yang dapat membuat Barang Masuk; SUPERADMIN read-only.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Koreksi kesalahan dilakukan melalui Penyesuaian Stok atau proses koreksi yang sah.',
+                        'Hanya Admin yang memproses Barang Masuk; Superadmin bersifat baca saja.',
                     ]],
                 ],
             ],
@@ -336,36 +325,36 @@ class PageGuideHelper {
                 'title' => 'Panduan Barang Keluar',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Gunakan halaman ini untuk mengurangi stok melalui transaksi pengeluaran barang.',
-                        'Untuk workflow teknisi, gunakan Pengajuan Barang → persetujuan → Barang Keluar sesuai rule existing.',
+                        'Menjadi titik eksekusi saat barang benar-benar dikeluarkan dari gudang.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow', 'items' => [
-                        'Approved Request → Validate Availability → Issue → Inventory Decrease → Custody.',
+                    ['icon' => 'fa-route', 'title' => 'Alur', 'items' => [
+                        'Pengajuan/Peminjaman disetujui → Admin memeriksa stok → pilih barang/jumlah/nomor seri → Barang Keluar dibuat → status barang diperbarui.',
+                    ]],
+                    ['icon' => 'fa-box-open', 'title' => 'Dua Dampak Utama', 'items' => [
+                        'Pengeluaran biasa: stok fisik berkurang.',
+                        'Peminjaman: stok fisik tetap, tetapi barang menjadi Barang Dipinjam dan jumlah Tersedia berkurang.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Stok tidak pernah berkurang tanpa transaksi penjelas.',
-                    ]],
-                    ['icon' => 'fa-lock', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Barang Keluar yang sudah diproses mengurangi stok & mengubah kepemilikan/serial → immutable: tidak ada Edit/Delete.',
-                        'Koreksi tidak dilakukan dengan menghapus transaksi; gunakan workflow koreksi/penyesuaian yang sah.',
-                        'Hanya ADMIN yang dapat membuat Barang Keluar; SUPERADMIN read-only.',
+                        'Stok tidak boleh berkurang tanpa transaksi Barang Keluar atau Penyesuaian Stok yang sah.',
+                        'Barang dengan nomor seri wajib memilih nomor seri yang benar-benar dikeluarkan.',
                     ]],
                 ],
             ],
 
             '/outgoing/create' => [
-                'title' => 'Panduan Pemenuhan Barang',
+                'title' => 'Panduan Proses Barang Keluar',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengeluarkan barang sesuai pengajuan yang disetujui.',
+                        'Menjalankan pengeluaran barang yang sudah disetujui.',
                     ]],
-                    ['icon' => 'fa-boxes-stacked', 'title' => 'Fungsi Utama', 'items' => [
-                        'Pilih gudang asal dengan benar.',
-                        'Barang berseri (SN) wajib memilih nomor seri spesifik yang diberikan.',
+                    ['icon' => 'fa-list-check', 'title' => 'Yang Wajib Diperiksa', 'items' => [
+                        'Pastikan gudang asal sesuai dengan gudang pemenuhan.',
+                        'Pastikan jumlah tidak melebihi jumlah yang sudah disetujui dan stok yang tersedia.',
+                        'Untuk barang dengan nomor seri, pilih nomor seri yang benar-benar dikeluarkan.',
                     ]],
-                    ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Pengeluaran tidak boleh melebihi Sisa Qty yang belum terpenuhi.',
-                        'Stok tidak berkurang tanpa transaksi penjelas.',
+                    ['icon' => 'fa-route', 'title' => 'Hasil Proses', 'items' => [
+                        'Pengeluaran biasa → stok fisik berkurang.',
+                        'Peminjaman → stok fisik tetap dan barang menjadi Barang Dipinjam.',
                     ]],
                 ],
             ],
@@ -374,18 +363,21 @@ class PageGuideHelper {
                 'title' => 'Panduan Transfer Gudang',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Gunakan halaman ini untuk memindahkan stok dari satu gudang ke gudang lain.',
+                        'Memindahkan barang dari satu gudang ke gudang lain.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow & Status', 'items' => [
-                        'Initiate → Validate Source → Dispatch → In Transit → Receive at Destination.',
+                    ['icon' => 'fa-route', 'title' => 'Alur', 'items' => [
+                        'Buat transfer → periksa stok gudang asal → kirim → barang dalam perjalanan → terima di gudang tujuan.',
+                    ]],
+                    ['icon' => 'fa-camera', 'title' => 'Bukti Transfer', 'items' => [
+                        'Foto pengiriman dan foto penerimaan wajib disimpan sebagai bukti.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Transfer adalah perpindahan, bukan incoming/outgoing palsu; ledger mencegah double counting.',
+                        'Barang yang bisa dipilih hanya barang yang tersedia di gudang asal.',
+                        'Gudang asal dan gudang tujuan harus berbeda.',
+                        'Transfer bukan barang masuk atau barang keluar biasa karena stok berpindah lokasi.',
                     ]],
-                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Status PENDING → IN_TRANSIT → COMPLETED.',
-                        'Terima hanya tersedia saat IN_TRANSIT dan hanya untuk ADMIN; SUPERADMIN read-only.',
-                        'Setelah COMPLETED, transfer immutable — tidak ada Edit/Delete karena stok sudah berpindah.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Setelah selesai diterima di gudang tujuan, transfer tidak boleh diedit atau dihapus.',
                     ]],
                 ],
             ],
@@ -394,22 +386,28 @@ class PageGuideHelper {
                 'title' => 'Panduan Peminjaman',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengelola peminjaman barang kepada teknisi (custody).',
+                        'Mengelola proses barang yang dipinjam teknisi mulai dari permintaan sampai pengembalian.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow & Status', 'items' => [
-                        'Available → Borrow/Assign → Custody → Return.',
-                        'Status: Dipinjam / Kembali Sebagian / Dikembalikan.',
+                    ['icon' => 'fa-route', 'title' => 'Alur Peminjaman', 'items' => [
+                        'Teknisi mengajukan → Admin memeriksa stok → Admin menentukan barang dan jumlah → Barang Keluar untuk Peminjaman → Barang Dipinjam → Pengembalian.',
                     ]],
-                    ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Batas waktu (due date) memicu status terlambat bila belum dikembalikan.',
+                    ['icon' => 'fa-box', 'title' => 'Aturan Stok', 'items' => [
+                        'Peminjaman tidak mengurangi Stok Fisik.',
+                        'Jumlah Tersedia berkurang selama barang masih dipinjam.',
+                        'Barang kembali menjadi Tersedia setelah pengembalian diterima dan dinyatakan baik.',
                     ]],
                     ['icon' => 'fa-user-gear', 'title' => 'Untuk Teknisi', 'roles' => ['TEKNISI_NOC'], 'items' => [
-                        'Lihat barang yang sedang Anda pinjam beserta tenggat pengembalian.',
+                        'Ajukan barang yang dibutuhkan dan ajukan pengembalian ketika barang sudah selesai digunakan.',
                     ]],
-                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Peminjaman yang sudah diberikan memengaruhi status serial & holder → tidak ada Delete.',
-                        'Perubahan hanya melalui workflow resmi: Pengembalian untuk mengembalikan aset.',
-                        'Teknisi hanya melihat peminjaman miliknya; Admin/Admin menangani proses.',
+                    ['icon' => 'fa-user-check', 'title' => 'Untuk Admin', 'roles' => ['ADMIN', 'SUPERADMIN'], 'items' => [
+                        'Admin wajib memeriksa stok sebelum memberikan barang.',
+                        'Barang manual/custom wajib dipetakan ke Master Barang.',
+                        'Jika barang memakai nomor seri, Admin wajib memilih nomor seri yang benar-benar diberikan.',
+                        'Setelah keputusan selesai, proses dilanjutkan melalui Barang Keluar.',
+                    ]],
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Peminjaman yang sudah diserahkan tidak dihapus; koreksi dilakukan melalui Pengembalian atau proses resmi lainnya.',
+                        'Riwayat siapa yang meminjam dan kapan barang diberikan tetap tersimpan.',
                     ]],
                 ],
             ],
@@ -418,34 +416,37 @@ class PageGuideHelper {
                 'title' => 'Panduan Pengembalian',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mencatat pengembalian barang pinjaman beserta kondisinya.',
+                        'Mencatat barang yang dikembalikan oleh teknisi dan menentukan kondisi akhirnya.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow', 'items' => [
-                        'Custody → Return → Receive/Inspect → Condition Decision → Next Lifecycle.',
+                    ['icon' => 'fa-route', 'title' => 'Alur', 'items' => [
+                        'Teknisi mengajukan pengembalian → Admin menerima dan memeriksa → kondisi ditentukan → barang kembali tersedia atau masuk proses perbaikan/insiden.',
                     ]],
-                    ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Hasil inspeksi menentukan: kembali ke stok, repair, atau damage/lost.',
+                    ['icon' => 'fa-check-circle', 'title' => 'Kondisi Barang', 'items' => [
+                        'Baik → kembali menjadi Tersedia.',
+                        'Rusak → masuk proses kerusakan/perbaikan sesuai kondisi.',
+                        'Hilang → diproses melalui Insiden Kerusakan/Kehilangan.',
                     ]],
-                    ['icon' => 'fa-lock', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Pengembalian yang sudah diproses Admin mengubah status serial/holder/stok → immutable: tidak ada Edit/Delete.',
-                        'Teknisi membuat permintaan pengembalian; hanya ADMIN yang memproses (Terima/inspeksi).',
-                        'Histori peminjaman, serial, dan pemegang tetap utuh.',
+                    ['icon' => 'fa-lock', 'title' => 'Aturan Penting', 'items' => [
+                        'Pengembalian yang sudah diproses tidak dihapus karena menjadi bagian dari riwayat barang.',
+                        'Teknisi hanya dapat mengembalikan barang yang memang sedang menjadi tanggung jawabnya.',
                     ]],
                 ],
             ],
 
             '/returns/create' => [
-                'title' => 'Panduan Pengembalian',
+                'title' => 'Panduan Pengajuan Pengembalian',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengembalikan inventaris yang tidak terpakai atau rusak ke gudang.',
+                        'Mengajukan barang yang sedang dipinjam untuk dikembalikan ke gudang.',
                     ]],
-                    ['icon' => 'fa-clipboard-check', 'title' => 'Fungsi Utama', 'items' => [
-                        'Tentukan status akhir SN: AVAILABLE (stok normal), BROKEN (rusak), atau REPAIR.',
+                    ['icon' => 'fa-list-check', 'title' => 'Cara', 'items' => [
+                        'Pilih barang yang sedang Anda pegang.',
+                        'Untuk barang dengan nomor seri, pilih nomor seri yang benar-benar dikembalikan.',
+                        'Isi jumlah pengembalian dan catatan bila diperlukan.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Teknisi hanya dapat mengembalikan SN yang sedang dipegangnya.',
-                        'Setelah disubmit, tanggung jawab aset Teknisi berkurang.',
+                        'Teknisi hanya dapat mengembalikan barang yang memang sedang dipinjam oleh dirinya.',
+                        'Pemeriksaan kondisi akhir dilakukan oleh Admin.',
                     ]],
                 ],
             ],
@@ -454,41 +455,40 @@ class PageGuideHelper {
                 'title' => 'Panduan Instalasi',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mencatat pemasangan barang di lapangan oleh teknisi.',
+                        'Mencatat pemasangan barang yang sudah menjadi tanggung jawab teknisi di lokasi pelanggan.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow', 'items' => [
-                        'Issue/Assignment → Installation → Installed State → Evidence (foto).',
+                    ['icon' => 'fa-route', 'title' => 'Alur', 'items' => [
+                        'Barang sudah dikeluarkan kepada teknisi → pilih barang yang sedang dipegang → pasang → catat lokasi → unggah foto bukti.',
                     ]],
-                    ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Status barang berubah menjadi Terpasang dengan lokasi terpasang.',
+                    ['icon' => 'fa-list-check', 'title' => 'Aturan Penting', 'items' => [
+                        'Teknisi hanya boleh memasang barang yang memang tersedia dalam tanggung jawabnya.',
+                        'Satu formulir instalasi hanya untuk satu pekerjaan pemasangan.',
+                        'Untuk barang dengan nomor seri, pilih nomor seri dari barang yang sedang dipegang; tidak mengetik manual.',
+                        'Foto bukti instalasi wajib diunggah.',
                     ]],
-                    ['icon' => 'fa-user-gear', 'title' => 'Untuk Teknisi', 'roles' => ['TEKNISI_NOC'], 'items' => [
-                        'Catat instalasi & unggah foto sebagai bukti (evidence).',
-                    ]],
-                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Instalasi yang sudah tercatat mengubah status serial & lokasi terpasang → tidak ada Delete.',
-                        'Teknisi hanya mencatat instalasi untuk data yang memang dipegangnya.',
-                        'Koreksi pasca-instalasi melalui workflow resmi (pengembalian/insiden), bukan hapus histori.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Instalasi yang sudah tercatat tidak dihapus untuk membetulkan histori.',
+                        'Koreksi dilakukan melalui proses resmi seperti pengembalian atau insiden sesuai kondisi barang.',
                     ]],
                 ],
             ],
 
             '/incidents' => [
-                'title' => 'Panduan Damage / Lost',
+                'title' => 'Panduan Kerusakan / Kehilangan',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Melaporkan dan menindaklanjuti insiden kerusakan/kehilangan aset.',
+                        'Melaporkan dan menindaklanjuti barang yang rusak atau hilang.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow', 'items' => [
-                        'Report → Evidence → Review → Damage/Lost State → Resolution.',
+                    ['icon' => 'fa-route', 'title' => 'Alur', 'items' => [
+                        'Lapor → bukti → pemeriksaan Admin → keputusan → status barang diperbarui.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Wajib mencatat pelapor, bukti fisik, pemegang/lokasi terakhir, dan timeline.',
+                        'Catat pelapor, lokasi atau pemegang terakhir, bukti, dan kronologi yang jelas.',
+                        'Barang rusak tidak otomatis dianggap hilang; kondisi harus diputuskan melalui proses pemeriksaan.',
                     ]],
-                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Insiden OPEN dapat diproses (INVESTIGATING → RESOLVED/REJECTED) oleh ADMIN.',
-                        'Setelah RESOLVED/REJECTED, record terkunci — histori keputusan tidak dihapus.',
-                        'Teknisi melapor, Admin memproses; tidak ada Delete transaksi insiden.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Teknisi melapor, Admin memproses dan menyelesaikan keputusan.',
+                        'Riwayat insiden tidak dihapus setelah diproses.',
                     ]],
                 ],
             ],
@@ -497,18 +497,16 @@ class PageGuideHelper {
                 'title' => 'Panduan Stock Opname',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Membandingkan stok fisik vs sistem dan meninjau selisih (variance).',
+                        'Membandingkan jumlah fisik di lapangan dengan jumlah yang tercatat di sistem.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow', 'items' => [
-                        'Count → Compare System vs Physical → Variance → Review → Approved Adjustment.',
+                    ['icon' => 'fa-route', 'title' => 'Alur', 'items' => [
+                        'Hitung fisik → bandingkan dengan sistem → tinjau selisih → setujui hasil → buat Penyesuaian Stok bila diperlukan.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Stock Opname ≠ Adjustment: penyesuaian hanya setelah review/approval.',
+                        'Stock Opname adalah pemeriksaan; perubahan stok dilakukan melalui Penyesuaian Stok setelah proses yang sah.',
                     ]],
-                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'ADMIN membuat opname; variance disetujui oleh SUPERADMIN sesuai rule existing.',
-                        'Opname yang sudah disetujui menjadi dasar Stock Adjustment — jangan dihapus agar adjustment tidak orphan.',
-                        'Draft dapat dibatalkan; setelah approval, record immutable.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Tindakan & Siklus Data', 'items' => [
+                        'Catatan opname yang sudah disetujui menjadi dasar koreksi dan tidak boleh dihapus sembarangan.',
                     ]],
                 ],
             ],
@@ -517,15 +515,15 @@ class PageGuideHelper {
                 'title' => 'Panduan Penyesuaian Stok',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Gunakan halaman ini untuk koreksi stok berdasarkan proses stock opname/adjustment yang sah.',
+                        'Melakukan koreksi stok secara resmi dan dapat diaudit.',
+                    ]],
+                    ['icon' => 'fa-list-check', 'title' => 'Sebelum Menyesuaikan', 'items' => [
+                        'Pastikan alasan dan sumber selisih jelas.',
+                        'Periksa gudang, barang, jumlah, dan bila perlu nomor seri yang terdampak.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Setiap penyesuaian wajib memiliki reason/reference yang dapat diaudit.',
-                    ]],
-                    ['icon' => 'fa-lock', 'title' => 'Aturan Action & Lifecycle', 'items' => [
-                        'Penyesuaian yang sudah diposting mengubah stok/ledger → immutable: tidak ada Edit/Delete.',
-                        'Koreksi lanjutan dilakukan dengan penyesuaian baru yang sah, bukan menghapus histori.',
-                        'Hanya ADMIN yang membuat penyesuaian; SUPERADMIN read-only.',
+                        'Penyesuaian bukan cara untuk menghapus transaksi lama.',
+                        'Setiap perubahan harus mempunyai alasan yang dapat ditelusuri.',
                     ]],
                 ],
             ],
@@ -534,13 +532,15 @@ class PageGuideHelper {
                 'title' => 'Panduan Laporan',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Menelusuri data operasional & audit dalam bentuk laporan.',
+                        'Membaca dan mencetak laporan operasional serta riwayat perubahan stok.',
                     ]],
                     ['icon' => 'fa-filter', 'title' => 'Fungsi Utama', 'items' => [
-                        'Gunakan filter tanggal/gudang/kategori/user, pencarian, dan export CSV.',
+                        'Gunakan filter tanggal, gudang, kategori, pengguna, dan pencarian sesuai kebutuhan.',
+                        'Gunakan ekspor atau cetak untuk mengambil hasil laporan.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Laporan menampilkan data nyata; export CSV menghormati filter yang dipilih.',
+                        'Laporan bersumber dari data transaksi dan riwayat yang tersimpan di sistem.',
+                        'Filter pada laporan harus ikut diterapkan pada hasil ekspor atau cetak.',
                     ]],
                 ],
             ],
@@ -549,33 +549,32 @@ class PageGuideHelper {
                 'title' => 'Panduan Pengguna',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengelola akun, role, dan status user sistem.',
+                        'Mengelola akun, peran, dan status pengguna sistem.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Workflow & Status', 'items' => [
-                        'Created → Pending Approval → Approved/Rejected → Active/Inactive.',
-                        'Klik "Tinjau" untuk approve/reject pendaftaran (alasan wajib saat menolak).',
+                    ['icon' => 'fa-route', 'title' => 'Alur Pendaftaran', 'items' => [
+                        'Pendaftaran → pemeriksaan Admin → disetujui atau ditolak → akun aktif atau tidak aktif.',
+                        'Penolakan wajib mempunyai alasan yang jelas.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Hanya user APPROVED & aktif yang dapat login.',
-                        'Superadmin tidak bisa dibuat melalui pendaftaran publik.',
+                        'Hanya pengguna yang disetujui dan aktif yang dapat masuk ke sistem.',
+                        'Superadmin tidak dibuat melalui pendaftaran publik.',
                     ]],
                 ],
             ],
 
             '/labels' => [
-                'title' => 'Panduan Label Barcode',
+                'title' => 'Panduan Label Barang',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mencetak label identitas barang (Code 128 + QR) untuk pelabelan fisik.',
+                        'Mencetak label identitas fisik barang.',
                     ]],
                     ['icon' => 'fa-route', 'title' => 'Fungsi Utama', 'items' => [
-                        'Satu label: buka dari Nomor Seri / Master Barang (ikon barcode).',
-                        'Batch: gunakan tombol \"Cetak Semua Label\" di halaman Nomor Seri.',
-                        'Klik Cetak untuk print, QR dapat dipindai aplikasi QR apapun.',
+                        'Buka label dari Detail Barang atau Nomor Seri sesuai jenis barang.',
+                        'Gunakan Cetak Semua Label untuk mencetak beberapa label sekaligus.',
+                        'Label dapat dipindai untuk membuka detail barang atau nomor seri.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Identitas memakai kode barang & serial number existing — tidak ada identitas baru.',
-                        'Scanner membaca kode ke halaman Scan untuk membuka detail.',
+                        'Label hanya menampilkan identitas yang sudah dimiliki barang; tidak membuat identitas baru.',
                     ]],
                 ],
             ],
@@ -584,18 +583,16 @@ class PageGuideHelper {
                 'title' => 'Panduan Cetak Label Massal',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Menyiapkan cetakan label massal (banyak sekaligus, bukan satu per satu).',
+                        'Menyiapkan banyak label sekaligus.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Fungsi Utama', 'items' => [
-                        'Filter pencarian/kategori/gudang/status untuk mempersempit daftar.',
-                        'SN berseri: centang baris → 1 SN = 1 label.',
-                        'Item non-serialized: centang + tentukan jumlah label (1/5/10/custom).',
-                        'Tombol Pilih Semua Tampil / Bersihkan untuk seleksi cepat.',
+                    ['icon' => 'fa-list-check', 'title' => 'Fungsi Utama', 'items' => [
+                        'Gunakan pencarian dan filter untuk memilih barang yang akan dicetak.',
+                        'Barang dengan nomor seri: satu nomor seri menghasilkan satu label.',
+                        'Barang tanpa nomor seri: tentukan jumlah label yang dibutuhkan.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Jumlah label ditampilkan sebelum dicetak — pastikan sudah sesuai.',
-                        'Duplikat SN otomatis dibuang (tidak tercetak dua kali).',
-                        'Setiap cetakan dicatat di Audit Log (aktor, waktu, jumlah).',
+                        'Periksa jumlah label sebelum mencetak agar tidak berlebihan.',
+                        'Nomor seri yang sama tidak dicetak dua kali dalam satu proses.',
                     ]],
                 ],
             ],
@@ -604,14 +601,11 @@ class PageGuideHelper {
                 'title' => 'Panduan Scan Barcode',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Membuka detail barang/serial dari hasil scan atau input manual.',
+                        'Membuka detail barang atau nomor seri dari hasil pemindaian.',
                     ]],
                     ['icon' => 'fa-route', 'title' => 'Fungsi Utama', 'items' => [
-                        'Scan kode barang / nomor seri lalu Enter — langsung ke detail.',
-                        'Scanner genggam mengetik otomatis; di ponsel ketik manual.',
-                    ]],
-                    ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Jika kode tidak ditemukan, sistem mengarahkan ke hasil pencarian.',
+                        'Pindai barcode atau QR, atau masukkan hasil scan secara manual lalu tekan Enter.',
+                        'Jika data tidak ditemukan, sistem mengarahkan ke pencarian.',
                     ]],
                 ],
             ],
@@ -620,16 +614,14 @@ class PageGuideHelper {
                 'title' => 'Panduan Notifikasi',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Menampilkan pembaruan penting untuk akun dan pekerjaan Anda.',
+                        'Menampilkan pembaruan penting yang berkaitan dengan pekerjaan dan akun Anda.',
                     ]],
                     ['icon' => 'fa-route', 'title' => 'Fungsi Utama', 'items' => [
-                        'Notifikasi bersifat pribadi — hanya milik Anda.',
-                        'Klik \"Buka\" untuk menuju halaman terkait, atau \"Tandai dibaca\".',
-                        '\"Tandai Semua Dibaca\" membersihkan badge di lonceng header.',
+                        'Buka notifikasi untuk menuju transaksi terkait.',
+                        'Gunakan Tandai Dibaca atau Tandai Semua Dibaca untuk membersihkan pemberitahuan yang sudah dibaca.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Login/logout tidak menghasilkan notifikasi bisnis.',
-                        'Notifikasi tidak dapat dilihat/diubah user lain.',
+                        'Notifikasi bersifat pribadi untuk pengguna yang menerimanya.',
                     ]],
                 ],
             ],
@@ -638,13 +630,13 @@ class PageGuideHelper {
                 'title' => 'Panduan Pengaturan Sistem',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengelola konfigurasi global aplikasi dan branding.',
+                        'Mengelola konfigurasi umum dan tampilan aplikasi.',
                     ]],
                     ['icon' => 'fa-cogs', 'title' => 'Fungsi Utama', 'items' => [
-                        'Umum (nama aplikasi), Branding (logo/warna/tema), Keamanan (sesi).',
+                        'Mengatur nama aplikasi, logo, warna, tema, dan pengaturan keamanan yang tersedia.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Perubahan langsung diterapkan ke seluruh pengguna.',
+                        'Perubahan pengaturan dapat langsung berlaku untuk seluruh pengguna.',
                     ]],
                 ],
             ],
@@ -655,35 +647,33 @@ class PageGuideHelper {
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
                         'Mengelola data diri dan keamanan akun Anda.',
                     ]],
-                    ['icon' => 'fa-key', 'title' => 'Ubah Password', 'items' => [
-                        'Wajib mengisi password saat ini untuk mengganti password.',
-                        'Password minimal 6 karakter dan konfirmasi harus cocok.',
+                    ['icon' => 'fa-key', 'title' => 'Keamanan Akun', 'items' => [
+                        'Masukkan kata sandi saat ini sebelum menggantinya.',
+                        'Kata sandi baru harus memenuhi aturan keamanan aplikasi dan konfirmasi harus sama.',
                     ]],
                 ],
             ],
 
             '/import-export' => [
-                'title' => 'Panduan Import / Export',
+                'title' => 'Panduan Impor / Ekspor',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengimpor data massal dan mengekspor template/master data.',
+                        'Mengelola pemasukan dan pengeluaran data secara massal sesuai format sistem.',
                     ]],
                     ['icon' => 'fa-file-import', 'title' => 'Fungsi Utama', 'items' => [
-                        'Gunakan template resmi; pastikan format kolom sesuai sebelum upload.',
+                        'Gunakan format/template resmi dari sistem.',
+                        'Periksa data sebelum mengunggah agar tidak membuat data ganda atau salah.',
                     ]],
                 ],
             ],
         ];
     }
 
-    /**
-     * Ambil panduan untuk sebuah path. Exact match dulu, lalu prefix terpanjang.
-     * Path form (/create, /edit) otomatis mendapat micro-guidance tambahan.
-     */
-    public static function forPath($path) {
+    public static function forPath($path)
+    {
         $path = '/' . ltrim((string)$path, '/');
-
         $guides = self::all();
+
         if (isset($guides[$path])) {
             $guide = $guides[$path];
         } else {
@@ -696,38 +686,30 @@ class PageGuideHelper {
                     $matchedKey = $prefix;
                 }
             }
-
             if ($matched === null) {
                 return null;
             }
             $guide = $matched;
 
-            // Micro-guidance untuk halaman form
             if (str_contains($path, '/create') || str_contains($path, '/edit')) {
                 $guide['sections'][] = [
                     'icon' => 'fa-lightbulb',
-                    'title' => 'Micro-guidance',
+                    'title' => 'Petunjuk Singkat',
                     'items' => [
-                        'Isi formulir lalu tekan Simpan. Field bertanda * wajib diisi.',
-                        'Gunakan tombol Batal/Kembali untuk membatalkan tanpa menyimpan.',
+                        'Isi data yang diperlukan lalu tekan Simpan.',
+                        'Gunakan Batal atau Kembali untuk keluar tanpa menyimpan.',
                     ],
                 ];
             }
         }
 
-        // Filter section sesuai role (roles = hanya untuk role tsb; roles_exclude = bukan untuk role tsb).
         $guide['sections'] = self::filterByRole($guide['sections'] ?? []);
-
-        // Judul distandarkan agar seluruh modul memakai pola yang sama.
         $guide['title'] = 'Panduan Cepat';
         return $guide;
     }
 
-    /**
-     * Filter section panduan berdasarkan role sesi saat ini.
-     * Section dapat mendeklarasikan 'roles' (hanya role ini) atau 'roles_exclude' (kecuali role ini).
-     */
-    private static function filterByRole(array $sections) {
+    private static function filterByRole(array $sections): array
+    {
         $role = $_SESSION['role'] ?? 'GUEST';
         $kept = [];
         foreach ($sections as $section) {
