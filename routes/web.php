@@ -41,6 +41,7 @@ $router->post('/warehouses/update/{id}', 'WarehouseController@update');
 $router->post('/warehouses/bulk-delete', 'WarehouseController@bulkDelete');
 
 $router->get('/locations', 'LocationController@index');
+$router->post('/locations', 'LocationController@store');
 $router->get('/locations/edit/{id}', 'LocationController@edit');
 $router->post('/locations/update/{id}', 'LocationController@update');
 $router->post('/locations/bulk-delete', 'LocationController@bulkDelete');
