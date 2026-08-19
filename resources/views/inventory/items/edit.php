@@ -12,7 +12,7 @@ if (empty($_SESSION['csrf_token'])) {
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Ubah Barang: <?= htmlspecialchars($item['kode_barang']) ?></h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Ubah Barang</h1>
         </div>
     </div>
 
@@ -21,11 +21,6 @@ if (empty($_SESSION['csrf_token'])) {
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kode Barang</label>
-                    <input type="text" value="<?= htmlspecialchars($item['kode_barang']) ?>" disabled class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 shadow-sm cursor-not-allowed">
-                </div>
-                
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Barang</label>
                     <input type="text" name="nama" value="<?= htmlspecialchars($item['nama']) ?>" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
