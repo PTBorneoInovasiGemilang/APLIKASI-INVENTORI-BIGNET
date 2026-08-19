@@ -79,7 +79,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
                     <?php
                     $rowActions = [
                         ['type' => 'view', 'url' => url('/timeline?type=SN&ref_id=' . (int)$sn['id']), 'label' => 'Lihat Perjalanan', 'icon' => 'fa-route', 'title' => 'Lihat Perjalanan Serial'],
-                        ['type' => 'link', 'url' => url('/labels?serial=' . urlencode($sn['serial_number'])), 'label' => 'Label', 'icon' => 'fa-barcode', 'title' => 'Cetak label barcode/QR']
+                        ['type' => 'link', 'url' => url('/technician-labels?serial_ids=' . (int)$sn['id']), 'label' => 'Label', 'icon' => 'fa-barcode', 'title' => 'Cetak label barcode/QR']
                     ];
                     require __DIR__ . '/../../components/table/row_actions.php';
                     ?>
