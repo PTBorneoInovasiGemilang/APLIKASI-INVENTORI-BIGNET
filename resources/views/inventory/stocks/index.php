@@ -10,7 +10,7 @@ ob_start();
 
 <?php
 $toolbarAction = url('/stocks');
-$searchPlaceholder = "Cari Kode/Nama...";
+$searchPlaceholder = "Cari Nama Barang...";
 ob_start();
 ?>
 <div>
@@ -44,12 +44,11 @@ require __DIR__ . '/../../components/table/toolbar.php';
 ?>
 
 <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-    <table class="w-full min-w-[1300px] table-sticky divide-y divide-gray-200 dark:divide-gray-700">
+    <table class="w-full min-w-[1180px] table-sticky divide-y divide-gray-200 dark:divide-gray-700">
         <thead class="bg-gray-50 dark:bg-gray-900/50">
             <tr>
                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Gudang</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kode Barang</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama Barang</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tipe</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kategori</th>
@@ -76,8 +75,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center"><?= $no++ ?></td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($stock['warehouse_name']); ?></td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($stock['kode_barang']); ?></td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($stock['item_name']); ?></td>
+                <td class="px-4 py-3 whitespace-normal text-sm text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($stock['item_name']); ?></td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm">
                     <?php if ($stock['is_serialized']): ?>
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">Berskala (Seri)</span>
@@ -108,7 +106,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
             <?php endforeach; ?>
             <?php if (empty($stocks)): ?>
                 <?php 
-                $colspan = 13;
+                $colspan = 12;
                 $emptyMessage = (isset($_GET['filter']) && $_GET['filter'] === 'low_stock') ? "Belum ada barang dengan stok rendah." : "Tidak ada catatan stok ditemukan.";
                 require __DIR__ . '/../../components/table/empty_state.php';
                 ?>
