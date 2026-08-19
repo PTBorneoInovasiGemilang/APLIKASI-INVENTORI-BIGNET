@@ -39,7 +39,7 @@ if (empty($_SESSION['csrf_token'])) {
                     <select name="loan_id" id="loan_id" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" onchange="handleLoanChange(this.value)">
                         <option value="">Pilih peminjaman...</option>
                         <?php foreach ($loans as $loan): ?>
-                            <option value="<?= $loan['id'] ?>" <?= ((int)$loan['id'] === $selectedLoanId) ? 'selected' : '' ?>>
+                            <option value="<?= $loan['id'] ?>" <?= ((int)$loan['id'] === $selectedLoanId) ? 'selected' : '' ?> >
                                 Peminjaman <?= htmlspecialchars(date('d M Y', strtotime($loan['created_at'] ?? 'now'))) ?>
                             </option>
                         <?php endforeach; ?>
@@ -159,7 +159,23 @@ function addSubItemRow(item) {
     const sourceType = String(item.source_type || 'STOCK').toUpperCase() === 'MANUAL' ? 'MANUAL' : 'STOCK';
     const isSerialized = Number(item.is_serialized || 0) === 1;
     const maxQty = Math.max(0, Number(item.quantity || 0) - Number(item.returned_quantity || 0));
+    const serials = Array.isArray(item.serial_numbers) ? item.serial_numbers : [];
     if (maxQty < 1) return;
+
+    const serialMarkup = isSerialized ? `
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">Pilih Nomor Seri yang Dikembalikan</label>
+            <div class="space-y-2 max-h-40 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-900/40">
+                ${serials.length ? serials.map(sn => `
+                    <label class="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white dark:hover:bg-gray-800 cursor-pointer">
+                        <input type="checkbox" class="sn-option-${rowIndex} h-4 w-4 text-blue-600 border-gray-300 rounded" value="${escapeHtml(sn)}" onchange="syncReturnRow(${rowIndex})">
+                        <span class="text-sm font-medium text-gray-800 dark:text-gray-200">${escapeHtml(sn)}</span>
+                    </label>
+                `).join('') : '<div class="text-sm text-red-500">Nomor seri barang ini tidak ditemukan.</div>'}
+            </div>
+            <div id="sn-counter-${rowIndex}" class="text-xs font-semibold text-orange-500 mt-1">0 / ${maxQty} nomor seri</div>
+        </div>
+    ` : '<span class="text-sm text-gray-500 dark:text-gray-400 italic">Barang tanpa nomor seri</span>';
 
     tr.innerHTML = `
         <td class="px-4 py-4 align-top text-center">
@@ -172,18 +188,13 @@ function addSubItemRow(item) {
         <td class="px-4 py-4 align-top">
             <div class="font-semibold text-gray-900 dark:text-gray-100">${escapeHtml(item.nama || '-')}</div>
             <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Dipinjam: ${Number(item.quantity || 0)} · Sudah kembali: ${Number(item.returned_quantity || 0)} · Sisa: ${maxQty}</div>
+            ${item.master_item_id ? `<div class="text-xs text-blue-600 dark:text-blue-300 mt-1">Terhubung ke Master Barang</div>` : ''}
         </td>
         <td class="px-4 py-4 align-top">
             <input type="number" min="1" max="${maxQty}" value="${maxQty}" id="qty-${rowIndex}" class="w-24 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-center" onchange="syncReturnRow(${rowIndex})" oninput="syncReturnRow(${rowIndex})">
         </td>
         <td class="px-4 py-4 align-top">
-            ${isSerialized ? `
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Nomor Seri yang Dikembalikan</label>
-                    <textarea id="sn-${rowIndex}" rows="2" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" placeholder="SN001\nSN002..." oninput="syncReturnRow(${rowIndex})"></textarea>
-                    <div id="sn-counter-${rowIndex}" class="text-xs font-semibold text-orange-500 mt-1">0 / ${maxQty} nomor seri</div>
-                </div>
-            ` : '<span class="text-sm text-gray-500 dark:text-gray-400 italic">Barang tanpa nomor seri</span>'}
+            ${serialMarkup}
         </td>
     `;
     tbody.appendChild(tr);
@@ -209,16 +220,13 @@ function syncReturnRow(rowIndex) {
     const qtyHidden = document.getElementById('qty-hidden-' + rowIndex);
     if (qtyHidden) qtyHidden.value = qty;
 
-    const snText = document.getElementById('sn-' + rowIndex);
     const snHidden = document.getElementById('sn-hidden-' + rowIndex);
     const counter = document.getElementById('sn-counter-' + rowIndex);
-    if (snText) {
-        const sns = snText.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-        if (counter) {
-            counter.textContent = `${sns.length} / ${qty} nomor seri`;
-            counter.className = `text-xs font-semibold mt-1 ${sns.length === qty ? 'text-green-600' : 'text-orange-500'}`;
-        }
-        if (snHidden) snHidden.value = sns.join('\n');
+    const snOptions = [...document.querySelectorAll('.sn-option-' + rowIndex + ':checked')].map(el => el.value);
+    if (snHidden) snHidden.value = snOptions.join('\n');
+    if (counter) {
+        counter.textContent = `${snOptions.length} / ${qty} nomor seri`;
+        counter.className = `text-xs font-semibold mt-1 ${snOptions.length === qty ? 'text-green-600' : 'text-orange-500'}`;
     }
 
     if (checked) validateAllRows();
@@ -231,10 +239,9 @@ function validateAllRows() {
         const tr = cb.closest('tr');
         const index = tr.dataset.index;
         const qty = Number(document.getElementById('qty-' + index)?.value || 0);
-        const snText = tr.querySelector('textarea');
-        const sns = snText ? snText.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
+        const snOptions = tr.querySelectorAll('.sn-option-' + index + ':checked');
         if (qty < 1) valid = false;
-        if (snText && sns.length !== qty) valid = false;
+        if (tr.querySelector('.sn-option-' + index) && snOptions.length !== qty) valid = false;
     });
     setSubmitEnabled(valid);
 }
