@@ -84,7 +84,7 @@ if (empty($_SESSION['csrf_token'])) {
         let selectHtml = `<select name="item_ids[]" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 item-select" onchange="handleItemChange(this, ${rowIndex})">
             <option value="">Pilih Barang</option>`;
         itemsData.forEach(item => {
-            selectHtml += `<option value="${item.id}" data-serialized="${item.is_serialized}">${item.nama} (${item.kode_barang})</option>`;
+            selectHtml += `<option value="${item.id}" data-serialized="${item.is_serialized}">${item.nama}</option>`;
         });
         selectHtml += `</select>`;
         
