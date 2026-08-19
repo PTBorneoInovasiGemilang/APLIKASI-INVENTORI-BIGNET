@@ -202,8 +202,6 @@ function handleItemChange(index) {
 
     snContainer.classList.remove('hidden');
     snDisabled.classList.add('hidden');
-
-    // Serial list is filled when a warehouse is selected.
     loadSerials(index);
 }
 
@@ -215,7 +213,7 @@ async function loadSerials(index) {
     if (!warehouse || !itemId || !snSelect) return;
 
     try {
-        const response = await fetch(`<?= url('/api/stock') ?>?warehouse_id=${encodeURIComponent(warehouse)}&master_item_id=${encodeURIComponent(itemId)}`);
+        const response = await fetch(`<?= url('/api/stock') ?>?warehouse_id=${encodeURIComponent(warehouse)}&item_id=${encodeURIComponent(itemId)}`);
         const data = await response.json();
         const serials = Array.isArray(data.serials) ? data.serials : [];
         snSelect.innerHTML = serials.map(sn => `<option value="${escapeHtml(sn.serial_number || sn)}">${escapeHtml(sn.serial_number || sn)}</option>`).join('');
