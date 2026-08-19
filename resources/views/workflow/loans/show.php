@@ -6,7 +6,29 @@ if(empty($_SESSION['csrf_token'])) $_SESSION['csrf_token']=bin2hex(random_bytes(
 $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Siap Diproses','blue'],'BORROWED'=>['Sedang Dipinjam','orange'],'PARTIAL_RETURNED'=>['Kembali Sebagian','purple'],'RETURNED'=>['Dikembalikan','green'],'REJECTED'=>['Ditolak','red']];
 $badge=$labels[$loan['status']]??[$loan['status'],'gray'];
 ?>
-<div class="max-w-6xl mx-auto px-4 py-8">
+<style>
+.dark .loan-ui{color:#e5e7eb}
+.dark .loan-ui .bg-white{background:#111827!important;color:#e5e7eb!important}
+.dark .loan-ui .bg-gray-50{background:#182235!important}
+.dark .loan-ui .bg-gray-100{background:#243044!important;color:#e2e8f0!important}
+.dark .loan-ui .border-gray-200{border-color:#37465d!important}
+.dark .loan-ui .border-gray-700{border-color:#3d4b63!important}
+.dark .loan-ui .text-gray-900,.dark .loan-ui .text-gray-800{color:#f8fafc!important}
+.dark .loan-ui .text-gray-700{color:#e2e8f0!important}
+.dark .loan-ui .text-gray-600{color:#cbd5e1!important}
+.dark .loan-ui .text-gray-500{color:#94a3b8!important}
+.dark .loan-ui .text-gray-400{color:#94a3b8!important}
+.dark .loan-ui input,.dark .loan-ui select,.dark .loan-ui textarea{background:#1e293b!important;color:#f8fafc!important;border-color:#475569!important}
+.dark .loan-ui input::placeholder,.dark .loan-ui textarea::placeholder{color:#94a3b8!important}
+.dark .loan-ui input:focus,.dark .loan-ui select:focus,.dark .loan-ui textarea:focus{border-color:#60a5fa!important;box-shadow:0 0 0 2px rgba(96,165,250,.18)!important}
+.dark .loan-ui .bg-blue-50{background:#0f2747!important}.dark .loan-ui .border-blue-200{border-color:#245da8!important}.dark .loan-ui .text-blue-700{color:#93c5fd!important}
+.dark .loan-ui .bg-green-50{background:#0d2f22!important}.dark .loan-ui .border-green-200{border-color:#206344!important}.dark .loan-ui .text-green-700{color:#86efac!important}
+.dark .loan-ui .bg-red-50{background:#381519!important}.dark .loan-ui .border-red-200{border-color:#7f1d1d!important}.dark .loan-ui .text-red-700{color:#fca5a5!important}
+.dark .loan-ui .bg-yellow-50{background:#332a0b!important}.dark .loan-ui .border-yellow-200{border-color:#715d16!important}.dark .loan-ui .text-yellow-700{color:#fde68a!important}
+.dark .loan-ui .bg-orange-50{background:#3c210d!important}.dark .loan-ui .border-orange-200{border-color:#8a4a13!important}.dark .loan-ui .text-orange-700{color:#fdba74!important}
+.dark .loan-ui .hover\:bg-gray-50:hover{background:#1a273b!important}
+</style>
+<div class="loan-ui max-w-6xl mx-auto px-4 py-8">
   <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
     <div><a href="<?=url('/loans')?>" class="text-blue-600 hover:underline text-sm">← Kembali</a><h1 class="text-3xl font-bold mt-3 text-gray-900">Detail Peminjaman</h1><p class="text-sm text-gray-500 mt-1">Permintaan → keputusan Admin → Barang Keluar → custody → pengembalian.</p></div>
     <span class="px-3 py-2 rounded-full text-sm font-semibold bg-<?=$badge[1]?>-100 text-<?=$badge[1]?>-800 w-fit"><?=$badge[0]?></span>
