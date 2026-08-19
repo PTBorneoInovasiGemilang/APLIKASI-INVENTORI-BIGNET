@@ -125,7 +125,7 @@ class LoanController {
         }
 
         $stockService = new StockService();
-        $transaction_code = \App\Helpers\TransactionHelper::generateCode('LOAN', 'loans');
+        $transaction_code = \\App\\Helpers\\TransactionHelper::generateCode('LOAN', 'loans');
 
         try {
             $pdo->beginTransaction();
@@ -150,7 +150,7 @@ class LoanController {
                     $spec = trim($manual_specs[$index] ?? '');
                     $unit = trim($manual_units[$index] ?? '');
                     if ($name === '') {
-                        throw new \Exception('Nama barang manual wajib diisi.');
+                        throw new \\Exception('Nama barang manual wajib diisi.');
                     }
                     $manualItemStmt->execute([$loan_id, $name, $spec !== '' ? $spec : null, $unit !== '' ? $unit : null, $qty]);
                     $validLines++;
@@ -159,21 +159,21 @@ class LoanController {
 
                 $itemId = (int)($item_ids[$index] ?? 0);
                 if ($itemId <= 0) {
-                    throw new \Exception('Barang dari stok wajib dipilih.');
+                    throw new \\Exception('Barang dari stok wajib dipilih.');
                 }
 
                 $itemStmt = $pdo->prepare('SELECT id, nama, is_serialized FROM master_items WHERE id = ? AND is_active = 1');
                 $itemStmt->execute([$itemId]);
                 $masterItem = $itemStmt->fetch();
                 if (!$masterItem) {
-                    throw new \Exception('Barang yang dipilih tidak valid.');
+                    throw new \\Exception('Barang yang dipilih tidak valid.');
                 }
 
                 $stockCheck = $pdo->prepare('SELECT quantity FROM stocks WHERE master_item_id = ? AND warehouse_id = ? FOR UPDATE');
                 $stockCheck->execute([$itemId, $warehouse_id]);
                 $available = (int)$stockCheck->fetchColumn();
                 if ($available < $qty) {
-                    throw new \Exception("Stok {$masterItem['nama']} tidak mencukupi. Tersedia $available, diminta $qty.");
+                    throw new \\Exception("Stok {$masterItem['nama']} tidak mencukupi. Tersedia $available, diminta $qty.");
                 }
 
                 $stockItemStmt->execute([$loan_id, $itemId, $qty]);
@@ -187,23 +187,23 @@ class LoanController {
                         if ($snValue !== '') $selectedSerials[] = $snValue;
                     }
                     if (count($selectedSerials) !== $qty) {
-                        throw new \Exception("Jumlah Serial Number untuk {$masterItem['nama']} harus $qty.");
+                        throw new \\Exception("Jumlah Serial Number untuk {$masterItem['nama']} harus $qty.");
                     }
                     if (count($selectedSerials) !== count(array_unique($selectedSerials))) {
-                        throw new \Exception('Ada Serial Number yang dipilih lebih dari sekali.');
+                        throw new \\Exception('Ada Serial Number yang dipilih lebih dari sekali.');
                     }
 
                     foreach ($selectedSerials as $sn) {
                         $serialLookupStmt->execute([$sn, $warehouse_id]);
                         $snRow = $serialLookupStmt->fetch();
                         if (!$snRow) {
-                            throw new \Exception("Serial Number '$sn' tidak tersedia di gudang asal.");
+                            throw new \\Exception("Serial Number '$sn' tidak tersedia di gudang asal.");
                         }
                         if ((int)$snRow['master_item_id'] !== $itemId) {
-                            throw new \Exception("Serial Number '$sn' bukan milik barang yang dipilih.");
+                            throw new \\Exception("Serial Number '$sn' bukan milik barang yang dipilih.");
                         }
                         if ($snRow['status'] !== 'AVAILABLE') {
-                            throw new \Exception("Serial Number '$sn' tidak tersedia untuk dipinjam.");
+                            throw new \\Exception("Serial Number '$sn' tidak tersedia untuk dipinjam.");
                         }
 
                         $stockService->moveSerial($snRow['id'], 'LOANED', null, null, $borrower_id, 'loan', $loan_id, 'Peminjaman - ' . $transaction_code);
@@ -215,14 +215,14 @@ class LoanController {
             }
 
             if ($validLines === 0) {
-                throw new \Exception('Tidak ada barang valid dalam peminjaman.');
+                throw new \\Exception('Tidak ada barang valid dalam peminjaman.');
             }
 
             $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'CREATE', 'loans', ?)");
             $auditStmt->execute([$user_id, $loan_id]);
             $pdo->commit();
             $_SESSION['success'] = 'Peminjaman berhasil diproses.';
-        } catch (\Exception $e) {
+        } catch (\\Exception $e) {
             if ($pdo->inTransaction()) $pdo->rollBack();
             $_SESSION['error'] = 'Gagal memproses peminjaman: ' . $e->getMessage();
             header('Location: ' . url('/loans/create'));
@@ -231,8 +231,8 @@ class LoanController {
 
         try {
             $actorName = AuthHelper::user()['name'];
-            \App\Helpers\NotificationHelper::createForRoleOnce('ADMIN', 'Peminjaman Barang Baru', $actorName . ' mengajukan peminjaman.', 'info', '/loans/show?id=' . $loan_id);
-        } catch (\Exception $notifEx) {
+            \\App\\Helpers\\NotificationHelper::createForRoleOnce('ADMIN', 'Peminjaman Barang Baru', $actorName . ' mengajukan peminjaman.', 'info', '/loans/show?id=' . $loan_id);
+        } catch (\\Exception $notifEx) {
             error_log('[BIGNET] Notification gagal (loan create #' . $loan_id . '): ' . $notifEx->getMessage());
         }
 
@@ -264,21 +264,22 @@ class LoanController {
         $itemStmt->execute([$id]);
         foreach ($itemStmt->fetchAll() as $row) $items[] = $row;
 
-        $manualStmt = $pdo->prepare("SELECT id, name AS nama, specification, unit, quantity, returned_quantity, 'MANUAL' AS source_type FROM loan_manual_items WHERE loan_id = ? ORDER BY id");
+        $manualStmt = $pdo->prepare("SELECT lmi.id, lmi.name AS nama, lmi.specification, lmi.unit, lmi.quantity, lmi.returned_quantity, lmi.master_item_id, COALESCE(m.is_serialized,0) AS is_serialized, 'MANUAL' AS source_type FROM loan_manual_items lmi LEFT JOIN master_items m ON m.id = lmi.master_item_id WHERE lmi.loan_id = ? ORDER BY lmi.id");
         $manualStmt->execute([$id]);
         foreach ($manualStmt->fetchAll() as $row) {
-            $row['is_serialized'] = 0;
             $row['serial_numbers'] = [];
             $items[] = $row;
         }
 
         $snStmt = $pdo->prepare("SELECT sn.serial_number FROM loan_item_serials lis JOIN serial_numbers sn ON lis.serial_number_id = sn.id WHERE lis.loan_item_id = ?");
+        $manualSnStmt = $pdo->prepare("SELECT sn.serial_number FROM loan_item_serials lis JOIN serial_numbers sn ON lis.serial_number_id = sn.id WHERE lis.loan_manual_item_id = ? AND lis.status IN ('PENDING','BORROWED')");
         foreach ($items as &$item) {
             if (($item['source_type'] ?? '') === 'STOCK' && !empty($item['is_serialized'])) {
                 $snStmt->execute([(int)$item['id']]);
                 $item['serial_numbers'] = $snStmt->fetchAll(PDO::FETCH_COLUMN);
-            } else {
-                $item['serial_numbers'] = [];
+            } elseif (($item['source_type'] ?? '') === 'MANUAL' && !empty($item['is_serialized'])) {
+                $manualSnStmt->execute([(int)$item['id']]);
+                $item['serial_numbers'] = $manualSnStmt->fetchAll(PDO::FETCH_COLUMN);
             }
         }
         unset($item);
@@ -305,12 +306,33 @@ class LoanController {
             $stmt->execute([$id]);
             $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $manualStmt = $pdo->prepare("SELECT id AS loan_item_id, NULL AS master_item_id, name AS nama, 0 AS is_serialized, quantity, returned_quantity, 'MANUAL' AS source_type, specification, unit FROM loan_manual_items WHERE loan_id = ? AND quantity > returned_quantity");
-            $manualStmt->execute([$id]);
-            $items = array_merge($items, $manualStmt->fetchAll(PDO::FETCH_ASSOC));
+            $stockSnStmt = $pdo->prepare("SELECT sn.serial_number FROM loan_item_serials lis JOIN serial_numbers sn ON lis.serial_number_id = sn.id WHERE lis.loan_item_id = ? AND lis.status IN ('PENDING','BORROWED') ORDER BY sn.serial_number");
+            foreach ($items as &$item) {
+                $item['serial_numbers'] = [];
+                if (!empty($item['is_serialized'])) {
+                    $stockSnStmt->execute([(int)$item['loan_item_id']]);
+                    $item['serial_numbers'] = $stockSnStmt->fetchAll(PDO::FETCH_COLUMN);
+                }
+            }
+            unset($item);
 
+            $manualStmt = $pdo->prepare("SELECT lmi.id AS loan_item_id, lmi.master_item_id, lmi.name AS nama, COALESCE(m.is_serialized,0) AS is_serialized, lmi.quantity, lmi.returned_quantity, 'MANUAL' AS source_type, lmi.specification, lmi.unit FROM loan_manual_items lmi LEFT JOIN master_items m ON m.id = lmi.master_item_id WHERE lmi.loan_id = ? AND lmi.quantity > lmi.returned_quantity");
+            $manualStmt->execute([$id]);
+            $manualItems = $manualStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $manualSnStmt = $pdo->prepare("SELECT sn.serial_number FROM loan_item_serials lis JOIN serial_numbers sn ON lis.serial_number_id = sn.id WHERE lis.loan_manual_item_id = ? AND lis.status IN ('PENDING','BORROWED') ORDER BY sn.serial_number");
+            foreach ($manualItems as &$item) {
+                $item['serial_numbers'] = [];
+                if (!empty($item['is_serialized'])) {
+                    $manualSnStmt->execute([(int)$item['loan_item_id']]);
+                    $item['serial_numbers'] = $manualSnStmt->fetchAll(PDO::FETCH_COLUMN);
+                }
+            }
+            unset($item);
+
+            $items = array_merge($items, $manualItems);
             echo json_encode($items);
-        } catch (\Exception $e) {
+        } catch (\\Exception $e) {
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
         }
