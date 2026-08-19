@@ -147,7 +147,6 @@ let rowCount = 0;
 function itemLabel(item) {
     const name = String(item.nama ?? '').trim();
     const code = String(item.kode_barang ?? '').trim();
-    // Jangan pernah menghasilkan "()" atau label kode kosong.
     return code ? `${name} · ${code}` : name;
 }
 
@@ -185,7 +184,6 @@ function refreshDestinationOptions() {
 function refreshItemOptions() {
     const sourceItems = getSourceItems();
     document.querySelectorAll('.item-select').forEach(select => populateItemSelect(select));
-
     itemHint.textContent = !sourceWarehouse.value
         ? 'Pilih gudang asal untuk menampilkan barang yang tersedia.'
         : (sourceItems.length
@@ -287,7 +285,7 @@ function addItemRow() {
         </td>
         <td class="px-4 py-4 align-top">
             <input type="number" name="quantities[]" min="1" value="1" required class="qty-input block w-full rounded-xl border-gray-300 bg-white px-3 py-2.5 text-sm text-center shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" onchange="validateQty(this, ${rowIndex})" oninput="validateQty(this, ${rowIndex})">
-            <div class="mt-1 text-center text-[11px] text-gray-400">stok tersedia akan dibatasi otomatis</div>
+            <div class="mt-1 text-center text-[11px] text-gray-400">dibatasi sesuai stok</div>
         </td>
         <td class="px-4 py-4 align-top">
             <div id="sn-container-${rowIndex}" class="hidden">
