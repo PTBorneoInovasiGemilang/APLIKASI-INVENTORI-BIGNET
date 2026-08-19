@@ -54,7 +54,6 @@ use App\Helpers\AuthHelper;
                             <option value="<?= $sub['id'] ?>">Pengajuan tersedia</option>
                         <?php endforeach; ?>
                     </select>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Kode pengajuan tidak ditampilkan di UI.</p>
                 </div>
 
                 <div>
@@ -133,10 +132,8 @@ function addItemRow() {
                     ${options}
                 </select>
             </div>
-            <div id="manual-fields-${index}" class="hidden space-y-2">
+            <div id="manual-fields-${index}" class="hidden">
                 <input type="text" name="manual_names[]" placeholder="Nama barang custom" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
-                <input type="text" name="manual_specs[]" placeholder="Spesifikasi / keterangan (opsional)" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
-                <input type="text" name="manual_units[]" placeholder="Satuan (pcs, unit, meter, dll.)" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
             </div>
         </td>
         <td class="px-4 py-3 align-top">
@@ -144,9 +141,9 @@ function addItemRow() {
         </td>
         <td class="px-4 py-3 align-top">
             <div id="sn-container-${index}" class="hidden">
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Untuk barang serial, pilih SN yang tersedia di gudang asal.</p>
-                <select name="sn_list[]" id="sn-input-${index}" multiple size="4" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"></select>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tahan Ctrl untuk memilih lebih dari satu SN.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Pilih SN yang tersedia di gudang asal.</p>
+                <select name="sn_list[${index}][]" id="sn-input-${index}" multiple size="4" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"></select>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih sesuai jumlah yang dipinjam.</p>
             </div>
             <div id="sn-disabled-${index}" class="text-sm text-gray-500 dark:text-gray-400 italic py-2">Barang non-serial.</div>
         </td>
