@@ -50,9 +50,9 @@ require __DIR__ . '/../../components/table/toolbar.php';
                 </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                <?php 
+                <?php
                 $no = ($offset ?? 0) + 1;
-                foreach ($serials as $sn): 
+                foreach ($serials as $sn):
                 ?>
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <td data-label="No" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center"><?= $no++ ?></td>
@@ -64,7 +64,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
                     <td data-label="Gudang" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500"><?php echo htmlspecialchars($sn['warehouse_name'] ?? '-'); ?></td>
                     <td data-label="Pemegang" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500"><?php echo htmlspecialchars($sn['holder_name'] ?? '-'); ?></td>
                     <td data-label="Status" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                        <?php 
+                        <?php
                         $st = $sn['status'];
                         $badgeType = 'NEUTRAL';
                         if ($st === 'AVAILABLE') $badgeType = 'SUCCESS';
@@ -72,8 +72,8 @@ require __DIR__ . '/../../components/table/toolbar.php';
                         else if ($st === 'INSTALLED') $badgeType = 'INFO';
                         else if ($st === 'IN_TRANSIT') $badgeType = 'WARNING';
                         else if ($st === 'BROKEN' || $st === 'REPAIR') $badgeType = 'DANGER';
-                        
-                        echo \\App\\Helpers\\UIHelper::badge($st, $badgeType);
+
+                        echo \App\Helpers\UIHelper::badge($st, $badgeType);
                         ?>
                     </td>
                     <?php
@@ -86,7 +86,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($serials)): ?>
-                    <?php 
+                    <?php
                     $colspan = 7;
                     $emptyMessage = "Belum ada nomor seri.";
                     require __DIR__ . '/../../components/table/empty_state.php';
@@ -95,10 +95,10 @@ require __DIR__ . '/../../components/table/toolbar.php';
             </tbody>
         </table>
     </div>
-    
-    <?php 
+
+    <?php
     $paginationBaseUrl = url('/serials');
-    require __DIR__ . '/../../components/table/pagination.php'; 
+    require __DIR__ . '/../../components/table/pagination.php';
     ?>
 </div>
 
