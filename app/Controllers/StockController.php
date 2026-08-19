@@ -45,39 +45,103 @@ class StockController {
 
         $whereSql = "WHERE " . implode(" AND ", $whereClauses);
 
-        // Count for pagination
-        $countSql = "SELECT COUNT(*) FROM stocks s 
-                     JOIN master_items m ON s.master_item_id = m.id 
-                     JOIN warehouses w ON s.warehouse_id = w.id $whereSql";
-        $stmtCount = $pdo->prepare($countSql);
-        $stmtCount->execute($params);
-        $totalItems = $stmtCount->fetchColumn();
-        $totalPages = ceil($totalItems / $limit);
-        
-        // Source of truth angka stok (konsisten dengan SearchController & MasterItemController::show):
-        //  - Stok Fisik   = stocks.quantity (bulk) / jumlah serial di gudang (serialized)
-        //  - Available    = jumlah serial AVAILABLE di gudang (serialized) / quantity (bulk)
-        //  - Reserved     = 0 (placeholder existing project, belum ada transaksi pemesanan)
-        //  - Allocated    = 0 (placeholder existing project, belum ada alokasi khusus)
-        $sql = "SELECT s.*, m.kode_barang, m.nama as item_name, m.is_serialized, m.stok_minimum, m.is_active,
-                       w.name as warehouse_name, c.name as category_name, u.name as unit_name,
-                       (SELECT COUNT(*) FROM serial_numbers sn
-                         WHERE sn.master_item_id = m.id AND sn.current_warehouse_id = s.warehouse_id
-                           AND sn.status = 'AVAILABLE') as available_serials,
-                       (SELECT COUNT(*) FROM serial_numbers sn2
-                         WHERE sn2.master_item_id = m.id AND sn2.current_warehouse_id = s.warehouse_id) as physical_serials
-                FROM stocks s 
-                JOIN master_items m ON s.master_item_id = m.id 
-                JOIN warehouses w ON s.warehouse_id = w.id 
-                LEFT JOIN item_categories c ON m.item_category_id = c.id
-                LEFT JOIN units u ON m.unit_id = u.id
-                $whereSql
-                ORDER BY w.name ASC, m.nama ASC
-                LIMIT $limit OFFSET $offset";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $stocks = $stmt->fetchAll();
+        // Low-stock mode is item-oriented so it matches the Dashboard KPI:
+        // one row per unique master item, even when that item is low in multiple warehouses.
+        if ($filter === 'low_stock') {
+            $countSql = "SELECT COUNT(DISTINCT s.master_item_id) FROM stocks s
+                         JOIN master_items m ON s.master_item_id = m.id
+                         JOIN warehouses w ON s.warehouse_id = w.id $whereSql";
+            $stmtCount = $pdo->prepare($countSql);
+            $stmtCount->execute($params);
+            $totalItems = (int)$stmtCount->fetchColumn();
+            $totalPages = (int)ceil($totalItems / $limit);
+
+            // Fetch all matching low-stock warehouse rows, then collapse them in PHP.
+            // This keeps serialized/bulk stock calculations consistent with the normal view.
+            $sql = "SELECT s.*, m.kode_barang, m.nama as item_name, m.is_serialized, m.stok_minimum, m.is_active,
+                           w.name as warehouse_name, c.name as category_name, u.name as unit_name,
+                           (SELECT COUNT(*) FROM serial_numbers sn
+                             WHERE sn.master_item_id = m.id AND sn.current_warehouse_id = s.warehouse_id
+                               AND sn.status = 'AVAILABLE') as available_serials,
+                           (SELECT COUNT(*) FROM serial_numbers sn2
+                             WHERE sn2.master_item_id = m.id AND sn2.current_warehouse_id = s.warehouse_id) as physical_serials
+                    FROM stocks s
+                    JOIN master_items m ON s.master_item_id = m.id
+                    JOIN warehouses w ON s.warehouse_id = w.id
+                    LEFT JOIN item_categories c ON m.item_category_id = c.id
+                    LEFT JOIN units u ON m.unit_id = u.id
+                    $whereSql
+                    ORDER BY m.nama ASC, w.name ASC";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $lowStockRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $groupedStocks = [];
+            foreach ($lowStockRows as $row) {
+                $itemId = (int)$row['master_item_id'];
+                $physical = (int)$row['is_serialized']
+                    ? (int)($row['physical_serials'] ?? 0)
+                    : (int)$row['quantity'];
+                $available = (int)$row['is_serialized']
+                    ? (int)($row['available_serials'] ?? 0)
+                    : $physical;
+
+                if (!isset($groupedStocks[$itemId])) {
+                    $groupedStocks[$itemId] = $row;
+                    $groupedStocks[$itemId]['warehouse_name'] = $row['warehouse_name'] . ' (' . $physical . ')';
+                    $groupedStocks[$itemId]['warehouse_id'] = 0;
+                    $groupedStocks[$itemId]['quantity'] = $physical;
+                    $groupedStocks[$itemId]['physical_serials'] = $physical;
+                    $groupedStocks[$itemId]['available_serials'] = $available;
+                } else {
+                    $groupedStocks[$itemId]['warehouse_name'] .= ', ' . $row['warehouse_name'] . ' (' . $physical . ')';
+                    $groupedStocks[$itemId]['quantity'] += $physical;
+                    $groupedStocks[$itemId]['physical_serials'] += $physical;
+                    $groupedStocks[$itemId]['available_serials'] += $available;
+                }
+            }
+
+            $stocks = array_values($groupedStocks);
+            usort($stocks, static function ($a, $b) {
+                return strcasecmp((string)$a['item_name'], (string)$b['item_name']);
+            });
+            $stocks = array_slice($stocks, $offset, $limit);
+        } else {
+            // Normal stock mode remains one row per item + warehouse.
+            $countSql = "SELECT COUNT(*) FROM stocks s 
+                         JOIN master_items m ON s.master_item_id = m.id 
+                         JOIN warehouses w ON s.warehouse_id = w.id $whereSql";
+            $stmtCount = $pdo->prepare($countSql);
+            $stmtCount->execute($params);
+            $totalItems = (int)$stmtCount->fetchColumn();
+            $totalPages = (int)ceil($totalItems / $limit);
+            
+            // Source of truth angka stok (konsisten dengan SearchController & MasterItemController::show):
+            //  - Stok Fisik   = stocks.quantity (bulk) / jumlah serial di gudang (serialized)
+            //  - Available    = jumlah serial AVAILABLE di gudang (serialized) / quantity (bulk)
+            //  - Reserved     = 0 (placeholder existing project, belum ada transaksi pemesanan)
+            //  - Allocated    = 0 (placeholder existing project, belum ada alokasi khusus)
+            $sql = "SELECT s.*, m.kode_barang, m.nama as item_name, m.is_serialized, m.stok_minimum, m.is_active,
+                           w.name as warehouse_name, c.name as category_name, u.name as unit_name,
+                           (SELECT COUNT(*) FROM serial_numbers sn
+                             WHERE sn.master_item_id = m.id AND sn.current_warehouse_id = s.warehouse_id
+                               AND sn.status = 'AVAILABLE') as available_serials,
+                           (SELECT COUNT(*) FROM serial_numbers sn2
+                             WHERE sn2.master_item_id = m.id AND sn2.current_warehouse_id = s.warehouse_id) as physical_serials
+                    FROM stocks s 
+                    JOIN master_items m ON s.master_item_id = m.id 
+                    JOIN warehouses w ON s.warehouse_id = w.id 
+                    LEFT JOIN item_categories c ON m.item_category_id = c.id
+                    LEFT JOIN units u ON m.unit_id = u.id
+                    $whereSql
+                    ORDER BY w.name ASC, m.nama ASC
+                    LIMIT $limit OFFSET $offset";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $stocks = $stmt->fetchAll();
+        }
 
         $warehouses = $pdo->query("SELECT * FROM warehouses WHERE is_active = 1")->fetchAll();
         $categories = $pdo->query("SELECT * FROM item_categories WHERE is_active = 1")->fetchAll();
