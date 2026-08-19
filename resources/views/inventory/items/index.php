@@ -18,7 +18,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 <?php
 $toolbarAction = url('/items');
-$searchPlaceholder = "Cari Kode / Nama...";
+$searchPlaceholder = "Cari Nama Barang...";
 ob_start();
 ?>
 <div>
@@ -45,12 +45,11 @@ require __DIR__ . '/../../components/table/toolbar.php';
 
 <div class="bg-white shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
     <div class="overflow-x-auto">
-        <table class="w-full min-w-[1100px] table-sticky divide-y divide-gray-200 dark:divide-gray-700">
+        <table class="w-full min-w-[980px] table-sticky divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
                     <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Foto</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kode</th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama</th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kategori</th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Satuan</th>
@@ -75,8 +74,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
                             </div>
                         <?php endif; ?>
                     </td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($item['kode_barang']); ?></td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($item['nama']); ?></td>
+                    <td class="px-4 py-3 whitespace-normal text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($item['nama']); ?></td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($item['category_name']); ?></td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($item['unit_name']); ?></td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -97,48 +95,43 @@ require __DIR__ . '/../../components/table/toolbar.php';
                     $rowActions = [];
                     $rowActions[] = ['type' => 'view', 'url' => url('/items/show/' . (int)$item['id']), 'label' => 'Lihat', 'icon' => 'fa-eye', 'title' => 'Detail Inventory 360'];
                     if (\App\Helpers\AuthHelper::hasRole('ADMIN')) {
-                        // ADMIN: write penuh sesuai action matrix (Lihat | Ubah | status | Hapus jika unused).
                         $rowActions[] = ['type' => 'link', 'url' => url('/items/edit/' . (int)$item['id']), 'label' => 'Ubah', 'icon' => 'fa-edit'];
                         $csrf = $_SESSION['csrf_token'] ?? '';
                         if (!$item['is_active']) {
-                            // Kondisi 2 & 4: Nonaktif — selalu tersedia Aktifkan.
                             $rowActions[] = [
                                 'type' => 'form', 'action' => url('/items/toggle-active/' . (int)$item['id']),
                                 'fields' => ['csrf_token' => $csrf], 'label' => 'Aktifkan', 'icon' => 'fa-play',
                                 'confirm' => [
                                     'title' => 'Aktifkan Barang?',
-                                    'message' => $item['kode_barang'] . ' — ' . $item['nama'] . '?',
+                                    'message' => 'Barang ini akan diaktifkan kembali?',
                                     'description' => 'Barang akan kembali berstatus Aktif dan dapat digunakan untuk transaksi baru sesuai aturan sistem.',
                                     'type' => 'success', 'icon' => 'fa-play', 'confirm' => 'Aktifkan', 'loading' => 'Mengaktifkan...'
                                 ]
                             ];
                         } else {
-                            // Kondisi 1 & 3: Aktif — selalu tersedia Nonaktifkan.
                             $rowActions[] = [
                                 'type' => 'form', 'action' => url('/items/toggle-active/' . (int)$item['id']),
                                 'fields' => ['csrf_token' => $csrf], 'label' => 'Nonaktifkan', 'icon' => 'fa-ban',
                                 'confirm' => [
                                     'title' => 'Nonaktifkan Barang?',
-                                    'message' => $item['kode_barang'] . ' — ' . $item['nama'] . '?',
+                                    'message' => 'Nonaktifkan barang ini?',
                                     'description' => 'Barang ini akan menjadi Nonaktif dan tidak dapat digunakan untuk transaksi baru sesuai aturan sistem. Riwayat barang tetap tersimpan.',
                                     'type' => 'warning', 'icon' => 'fa-ban', 'confirm' => 'Nonaktifkan', 'loading' => 'Menonaktifkan...'
                                 ]
                             ];
                         }
-                        // Delete eligibility = history/relasi, bukan status (kondisi 1 & 2: belum pernah digunakan).
                         if (!$item['is_used']) {
                             $rowActions[] = [
                                 'type' => 'form', 'action' => url('/items/delete/' . (int)$item['id']),
                                 'fields' => ['csrf_token' => $csrf], 'label' => 'Hapus', 'icon' => 'fa-trash', 'danger' => true,
                                 'confirm' => [
                                     'title' => 'Hapus Master Barang?',
-                                    'message' => $item['kode_barang'] . ' — ' . $item['nama'] . '. Barang ini belum memiliki riwayat transaksi dan dapat dihapus permanen.',
+                                    'message' => 'Barang ini belum memiliki riwayat transaksi dan dapat dihapus permanen. Lanjutkan?',
                                     'type' => 'danger', 'icon' => 'fa-trash', 'confirm' => 'Hapus', 'loading' => 'Menghapus...'
                                 ]
                             ];
                         }
                     } else {
-                        // SUPERADMIN / role lain: read-only — hanya Lihat (+ timeline). Tidak ada tombol write.
                         $rowActions[] = ['type' => 'link', 'url' => url('/timeline?search=' . urlencode($item['kode_barang'])), 'label' => 'Lihat Perjalanan', 'icon' => 'fa-route'];
                     }
                     require __DIR__ . '/../../components/table/row_actions.php';
@@ -147,7 +140,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
                 <?php endforeach; ?>
                 <?php if (empty($items)): ?>
                     <?php 
-                    $colspan = 9;
+                    $colspan = 8;
                     $emptyMessage = "Tidak ada barang ditemukan.";
                     require __DIR__ . '/../../components/table/empty_state.php';
                     ?>
@@ -171,11 +164,6 @@ require __DIR__ . '/../../components/table/toolbar.php';
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="mb-4">
-                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Kode Barang</label>
-                        <input type="text" value="[Auto Generated]" disabled class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-400 bg-gray-100 dark:bg-gray-700 leading-tight">
-                    </div>
-                    
                     <div class="mb-4">
                         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Nama Barang</label>
                         <input type="text" name="nama" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
