@@ -34,7 +34,7 @@ if (empty($_SESSION['csrf_token'])) {
 
     <?php
     $toolbarAction = url('/warehouses');
-    $searchPlaceholder = "Cari Kode / Nama...";
+    $searchPlaceholder = "Cari Nama Gudang...";
     ob_start();
     ?>
     <div>
@@ -49,7 +49,6 @@ if (empty($_SESSION['csrf_token'])) {
     $extraFilters = ob_get_clean();
     require __DIR__ . '/../../components/table/toolbar.php';
 
-    // Bulk actions (hanya role dengan hak tulis)
     if (!\App\Helpers\AuthHelper::hasRole('SUPERADMIN')):
         $bulkAction = url('/warehouses/bulk-delete');
         $bulkId = 'bulkWh';
@@ -68,7 +67,6 @@ if (empty($_SESSION['csrf_token'])) {
                         </th>
                         <?php endif; ?>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kode</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Alamat</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
@@ -87,7 +85,6 @@ if (empty($_SESSION['csrf_token'])) {
                         </td>
                         <?php endif; ?>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center"><?= $no++ ?></td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($wh['code']); ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($wh['name']); ?></td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs"><?php echo htmlspecialchars($wh['address']); ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -109,7 +106,7 @@ if (empty($_SESSION['csrf_token'])) {
                     <?php endforeach; ?>
                     <?php if (empty($warehouses)): ?>
                         <?php 
-                        $colspan = \App\Helpers\AuthHelper::hasRole('SUPERADMIN') ? 5 : 7;
+                        $colspan = \App\Helpers\AuthHelper::hasRole('SUPERADMIN') ? 4 : 6;
                         $emptyMessage = "Tidak ada gudang yang ditemukan.";
                         require __DIR__ . '/../../components/table/empty_state.php';
                         ?>
@@ -138,15 +135,9 @@ if (empty($_SESSION['csrf_token'])) {
             
             <form action="<?php echo url('/warehouses'); ?>" method="POST">
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                
+
                 <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Kode</label>
-                    <input type="text" value="[Auto Generated]" disabled class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-400 bg-gray-100 dark:bg-gray-800 leading-tight">
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Kode dibuat otomatis oleh sistem (format GDG-xxxxxx).</p>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Nama</label>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Nama Gudang</label>
                     <input type="text" name="name" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
