@@ -2,40 +2,67 @@
 $pageTitle = 'Transfer Gudang';
 ob_start();
 if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+$pdoView = \App\Core\Database::getInstance()->getConnection();
 ?>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div><h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Transfer Gudang</h1><p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Kelola transfer stok internal antar gudang.</p></div>
-        <?php if (!\App\Helpers\AuthHelper::hasRole('SUPERADMIN')): ?><a href="<?= url('/transfers/create') ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow whitespace-nowrap inline-flex items-center"><i class="fas fa-plus mr-2"></i> Transfer Baru</a><?php endif; ?>
-    </div>
-    <?php if (isset($_SESSION['success'])): ?><div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"><?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div><?php endif; ?>
-    <?php if (isset($_SESSION['error'])): ?><div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"><?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?></div><?php endif; ?>
-    <?php $toolbarAction=url('/transfers'); $searchPlaceholder='Cari Kode Transaksi...'; ob_start(); ?>
-    <div><label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Status</label><select name="status" class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-40 py-2 px-3 text-sm text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="">Semua Status</option><option value="IN_TRANSIT" <?= (($_GET['status'] ?? '')==='IN_TRANSIT')?'selected':'' ?>><?= htmlspecialchars(\App\Helpers\UIHelper::statusLabel('IN_TRANSIT')) ?></option><option value="PARTIAL_RECEIVED" <?= (($_GET['status'] ?? '')==='PARTIAL_RECEIVED')?'selected':'' ?>><?= htmlspecialchars(\App\Helpers\UIHelper::statusLabel('PARTIAL_RECEIVED')) ?></option><option value="COMPLETED" <?= (($_GET['status'] ?? '')==='COMPLETED')?'selected':'' ?>><?= htmlspecialchars(\App\Helpers\UIHelper::statusLabel('COMPLETED')) ?></option></select></div>
-    <?php $extraFilters=ob_get_clean(); require __DIR__.'/../../components/table/toolbar.php'; ?>
-    <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700"><div class="overflow-x-auto"><table class="w-full min-w-[1000px] table-sticky divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-gray-50 dark:bg-gray-900/50"><tr>
-        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-12">No</th><th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Tanggal</th><th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Kode</th><th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Dari Gudang</th><th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Ke Gudang</th><th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Pengirim</th><th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Status</th><th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Aksi</th>
-    </tr></thead><tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-    <?php $no=$offset+1; foreach($transfers as $trf): ?>
-    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-        <td class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td><td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap"><?= date('d M Y H:i',strtotime($trf['sent_at'])) ?></td><td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100"><?= htmlspecialchars($trf['transaction_code']) ?></td><td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"><?= htmlspecialchars($trf['source_warehouse']) ?></td><td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"><?= htmlspecialchars($trf['dest_warehouse']) ?></td><td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"><?= htmlspecialchars($trf['sender_name']) ?></td>
-        <td class="px-4 py-3 text-sm text-center"><?php $badgeType=$trf['status']==='IN_TRANSIT'?'INFO':($trf['status']==='COMPLETED'?'SUCCESS':'NEUTRAL'); ?><?= \App\Helpers\UIHelper::badge($trf['status'],$badgeType) ?></td>
-        <td class="px-4 py-3 text-sm text-center">
-            <div class="flex items-center justify-center gap-3">
-                <a href="<?= url('/transfers/show?id='.(int)$trf['id']) ?>" class="text-blue-600 hover:text-blue-800 inline-flex items-center"><i class="fas fa-eye mr-1"></i>Lihat</a>
-                <?php if ($trf['status']==='IN_TRANSIT' && \App\Helpers\AuthHelper::hasRole('ADMIN')): ?>
-                <form action="<?= url('/transfers/delete') ?>" method="POST" class="inline">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>"><input type="hidden" name="id" value="<?= (int)$trf['id'] ?>">
-                    <button type="submit" class="text-red-600 hover:text-red-800 inline-flex items-center" data-confirm="Transfer ini akan dibatalkan dan stok dikembalikan ke gudang asal. Lanjutkan?" data-confirm-title="Hapus Transfer" data-confirm-type="danger" data-confirm-icon="fa-trash" data-confirm-confirm="Hapus" data-confirm-loading="Menghapus..."><i class="fas fa-trash mr-1"></i>Hapus</button>
-                </form>
-                <?php endif; ?>
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-7 gap-4">
+        <div>
+            <div class="flex items-center gap-3">
+                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300"><i class="fas fa-right-left"></i></div>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Transfer Gudang</h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Pantau pengiriman antar gudang, isi barang, bukti, dan surat jalan dari satu halaman.</p>
+                </div>
             </div>
-        </td>
-    </tr>
-    <?php endforeach; ?>
-    <?php if(empty($transfers)): ?><?php $colspan=8;$emptyMessage='Belum ada transaksi transfer.';require __DIR__.'/../../components/table/empty_state.php'; ?><?php endif; ?>
-    </tbody></table></div>
-    <?php $paginationBaseUrl=url('/transfers'); require __DIR__.'/../../components/table/pagination.php'; ?>
+        </div>
+        <?php if (!\App\Helpers\AuthHelper::hasRole('SUPERADMIN')): ?>
+            <a href="<?= url('/transfers/create') ?>" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"><i class="fas fa-plus"></i> Transfer Baru</a>
+        <?php endif; ?>
+    </div>
+
+    <?php if (isset($_SESSION['success'])): ?><div class="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300"><?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div><?php endif; ?>
+    <?php if (isset($_SESSION['error'])): ?><div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"><?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?></div><?php endif; ?>
+
+    <?php $toolbarAction=url('/transfers'); $searchPlaceholder='Cari kode, gudang, atau pengirim...'; ob_start(); ?>
+    <div><label class="mb-1.5 block text-xs font-bold text-gray-700 dark:text-gray-300">Status</label><select name="status" class="w-48 rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-white"><option value="">Semua Status</option><option value="IN_TRANSIT" <?= (($_GET['status'] ?? '')==='IN_TRANSIT')?'selected':'' ?>>Dalam Perjalanan</option><option value="PARTIAL_RECEIVED" <?= (($_GET['status'] ?? '')==='PARTIAL_RECEIVED')?'selected':'' ?>>Diterima Sebagian</option><option value="COMPLETED" <?= (($_GET['status'] ?? '')==='COMPLETED')?'selected':'' ?>>Selesai</option></select></div>
+    <?php $extraFilters=ob_get_clean(); require __DIR__.'/../../components/table/toolbar.php'; ?>
+
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="overflow-x-auto"><table class="w-full min-w-[1180px] divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-900/50"><tr>
+                <th class="px-4 py-4 text-center text-xs font-semibold uppercase text-gray-500 w-12">No</th>
+                <th class="px-4 py-4 text-left text-xs font-semibold uppercase text-gray-500">Transfer</th>
+                <th class="px-4 py-4 text-left text-xs font-semibold uppercase text-gray-500">Rute</th>
+                <th class="px-4 py-4 text-left text-xs font-semibold uppercase text-gray-500">Isi Barang</th>
+                <th class="px-4 py-4 text-left text-xs font-semibold uppercase text-gray-500">Pengiriman</th>
+                <th class="px-4 py-4 text-left text-xs font-semibold uppercase text-gray-500">Status</th>
+                <th class="px-4 py-4 text-center text-xs font-semibold uppercase text-gray-500">Aksi</th>
+            </tr></thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <?php $no=$offset+1; foreach($transfers as $trf):
+                $sumStmt=$pdoView->prepare("SELECT COUNT(*) AS item_types, COALESCE(SUM(quantity_sent),0) AS qty_sent, COALESCE(SUM(quantity_received),0) AS qty_received, SUM(CASE WHEN m.is_serialized=1 THEN 1 ELSE 0 END) AS serialized_types FROM transfer_items ti JOIN master_items m ON m.id=ti.master_item_id WHERE ti.transfer_id=?");
+                $sumStmt->execute([(int)$trf['id']]); $summary=$sumStmt->fetch(PDO::FETCH_ASSOC) ?: ['item_types'=>0,'qty_sent'=>0,'qty_received'=>0,'serialized_types'=>0];
+                $sent=(int)$summary['qty_sent']; $received=(int)$summary['qty_received']; $progress=$sent>0?min(100,round(($received/$sent)*100)):0;
+                $photoStmt=$pdoView->prepare("SELECT COUNT(*) FROM attachments WHERE reference_id=? AND reference_type IN ('transfer_dispatch','transfer_receive')"); $photoStmt->execute([(int)$trf['id']); $photoCount=(int)$photoStmt->fetchColumn();
+                $badgeType=$trf['status']==='IN_TRANSIT'?'INFO':($trf['status']==='COMPLETED'?'SUCCESS':'WARNING');
+            ?>
+            <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                <td class="px-4 py-4 text-center text-sm text-gray-500"><?= $no++ ?></td>
+                <td class="px-4 py-4"><div class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($trf['transaction_code']) ?></div><div class="mt-1 text-xs text-gray-500 dark:text-gray-400"><?= date('d M Y, H:i',strtotime($trf['sent_at'])) ?></div></td>
+                <td class="px-4 py-4"><div class="text-sm font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($trf['source_warehouse']) ?></div><div class="my-1 text-xs text-gray-400">↓</div><div class="text-sm font-semibold text-blue-600 dark:text-blue-300"><?= htmlspecialchars($trf['dest_warehouse']) ?></div></td>
+                <td class="px-4 py-4"><div class="flex flex-wrap gap-1.5"><span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"><?= (int)$summary['item_types'] ?> jenis</span><span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-200"><?= number_format($sent) ?> unit</span><?php if((int)$summary['serialized_types']>0): ?><span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"><i class="fas fa-barcode mr-1"></i> Nomor Seri</span><?php endif; ?></div><div class="mt-2 text-xs text-gray-500 dark:text-gray-400">Diterima <?= number_format($received) ?> / <?= number_format($sent) ?></div></td>
+                <td class="px-4 py-4"><div class="text-sm font-medium text-gray-900 dark:text-gray-100"><?= htmlspecialchars($trf['sender_name']) ?></div><div class="mt-2 flex items-center gap-2"><div class="h-2 w-28 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700"><div class="h-full rounded-full bg-blue-600" style="width:<?= $progress ?>%"></div></div><span class="text-xs font-semibold text-gray-500 dark:text-gray-400"><?= $progress ?>%</span></div><div class="mt-1 text-xs text-gray-500 dark:text-gray-400"><i class="fas fa-camera mr-1"></i><?= $photoCount ?> bukti</div></td>
+                <td class="px-4 py-4"><?= \App\Helpers\UIHelper::badge($trf['status'],$badgeType) ?><div class="mt-1 text-xs text-gray-500 dark:text-gray-400"><?= $trf['status']==='COMPLETED' ? 'Barang sudah diterima' : ($trf['status']==='PARTIAL_RECEIVED' ? 'Sebagian barang sudah diterima' : 'Menunggu penerimaan') ?></div></td>
+                <td class="px-4 py-4"><div class="flex items-center justify-center gap-2">
+                    <a href="<?= url('/transfers/show?id='.(int)$trf['id']) ?>" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"><i class="fas fa-eye"></i> Detail</a>
+                    <a href="<?= url('/transfers/show?id='.(int)$trf['id'].'#surat-jalan') ?>" class="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-300"><i class="fas fa-file-lines"></i> Surat Jalan</a>
+                    <?php if ($trf['status']==='IN_TRANSIT' && \App\Helpers\AuthHelper::hasRole('ADMIN')): ?><form action="<?= url('/transfers/delete') ?>" method="POST"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>"><input type="hidden" name="id" value="<?= (int)$trf['id'] ?>"><button type="submit" class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-900/60 dark:bg-gray-800 dark:text-red-300 dark:hover:bg-red-950/30" data-confirm="Transfer ini akan dibatalkan dan stok dikembalikan ke gudang asal. Lanjutkan?" data-confirm-title="Hapus Transfer" data-confirm-type="danger" data-confirm-icon="fa-trash" data-confirm-confirm="Hapus" data-confirm-loading="Menghapus..."><i class="fas fa-trash"></i></button></form><?php endif; ?>
+                </div></td>
+            </tr>
+            <?php endforeach; ?>
+            <?php if(empty($transfers)): ?><?php $colspan=7;$emptyMessage='Belum ada transaksi transfer.';require __DIR__.'/../../components/table/empty_state.php'; ?><?php endif; ?>
+            </tbody></table></div>
+        <?php $paginationBaseUrl=url('/transfers'); require __DIR__.'/../../components/table/pagination.php'; ?>
     </div>
 </div>
 <?php $content=ob_get_clean(); require __DIR__.'/../../layouts/app.php'; ?>
