@@ -77,3 +77,11 @@ Setiap UI baru atau refactor harus mematuhi standar berikut (merujuk `MASTER_BIG
 - **Page Guide**: Setiap menu relevan harus memiliki bantuan kontekstual/informasi halaman statis yang konsisten.
 - **Dark Mode**: Dukungan penuh untuk mode gelap (Tailwind `dark:` class).
 - **Role-Based UI**: Warna atau layout menyesuaikan Role (mis. Teknisi NOC vs Admin Gudang) untuk visibilitas dan batasan akses.
+
+## GLOBAL INTERNAL CODE VISIBILITY RULE
+- Kode internal/generated seperti kode barang, gudang, kategori, satuan, pengajuan, transfer, lokasi, dan identifier database **tidak boleh tampil di UI user-facing**.
+- Jangan menampilkan field kode saat tambah/ubah data bila kode dibuat otomatis oleh sistem.
+- Jangan menampilkan kolom kode pada tabel/list, search placeholder, page guide, confirmation text, heading, detail, atau filter yang ditujukan untuk pengguna umum.
+- Kode tetap digunakan di backend, database, URL, audit log, relasi, import/export, dan proses internal.
+- **Nomor seri fisik** tetap boleh ditampilkan karena merupakan identitas unit fisik, bukan sekadar kode internal.
+- Barcode/QR untuk operasi scanning tetap boleh digunakan; teks kode internal tidak boleh ditampilkan sebagai informasi biasa kepada pengguna.
