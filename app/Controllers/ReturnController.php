@@ -172,8 +172,7 @@ class ReturnController {
             $stmt->execute([$transaction_code, $loan_id, $user_id, $warehouse_id, $notes]);
             $return_id = (int)$pdo->lastInsertId();
 
-            $itemStmt = $pdo->prepare("INSERT INTO return_items (return_id, master_item_id, quantity, serial_number_id, condition_status, loan_item_id) VALUES (?, ?, ?, ?, 'GOOD', ?)");
-            $manualItemStmt = $pdo->prepare("INSERT INTO return_items (return_id, master_item_id, quantity, serial_number_id, condition_status, loan_item_id) VALUES (?, ?, ?, ?, 'GOOD', ?)");
+            $itemStmt = $pdo->prepare("INSERT INTO return_items (return_id, master_item_id, quantity, serial_number_id, condition_status, loan_item_id, loan_manual_item_id) VALUES (?, ?, ?, ?, 'GOOD', ?, ?)");
 
             $createdLines = 0;
 
@@ -223,19 +222,19 @@ class ReturnController {
                         }
 
                         foreach ($snArray as $sn) {
-                            $chk = $pdo->prepare("SELECT sn.id FROM serial_numbers sn JOIN loan_item_serials lis ON lis.serial_number_id = sn.id JOIN loan_items li ON li.id = lis.loan_item_id WHERE li.loan_id = ? AND li.master_item_id = ? AND sn.serial_number = ? AND lis.status IN ('PENDING','HANDED_OVER','RETURNED') LIMIT 1 FOR UPDATE");
-                            $chk->execute([$loan_id, $masterId, $sn]);
+                            $chk = $pdo->prepare("SELECT sn.id FROM serial_numbers sn JOIN loan_item_serials lis ON lis.serial_number_id = sn.id WHERE lis.loan_manual_item_id = ? AND sn.serial_number = ? AND lis.status IN ('PENDING','BORROWED') LIMIT 1 FOR UPDATE");
+                            $chk->execute([(int)$loanItem['id'], $sn]);
                             $snId = $chk->fetchColumn();
 
                             if (!$snId) {
-                                throw new \Exception("Nomor seri '$sn' bukan bagian dari barang yang dipinjamkan.");
+                                throw new \Exception("Nomor seri '$sn' bukan bagian dari barang manual yang dipinjamkan atau sudah dikembalikan.");
                             }
 
-                            $itemStmt->execute([$return_id, $masterId, 1, (int)$snId, null]);
+                            $itemStmt->execute([$return_id, $masterId, 1, (int)$snId, null, (int)$loanItem['id']]);
                             $createdLines++;
                         }
                     } else {
-                        $itemStmt->execute([$return_id, $masterId, $qty, null, null]);
+                        $itemStmt->execute([$return_id, $masterId, $qty, null, null, (int)$loanItem['id']]);
                         $createdLines++;
                     }
 
@@ -274,18 +273,18 @@ class ReturnController {
                     }
 
                     foreach ($snArray as $sn) {
-                        $chk = $pdo->prepare("SELECT sn.id FROM serial_numbers sn JOIN loan_item_serials lis ON lis.serial_number_id = sn.id WHERE lis.loan_item_id = ? AND sn.serial_number = ? AND lis.status IN ('PENDING','HANDED_OVER') LIMIT 1 FOR UPDATE");
+                        $chk = $pdo->prepare("SELECT sn.id FROM serial_numbers sn JOIN loan_item_serials lis ON lis.serial_number_id = sn.id WHERE lis.loan_item_id = ? AND sn.serial_number = ? AND lis.status IN ('PENDING','BORROWED') LIMIT 1 FOR UPDATE");
                         $chk->execute([(int)$loanItem['id'], $sn]);
                         $snId = $chk->fetchColumn();
                         if (!$snId) {
                             throw new \Exception("Nomor seri '$sn' bukan bagian dari peminjaman ini atau sudah dikembalikan.");
                         }
 
-                        $itemStmt->execute([$return_id, $master_item_id, 1, (int)$snId, (int)$loanItem['id']]);
+                        $itemStmt->execute([$return_id, $master_item_id, 1, (int)$snId, (int)$loanItem['id'], null]);
                         $createdLines++;
                     }
                 } else {
-                    $itemStmt->execute([$return_id, $master_item_id, $qty, null, (int)$loanItem['id']]);
+                    $itemStmt->execute([$return_id, $master_item_id, $qty, null, (int)$loanItem['id'], null]);
                     $createdLines++;
                 }
             }
@@ -395,8 +394,12 @@ class ReturnController {
                             $cond
                         );
 
-                        if ($item['loan_item_id']) {
-                            $pdo->prepare("UPDATE loan_item_serials SET status = 'RETURNED' WHERE loan_item_id = ? AND serial_number_id = ?")->execute([$item['loan_item_id'], $snRow['id']]);
+                        if ($item['loan_item_id'] || $item['loan_manual_item_id']) {
+                            $serialLinkSql = $item['loan_manual_item_id']
+                                ? "UPDATE loan_item_serials SET status = 'RETURNED' WHERE loan_manual_item_id = ? AND serial_number_id = ?"
+                                : "UPDATE loan_item_serials SET status = 'RETURNED' WHERE loan_item_id = ? AND serial_number_id = ?";
+                            $serialLinkId = $item['loan_manual_item_id'] ?: $item['loan_item_id'];
+                            $pdo->prepare($serialLinkSql)->execute([(int)$serialLinkId, $snRow['id']]);
                         }
 
                         if ($isGood) {
@@ -410,10 +413,12 @@ class ReturnController {
                 }
 
                 if ($item['loan_item_id'] && !$item['is_serialized']) {
-                    $updLoan = $pdo->prepare("UPDATE loan_items SET returned_quantity = returned_quantity + ? WHERE id = ?");
+                    $updLoan = $pdo->prepare("UPDATE loan_items SET returned_quantity = LEAST(quantity, returned_quantity + ?) WHERE id = ?");
                     $updLoan->execute([$qty, $item['loan_item_id']]);
                 } elseif ($item['loan_item_id'] && $item['is_serialized']) {
                     $pdo->prepare("UPDATE loan_items SET returned_quantity = LEAST(quantity, returned_quantity + ?) WHERE id = ?")->execute([$qty, $item['loan_item_id']]);
+                } elseif ($item['loan_manual_item_id']) {
+                    $pdo->prepare("UPDATE loan_manual_items SET returned_quantity = LEAST(quantity, returned_quantity + ?) WHERE id = ?")->execute([$qty, $item['loan_manual_item_id']]);
                 }
             }
 
