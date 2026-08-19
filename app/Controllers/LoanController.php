@@ -8,7 +8,6 @@ use App\Services\StockService;
 use PDO;
 
 class LoanController {
-    
     public function __construct() {
         AuthHelper::requireRole(['SUPERADMIN', 'ADMIN', 'TEKNISI_NOC']);
     }
@@ -22,46 +21,40 @@ class LoanController {
         $limit = 15;
         $offset = ($page - 1) * $limit;
 
-        $whereClauses = ["1=1"];
+        $whereClauses = ['1=1'];
         $params = [];
-
         if (!AuthHelper::hasRole(['SUPERADMIN', 'ADMIN'])) {
-            $whereClauses[] = "l.borrower_id = ?";
+            $whereClauses[] = 'l.borrower_id = ?';
             $params[] = (int)$user['id'];
         }
-
         if ($search !== '') {
-            $whereClauses[] = "(l.transaction_code LIKE ? OR s.submission_code LIKE ?)";
+            $whereClauses[] = '(l.transaction_code LIKE ? OR s.submission_code LIKE ?)';
             $params[] = "%$search%";
             $params[] = "%$search%";
         }
-
         if ($status !== '') {
-            $whereClauses[] = "l.status = ?";
+            $whereClauses[] = 'l.status = ?';
             $params[] = $status;
         }
+        $whereSql = 'WHERE ' . implode(' AND ', $whereClauses);
 
-        $whereSql = "WHERE " . implode(" AND ", $whereClauses);
-
-        // Count for pagination
-        $countSql = "SELECT COUNT(*) FROM loans l 
-                     JOIN warehouses w ON l.warehouse_id = w.id 
-                     JOIN users u ON l.borrower_id = u.id 
-                     LEFT JOIN submissions s ON l.submission_id = s.id 
+        $countSql = "SELECT COUNT(*) FROM loans l
+                     JOIN warehouses w ON l.warehouse_id = w.id
+                     JOIN users u ON l.borrower_id = u.id
+                     LEFT JOIN submissions s ON l.submission_id = s.id
                      $whereSql";
         $stmtCount = $pdo->prepare($countSql);
         $stmtCount->execute($params);
-        $totalItems = $stmtCount->fetchColumn();
-        $totalPages = ceil($totalItems / $limit);
+        $totalItems = (int)$stmtCount->fetchColumn();
+        $totalPages = (int)ceil($totalItems / $limit);
 
-        $sql = "SELECT l.*, w.name as warehouse_name, u.name as borrower_name, s.submission_code 
-                FROM loans l 
-                JOIN warehouses w ON l.warehouse_id = w.id 
-                JOIN users u ON l.borrower_id = u.id 
-                LEFT JOIN submissions s ON l.submission_id = s.id 
+        $sql = "SELECT l.*, w.name AS warehouse_name, u.name AS borrower_name, s.submission_code
+                FROM loans l
+                JOIN warehouses w ON l.warehouse_id = w.id
+                JOIN users u ON l.borrower_id = u.id
+                LEFT JOIN submissions s ON l.submission_id = s.id
                 $whereSql
                 ORDER BY l.id DESC LIMIT $limit OFFSET $offset";
-
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $loans = $stmt->fetchAll();
@@ -72,71 +65,66 @@ class LoanController {
     public function create() {
         AuthHelper::requireRole(['TEKNISI_NOC']);
         $pdo = Database::getInstance()->getConnection();
-        $warehouses = $pdo->query("SELECT * FROM warehouses WHERE is_active = 1")->fetchAll();
-        $items = $pdo->query("SELECT id, kode_barang, nama, is_serialized FROM master_items WHERE is_active = 1")->fetchAll();
-        
-        $users = [];
-        if (AuthHelper::hasRole(['SUPERADMIN', 'ADMIN'])) {
-            $users = $pdo->query("SELECT id, name FROM users WHERE is_active = 1")->fetchAll();
-        }
+        $warehouses = $pdo->query('SELECT id, name FROM warehouses WHERE is_active = 1 ORDER BY name')->fetchAll();
+        $items = $pdo->query('SELECT id, nama, is_serialized FROM master_items WHERE is_active = 1 ORDER BY nama')->fetchAll();
 
-        // Fetch approved submissions
-        if (AuthHelper::hasRole(['SUPERADMIN', 'ADMIN'])) {
-            $submissions = $pdo->query("SELECT id, submission_code FROM submissions WHERE status IN ('APPROVED', 'PARTIAL_APPROVED')")->fetchAll();
-        } else {
-            $stmt = $pdo->prepare("SELECT id, submission_code FROM submissions WHERE status IN ('APPROVED', 'PARTIAL_APPROVED') AND submitted_by = ?");
-            $stmt->execute([AuthHelper::user()['id']]);
-            $submissions = $stmt->fetchAll();
-        }
+        $submissions = [];
+        $stmt = $pdo->prepare("SELECT id FROM submissions WHERE status IN ('APPROVED', 'PARTIAL_APPROVED') AND submitted_by = ? ORDER BY id DESC");
+        $stmt->execute([AuthHelper::user()['id']]);
+        $submissions = $stmt->fetchAll();
 
         require __DIR__ . '/../../resources/views/transactions/loans/create.php';
     }
 
     public function store() {
         AuthHelper::requireRole(['TEKNISI_NOC']);
-        if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-            $_SESSION['error'] = "CSRF validation failed.";
-            header("Location: " . url('/loans/create'));
-            exit;
-        }
-
-        $warehouse_id = (int)$_POST['warehouse_id'];
-        $notes = trim($_POST['notes']);
-        $due_date = $_POST['due_date'] ?? null;
-        $loan_type = $_POST['loan_type'] ?? 'INTERNAL';
-        $submission_id = !empty($_POST['submission_id']) ? (int)$_POST['submission_id'] : null;
-        
-        $borrower_id = AuthHelper::user()['id'];
-
-        if ($loan_type === 'FROM_SUBMISSION' && $submission_id) {
-            $subCheck = $pdo->prepare("SELECT submitted_by FROM submissions WHERE id = ?");
-            $subCheck->execute([$submission_id]);
-            $subRow = $subCheck->fetch();
-            
-            if (!$subRow || (!AuthHelper::hasRole(['SUPERADMIN', 'ADMIN']) && $subRow['submitted_by'] != $borrower_id)) {
-                $_SESSION['error'] = "Pengajuan ini bukan milik Anda.";
-                header("Location: " . url('/loans/create'));
-                exit;
-            }
-            // borrower adalah teknisi pemilik pengajuan.
-            if ($subRow) {
-                $borrower_id = $subRow['submitted_by'];
-            }
-        }
-
-        $item_ids = $_POST['item_ids'] ?? [];
-        $quantities = $_POST['quantities'] ?? [];
-        $sn_list = $_POST['sn_list'] ?? [];
-
-        if (empty($item_ids)) {
-            $_SESSION['error'] = "Tidak ada barang yang dipilih.";
-            header("Location: " . url('/loans/create'));
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
+            $_SESSION['error'] = 'CSRF validation failed.';
+            header('Location: ' . url('/loans/create'));
             exit;
         }
 
         $pdo = Database::getInstance()->getConnection();
+        $warehouse_id = (int)($_POST['warehouse_id'] ?? 0);
+        $notes = trim($_POST['notes'] ?? '');
+        $due_date = $_POST['due_date'] ?? null;
+        $loan_type = $_POST['loan_type'] ?? 'INTERNAL';
+        $submission_id = !empty($_POST['submission_id']) ? (int)$_POST['submission_id'] : null;
+        $borrower_id = (int)AuthHelper::user()['id'];
+        $user_id = $borrower_id;
+
+        if ($warehouse_id <= 0) {
+            $_SESSION['error'] = 'Gudang asal wajib dipilih.';
+            header('Location: ' . url('/loans/create'));
+            exit;
+        }
+
+        if ($submission_id) {
+            $subCheck = $pdo->prepare("SELECT submitted_by FROM submissions WHERE id = ? AND status IN ('APPROVED','PARTIAL_APPROVED')");
+            $subCheck->execute([$submission_id]);
+            $subRow = $subCheck->fetch();
+            if (!$subRow || (int)$subRow['submitted_by'] !== $borrower_id) {
+                $_SESSION['error'] = 'Pengajuan yang dipilih tidak valid atau bukan milik Anda.';
+                header('Location: ' . url('/loans/create'));
+                exit;
+            }
+        }
+
+        $source_types = $_POST['source_types'] ?? [];
+        $item_ids = $_POST['item_ids'] ?? [];
+        $quantities = $_POST['quantities'] ?? [];
+        $sn_lists = $_POST['sn_list'] ?? [];
+        $manual_names = $_POST['manual_names'] ?? [];
+        $manual_specs = $_POST['manual_specs'] ?? [];
+        $manual_units = $_POST['manual_units'] ?? [];
+
+        if (empty($source_types)) {
+            $_SESSION['error'] = 'Tambahkan minimal satu barang.';
+            header('Location: ' . url('/loans/create'));
+            exit;
+        }
+
         $stockService = new StockService();
-        $user_id = AuthHelper::user()['id'];
         $transaction_code = \App\Helpers\TransactionHelper::generateCode('LOAN', 'loans');
 
         try {
@@ -144,211 +132,183 @@ class LoanController {
 
             $stmt = $pdo->prepare("INSERT INTO loans (transaction_code, borrower_id, warehouse_id, submission_id, loan_type, loan_date, due_date, status, notes, processed_by) VALUES (?, ?, ?, ?, ?, NOW(), ?, 'BORROWED', ?, ?)");
             $stmt->execute([$transaction_code, $borrower_id, $warehouse_id, $submission_id, $loan_type, $due_date, $notes, $user_id]);
-            $loan_id = $pdo->lastInsertId();
+            $loan_id = (int)$pdo->lastInsertId();
 
-            $itemStmt = $pdo->prepare("INSERT INTO loan_items (loan_id, master_item_id, quantity, returned_quantity) VALUES (?, ?, ?, 0)");
+            $stockItemStmt = $pdo->prepare("INSERT INTO loan_items (loan_id, master_item_id, quantity, returned_quantity) VALUES (?, ?, ?, 0)");
+            $manualItemStmt = $pdo->prepare("INSERT INTO loan_manual_items (loan_id, name, specification, unit, quantity, returned_quantity) VALUES (?, ?, ?, ?, ?, 0)");
+            $serialLookupStmt = $pdo->prepare("SELECT id, status, master_item_id FROM serial_numbers WHERE serial_number = ? AND current_warehouse_id = ? FOR UPDATE");
 
-            foreach ($item_ids as $index => $item_id) {
-                $qty = (int)$quantities[$index];
-                if ($qty <= 0) continue;
+            $validLines = 0;
+            foreach ($source_types as $index => $source) {
+                $qty = (int)($quantities[$index] ?? 0);
+                if ($qty <= 0) {
+                    continue;
+                }
 
-                // Validation against submission if applicable (only if this loan itself is fulfilling the submission directly)
-                // Note: According to the prompt, usually Outgoing fulfills it. If Loan fulfills it, it shouldn't double deduct.
-                // Actually, if loan_type === 'FROM_SUBMISSION', we don't deduct stock because it was already deducted by Outgoing.
-                // But wait, if loan_type === 'FROM_SUBMISSION', we don't update submission_items remaining_quantity because Outgoing did it!
-                
-                $itemStmt->execute([$loan_id, $item_id, $qty]);
-                $loan_item_id = $pdo->lastInsertId();
-
-                // Check serialized
-                $mItem = $pdo->query("SELECT is_serialized FROM master_items WHERE id = " . (int)$item_id)->fetch();
-                if ($mItem && $mItem['is_serialized']) {
-                    $rawSn = $sn_list[$index] ?? '';
-                    $snArray = array_filter(array_map('trim', preg_split('/[\n,]+/', $rawSn)));
-                    
-                    if (count($snArray) !== $qty) {
-                        throw new \Exception("Jumlah Serial Number tidak cocok dengan kuantitas untuk barang ID $item_id. Diminta: $qty, Diisi: " . count($snArray));
+                if ($source === 'MANUAL') {
+                    $name = trim($manual_names[$index] ?? '');
+                    $spec = trim($manual_specs[$index] ?? '');
+                    $unit = trim($manual_units[$index] ?? '');
+                    if ($name === '') {
+                        throw new \Exception('Nama barang manual wajib diisi.');
                     }
-                    if (count($snArray) !== count(array_unique($snArray))) {
-                         throw new \Exception("Ada Serial Number duplikat pada input barang ID $item_id.");
+                    $manualItemStmt->execute([$loan_id, $name, $spec !== '' ? $spec : null, $unit !== '' ? $unit : null, $qty]);
+                    $validLines++;
+                    continue;
+                }
+
+                $itemId = (int)($item_ids[$index] ?? 0);
+                if ($itemId <= 0) {
+                    throw new \Exception('Barang dari stok wajib dipilih.');
+                }
+
+                $itemStmt = $pdo->prepare('SELECT id, nama, is_serialized FROM master_items WHERE id = ? AND is_active = 1');
+                $itemStmt->execute([$itemId]);
+                $masterItem = $itemStmt->fetch();
+                if (!$masterItem) {
+                    throw new \Exception('Barang yang dipilih tidak valid.');
+                }
+
+                $stockCheck = $pdo->prepare('SELECT quantity FROM stocks WHERE master_item_id = ? AND warehouse_id = ? FOR UPDATE');
+                $stockCheck->execute([$itemId, $warehouse_id]);
+                $available = (int)$stockCheck->fetchColumn();
+                if ($available < $qty) {
+                    throw new \Exception("Stok {$masterItem['nama']} tidak mencukupi. Tersedia $available, diminta $qty.");
+                }
+
+                $stockItemStmt->execute([$loan_id, $itemId, $qty]);
+                $loan_item_id = (int)$pdo->lastInsertId();
+                $validLines++;
+
+                if ((int)$masterItem['is_serialized'] === 1) {
+                    $selectedSerials = [];
+                    foreach ((array)($sn_lists[$index] ?? []) as $snValue) {
+                        $snValue = trim((string)$snValue);
+                        if ($snValue !== '') $selectedSerials[] = $snValue;
+                    }
+                    if (count($selectedSerials) !== $qty) {
+                        throw new \Exception("Jumlah Serial Number untuk {$masterItem['nama']} harus $qty.");
+                    }
+                    if (count($selectedSerials) !== count(array_unique($selectedSerials))) {
+                        throw new \Exception('Ada Serial Number yang dipilih lebih dari sekali.');
                     }
 
-                    foreach ($snArray as $sn) {
-                        if ($loan_type === 'DIRECT') {
-                            $chk = $pdo->prepare("SELECT id, status, master_item_id FROM serial_numbers WHERE serial_number = ? AND current_warehouse_id = ? FOR UPDATE");
-                            $chk->execute([$sn, $warehouse_id]);
-                            $snRow = $chk->fetch();
-                        } else {
-                            if (!$submission_id) {
-                                throw new \Exception("Submission ID wajib diisi untuk peminjaman FROM_SUBMISSION.");
-                            }
-                            $chk = $pdo->prepare("SELECT id, status, master_item_id FROM serial_numbers WHERE serial_number = ? FOR UPDATE");
-                            $chk->execute([$sn]);
-                            $snRow = $chk->fetch();
-                            
-                            if ($snRow) {
-                                $valOut = $pdo->prepare("
-                                    SELECT 1 FROM serial_movements sm
-                                    JOIN outgoing o ON sm.reference_id = o.id
-                                    WHERE sm.serial_number_id = ? AND sm.reference_type = 'outgoing' AND o.submission_id = ?
-                                ");
-                                $valOut->execute([$snRow['id'], $submission_id]);
-                                if (!$valOut->fetch()) {
-                                    throw new \Exception("Serial Number '$sn' tidak terkait dengan Pengajuan (Submission) ini.");
-                                }
-                            }
-                        }
-                        
+                    foreach ($selectedSerials as $sn) {
+                        $serialLookupStmt->execute([$sn, $warehouse_id]);
+                        $snRow = $serialLookupStmt->fetch();
                         if (!$snRow) {
-                            throw new \Exception("Serial Number '$sn' tidak ditemukan di lokasi yang diharapkan.");
+                            throw new \Exception("Serial Number '$sn' tidak tersedia di gudang asal.");
+                        }
+                        if ((int)$snRow['master_item_id'] !== $itemId) {
+                            throw new \Exception("Serial Number '$sn' bukan milik barang yang dipilih.");
+                        }
+                        if ($snRow['status'] !== 'AVAILABLE') {
+                            throw new \Exception("Serial Number '$sn' tidak tersedia untuk dipinjam.");
                         }
 
-                        if ($snRow['master_item_id'] != $item_id) {
-                            throw new \Exception("Serial Number '$sn' tidak cocok dengan Master Item yang dipilih.");
-                        }
-
-                        if ($loan_type === 'DIRECT' && $snRow['status'] !== 'AVAILABLE') {
-                            throw new \Exception("Serial Number '$sn' tidak berstatus AVAILABLE.");
-                        }
-                        if ($loan_type === 'FROM_SUBMISSION' && !in_array($snRow['status'], ['ISSUED', 'AVAILABLE'])) {
-                            throw new \Exception("Serial Number '$sn' tidak berstatus ISSUED atau AVAILABLE (saat ini: {$snRow['status']}).");
-                        }
-
-                        $oldStatus = $snRow['status'];
-
-                        // Update SN status and set holder to the borrower using StockService
-                        $stockService->moveSerial(
-                            $snRow['id'], 
-                            'LOANED', 
-                            null, 
-                            null, 
-                            $borrower_id, 
-                            'loan', 
-                            $loan_id, 
-                            "Peminjaman - " . $transaction_code
-                        );
-                        
-                        // Pivot insert
-                        $pdo->prepare("INSERT INTO loan_item_serials (loan_item_id, serial_number_id) VALUES (?, ?)")->execute([$loan_item_id, $snRow['id']]);
+                        $stockService->moveSerial($snRow['id'], 'LOANED', null, null, $borrower_id, 'loan', $loan_id, 'Peminjaman - ' . $transaction_code);
+                        $pdo->prepare('INSERT INTO loan_item_serials (loan_item_id, serial_number_id) VALUES (?, ?)')->execute([$loan_item_id, $snRow['id']]);
                     }
                 }
 
-                // Mutate stock ONLY for DIRECT loan
-                if ($loan_type === 'DIRECT') {
-                    $stockService->mutateStock($item_id, $warehouse_id, -$qty, 'LOAN', 'loans', $loan_id, "Peminjaman Langsung $transaction_code oleh User ID $borrower_id");
-                }
+                $stockService->mutateStock($itemId, $warehouse_id, -$qty, 'LOAN', 'loans', $loan_id, 'Peminjaman ' . $transaction_code);
             }
 
-            // We removed the submission fulfillment logic here since Outgoing handles it.
-            // But we keep submission_id to link the loan to the submission.
+            if ($validLines === 0) {
+                throw new \Exception('Tidak ada barang valid dalam peminjaman.');
+            }
 
             $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'CREATE', 'loans', ?)");
             $auditStmt->execute([$user_id, $loan_id]);
-
             $pdo->commit();
-            $_SESSION['success'] = "Peminjaman berhasil diproses.";
+            $_SESSION['success'] = 'Peminjaman berhasil diproses.';
         } catch (\Exception $e) {
-            $pdo->rollBack();
-            $_SESSION['error'] = "Gagal memproses peminjaman: " . $e->getMessage();
-            header("Location: " . url('/loans/create'));
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $_SESSION['error'] = 'Gagal memproses peminjaman: ' . $e->getMessage();
+            header('Location: ' . url('/loans/create'));
             exit;
         }
 
-        // Notification ke ADMIN (business event: teknisi request peminjaman).
         try {
             $actorName = AuthHelper::user()['name'];
-            \App\Helpers\NotificationHelper::createForRoleOnce(
-                'ADMIN',
-                'Peminjaman Barang Baru',
-                $actorName . ' mengajukan peminjaman ' . $transaction_code . '.',
-                'info',
-                '/loans/show?id=' . $loan_id
-            );
+            \App\Helpers\NotificationHelper::createForRoleOnce('ADMIN', 'Peminjaman Barang Baru', $actorName . ' mengajukan peminjaman.', 'info', '/loans/show?id=' . $loan_id);
         } catch (\Exception $notifEx) {
             error_log('[BIGNET] Notification gagal (loan create #' . $loan_id . '): ' . $notifEx->getMessage());
         }
 
-        header("Location: " . url('/loans'));
+        header('Location: ' . url('/loans'));
         exit;
     }
 
     public function show() {
-        $id = (int)$_GET['id'];
+        $id = (int)($_GET['id'] ?? 0);
         $pdo = Database::getInstance()->getConnection();
         $user = AuthHelper::user();
-        
-        $stmt = $pdo->prepare("SELECT l.*, w.name as warehouse_name, u.name as borrower_name, s.submission_code 
-                FROM loans l 
-                JOIN warehouses w ON l.warehouse_id = w.id 
-                JOIN users u ON l.borrower_id = u.id 
-                LEFT JOIN submissions s ON l.submission_id = s.id 
-                WHERE l.id = ?");
+
+        $stmt = $pdo->prepare("SELECT l.*, w.name AS warehouse_name, u.name AS borrower_name, s.submission_code FROM loans l JOIN warehouses w ON l.warehouse_id = w.id JOIN users u ON l.borrower_id = u.id LEFT JOIN submissions s ON l.submission_id = s.id WHERE l.id = ?");
         $stmt->execute([$id]);
         $loan = $stmt->fetch();
-
         if (!$loan) {
-            $_SESSION['error'] = "Loan not found";
-            header("Location: " . url('/loans'));
+            $_SESSION['error'] = 'Peminjaman tidak ditemukan.';
+            header('Location: ' . url('/loans'));
+            exit;
+        }
+        if ($user['role'] === 'TEKNISI_NOC' && (int)$loan['borrower_id'] !== (int)$user['id']) {
+            $_SESSION['error'] = 'Anda tidak memiliki akses ke peminjaman ini.';
+            header('Location: ' . url('/loans'));
             exit;
         }
 
-        if ($user['role'] === 'TEKNISI_NOC' && $loan['borrower_id'] !== $user['id']) {
-            $_SESSION['error'] = "403 Forbidden";
-            header("Location: " . url('/loans'));
-            exit;
-        }
-
-        $itemStmt = $pdo->prepare("SELECT li.*, m.kode_barang, m.nama, m.is_serialized 
-                                   FROM loan_items li 
-                                   JOIN master_items m ON li.master_item_id = m.id 
-                                   WHERE li.loan_id = ?");
+        $items = [];
+        $itemStmt = $pdo->prepare("SELECT li.id, li.quantity, li.returned_quantity, m.nama, m.is_serialized, 'STOCK' AS source_type FROM loan_items li JOIN master_items m ON li.master_item_id = m.id WHERE li.loan_id = ?");
         $itemStmt->execute([$id]);
-        $items = $itemStmt->fetchAll();
+        foreach ($itemStmt->fetchAll() as $row) $items[] = $row;
 
-        // Fetch serial numbers for each item
-        $snStmt = $pdo->prepare("SELECT sn.serial_number 
-                                 FROM loan_item_serials lis 
-                                 JOIN serial_numbers sn ON lis.serial_number_id = sn.id 
-                                 WHERE lis.loan_item_id = ?");
+        $manualStmt = $pdo->prepare("SELECT id, name AS nama, specification, unit, quantity, returned_quantity, 'MANUAL' AS source_type FROM loan_manual_items WHERE loan_id = ? ORDER BY id");
+        $manualStmt->execute([$id]);
+        foreach ($manualStmt->fetchAll() as $row) {
+            $row['is_serialized'] = 0;
+            $row['serial_numbers'] = [];
+            $items[] = $row;
+        }
+
+        $snStmt = $pdo->prepare("SELECT sn.serial_number FROM loan_item_serials lis JOIN serial_numbers sn ON lis.serial_number_id = sn.id WHERE lis.loan_item_id = ?");
         foreach ($items as &$item) {
-            if ($item['is_serialized']) {
-                $snStmt->execute([$item['id']]);
+            if (($item['source_type'] ?? '') === 'STOCK' && !empty($item['is_serialized'])) {
+                $snStmt->execute([(int)$item['id']]);
                 $item['serial_numbers'] = $snStmt->fetchAll(PDO::FETCH_COLUMN);
             } else {
                 $item['serial_numbers'] = [];
             }
         }
+        unset($item);
 
-        // Fetch Timeline / Audit logs
-        $stmt = $pdo->prepare("SELECT a.*, u.name as user_name 
-                               FROM audit_logs a 
-                               LEFT JOIN users u ON a.user_id = u.id 
-                               WHERE a.entity = 'loans' AND a.entity_id = ? 
-                               ORDER BY a.created_at DESC");
-        $stmt->execute([$id]);
-        $timeline = $stmt->fetchAll();
+        $auditStmt = $pdo->prepare("SELECT a.*, u.name AS user_name FROM audit_logs a LEFT JOIN users u ON a.user_id = u.id WHERE a.entity = 'loans' AND a.entity_id = ? ORDER BY a.created_at DESC");
+        $auditStmt->execute([$id]);
+        $timeline = $auditStmt->fetchAll();
 
         require __DIR__ . '/../../resources/views/transactions/loans/show.php';
     }
-    
+
     public function apiItems() {
         header('Content-Type: application/json');
         try {
-            if (!isset($_GET['id'])) {
+            $id = (int)($_GET['id'] ?? 0);
+            if ($id <= 0) {
                 echo json_encode([]);
                 return;
             }
-            
-            $id = (int)$_GET['id'];
             $pdo = Database::getInstance()->getConnection();
-            
-            $stmt = $pdo->prepare("SELECT li.id as loan_item_id, li.master_item_id, m.nama, m.kode_barang, m.is_serialized, li.quantity, li.returned_quantity 
-                                   FROM loan_items li 
-                                   JOIN master_items m ON li.master_item_id = m.id 
-                                   WHERE li.loan_id = ? AND li.quantity > li.returned_quantity");
+            $items = [];
+
+            $stmt = $pdo->prepare("SELECT li.id AS loan_item_id, li.master_item_id, m.nama, m.is_serialized, li.quantity, li.returned_quantity, 'STOCK' AS source_type FROM loan_items li JOIN master_items m ON li.master_item_id = m.id WHERE li.loan_id = ? AND li.quantity > li.returned_quantity");
             $stmt->execute([$id]);
-            $items = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            
+            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $manualStmt = $pdo->prepare("SELECT id AS loan_item_id, NULL AS master_item_id, name AS nama, 0 AS is_serialized, quantity, returned_quantity, 'MANUAL' AS source_type, specification, unit FROM loan_manual_items WHERE loan_id = ? AND quantity > returned_quantity");
+            $manualStmt->execute([$id]);
+            $items = array_merge($items, $manualStmt->fetchAll(PDO::FETCH_ASSOC));
+
             echo json_encode($items);
         } catch (\Exception $e) {
             http_response_code(500);
