@@ -1,19 +1,91 @@
-<?php $pageTitle='Detail Peminjaman'; ob_start(); $role=\App\Helpers\AuthHelper::user()['role']; $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Siap Diserahkan','blue'],'BORROWED'=>['Sedang Dipinjam','orange'],'PARTIAL_RETURNED'=>['Kembali Sebagian','purple'],'RETURNED'=>['Dikembalikan','green'],'REJECTED'=>['Ditolak','red']];$badge=$labels[$loan['status']]??[$loan['status'],'gray']; ?>
+<?php
+$pageTitle='Detail Peminjaman';
+ob_start();
+$role=\App\Helpers\AuthHelper::user()['role'];
+if(empty($_SESSION['csrf_token'])) $_SESSION['csrf_token']=bin2hex(random_bytes(32));
+$labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Siap Diproses','blue'],'BORROWED'=>['Sedang Dipinjam','orange'],'PARTIAL_RETURNED'=>['Kembali Sebagian','purple'],'RETURNED'=>['Dikembalikan','green'],'REJECTED'=>['Ditolak','red']];
+$badge=$labels[$loan['status']]??[$loan['status'],'gray'];
+?>
 <div class="max-w-6xl mx-auto px-4 py-8">
-<a href="<?=url('/loans')?>" class="text-blue-600">← Kembali</a><div class="flex flex-col md:flex-row md:justify-between gap-4 mt-4 mb-6"><div><h1 class="text-3xl font-bold">Detail Peminjaman</h1><p class="text-sm text-gray-500 mt-1">Permintaan → keputusan Admin → serah terima → pengembalian.</p></div><span class="px-3 py-1 rounded-full text-sm font-semibold bg-<?=$badge[1]?>-100 text-<?=$badge[1]?>-800 w-fit"><?=$badge[0]?></span></div>
-<?php foreach(['success'=>'green','error'=>'red'] as $key=>$c):if(isset($_SESSION[$key])):?><div class="mb-4 bg-<?=$c?>-50 border border-<?=$c?>-200 text-<?=$c?>-700 p-3 rounded-lg"><?=htmlspecialchars($_SESSION[$key]);unset($_SESSION[$key]);?></div><?php endif;endforeach;?>
-<div class="bg-white rounded-xl shadow p-6 mb-6"><div class="grid md:grid-cols-3 gap-5"><div><div class="text-xs text-gray-500">Peminjam</div><div class="font-semibold"><?=htmlspecialchars($loan['borrower_name'])?></div></div><div><div class="text-xs text-gray-500">Gudang Asal</div><div class="font-semibold"><?=htmlspecialchars($loan['warehouse_name'])?></div></div><div><div class="text-xs text-gray-500">Tipe</div><div class="font-semibold"><?=htmlspecialchars($loan['loan_type']??'INTERNAL')?></div></div><div><div class="text-xs text-gray-500">Diajukan</div><div><?=date('d M Y H:i',strtotime($loan['loan_date']))?></div></div><div><div class="text-xs text-gray-500">Jatuh Tempo</div><div><?=!empty($loan['due_date'])?date('d M Y',strtotime($loan['due_date'])):'-'?></div></div><div><div class="text-xs text-gray-500">Catatan</div><div><?=nl2br(htmlspecialchars($loan['notes']?:'-'))?></div></div></div></div>
+  <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
+    <div><a href="<?=url('/loans')?>" class="text-blue-600 hover:underline text-sm">← Kembali</a><h1 class="text-3xl font-bold mt-3 text-gray-900">Detail Peminjaman</h1><p class="text-sm text-gray-500 mt-1">Permintaan → keputusan Admin → Barang Keluar → custody → pengembalian.</p></div>
+    <span class="px-3 py-2 rounded-full text-sm font-semibold bg-<?=$badge[1]?>-100 text-<?=$badge[1]?>-800 w-fit"><?=$badge[0]?></span>
+  </div>
 
-<?php if($role==='ADMIN' && $loan['status']==='PENDING_APPROVAL'): ?>
-<form method="POST" action="<?=url('/loans/approve')?>" class="bg-yellow-50 border border-yellow-200 rounded-xl p-5 mb-6" id="keputusan"><input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>"><input type="hidden" name="id" value="<?=$loan['id']?>"><div class="flex justify-between items-center gap-3 mb-3"><div><h2 class="font-semibold text-lg">Keputusan Admin</h2><p class="text-sm text-gray-600">Pilih barang dan jumlah yang benar-benar akan diberikan. Tidak harus sama dengan permintaan teknisi.</p></div></div>
-<div class="space-y-3"><?php foreach($items as $it):$isManual=($it['source_type']??'')==='MANUAL';$key=$isManual?'m'.$it['id']:$it['id'];$requested=(int)$it['requested_quantity'];$serialChoices=$availableSerials[(int)$it['id']]??[];?><div class="bg-white rounded-lg border p-4"><div class="grid md:grid-cols-12 gap-3 items-start"><div class="md:col-span-4"><label class="flex items-start gap-2"><input type="checkbox" name="approved_include[<?=$key?>]" value="1" class="mt-1 include" data-key="<?=$key?>"><span><strong><?=htmlspecialchars($it['nama'])?></strong><span class="block text-xs text-gray-500 mt-1"><?=$isManual?'Manual / Custom':'Dari Stok'?> · Diminta <?=$requested?></span></span></label></div><div class="md:col-span-2"><label class="block text-xs font-semibold mb-1"><?= $isManual?'Jumlah Diberikan':'Jumlah Diberikan' ?></label><input type="number" min="0" max="<?=$requested?>" value="<?=$requested?>" name="<?= $isManual?'approved_manual_qty['.$it['id'].']':'approved_qty['.$it['id'].']' ?>" class="qty w-full border rounded-lg px-3 py-2 text-center" data-key="<?=$key?>"></div><div class="md:col-span-6"><?php if(!$isManual && (int)$it['is_serialized']===1): ?><label class="block text-xs font-semibold mb-1">Pilih Nomor Seri yang Diberikan</label><select name="approved_serials[<?=$it['id']?>][]" class="serial-select w-full border rounded-lg px-3 py-2" multiple size="4" data-key="<?=$key?>"><?php foreach($serialChoices as $sn):?><option value="<?=$sn['id']?>"><?=htmlspecialchars($sn['serial_number'])?></option><?php endforeach;?></select><div class="text-xs text-gray-500 mt-1">Jumlah serial yang dipilih harus sama dengan jumlah diberikan.</div><?php elseif(!$isManual): ?><div class="text-sm text-gray-500 mt-6">Barang bulk: Admin cukup menentukan jumlah yang diberikan.</div><?php else: ?><div class="text-sm text-gray-500 mt-6">Barang manual tidak memengaruhi stok gudang.</div><?php endif;?></div></div></div><?php endforeach;?></div>
-<textarea name="approval_notes" rows="2" placeholder="Catatan keputusan Admin (opsional untuk setuju; wajib saat menolak)" class="w-full border rounded-lg px-3 py-2 mt-4"></textarea><div class="flex flex-wrap gap-2 mt-4"><button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold" onclick="return validateApproval()">Setujui & Siapkan Serah Terima</button></form><form method="POST" action="<?=url('/loans/reject')?>" onsubmit="return rejectLoan()" class="inline"><input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>"><input type="hidden" name="id" value="<?=$loan['id']?>"><input type="hidden" name="approval_notes" id="reject_notes"><button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold">Tolak</button></form></div></div>
-<?php endif; ?>
+  <?php foreach(['success'=>'green','error'=>'red'] as $key=>$color): if(isset($_SESSION[$key])): ?>
+    <div class="mb-5 px-4 py-3 rounded-lg border bg-<?=$color?>-50 border-<?=$color?>-200 text-<?=$color?>-700"><?=htmlspecialchars($_SESSION[$key]); unset($_SESSION[$key]);?></div>
+  <?php endif; endforeach; ?>
 
-<div class="bg-white rounded-xl shadow p-6 mb-6"><div class="flex justify-between items-center mb-4"><div><h2 class="text-lg font-semibold">Barang Peminjaman</h2><p class="text-xs text-gray-500">Diminta dan benar-benar disetujui oleh Admin.</p></div></div><div class="space-y-3"><?php foreach($items as $it):$remaining=max(0,(int)$it['quantity']-(int)$it['returned_quantity']);?><div class="border rounded-lg p-4"><div class="flex flex-col md:flex-row md:justify-between gap-2"><div><div class="font-semibold"><?=htmlspecialchars($it['nama'])?></div><div class="text-xs text-gray-500 mt-1"><?=($it['source_type']??'STOCK')==='MANUAL'?'Manual / Custom':'Dari Stok'?></div><?php if(!empty($it['specification'])):?><div class="text-xs text-gray-500 mt-1"><?=htmlspecialchars($it['specification'])?></div><?php endif;?></div><div class="text-sm text-right"><div>Diminta <strong><?=$it['requested_quantity']?></strong></div><div>Disetujui <strong><?=$it['approved_quantity']?></strong></div><div>Tersisa <strong><?=$remaining?></strong></div></div></div><?php if(!empty($it['serial_numbers'])):?><div class="mt-3 flex flex-wrap gap-2"><?php foreach($it['serial_numbers'] as $sn):?><span class="px-2 py-1 bg-gray-100 rounded text-sm"><?=htmlspecialchars($sn['serial_number'])?></span><?php endforeach;?></div><?php endif;?></div><?php endforeach;if(empty($items)):?><div class="p-6 text-center text-gray-500">Belum ada barang.</div><?php endif;?></div></div>
+  <div class="bg-white rounded-xl border shadow-sm p-6 mb-6">
+    <div class="grid md:grid-cols-3 gap-5">
+      <div><div class="text-xs text-gray-500">Peminjam</div><div class="font-semibold text-gray-900 mt-1"><?=htmlspecialchars($loan['borrower_name'])?></div></div>
+      <div><div class="text-xs text-gray-500">Gudang Pemenuhan</div><div class="font-semibold text-gray-900 mt-1"><?=htmlspecialchars($loan['warehouse_name'])?></div></div>
+      <div><div class="text-xs text-gray-500">Jenis</div><div class="font-semibold text-gray-900 mt-1"><?=htmlspecialchars($loan['loan_type']??'INTERNAL')?></div></div>
+      <div><div class="text-xs text-gray-500">Diajukan</div><div class="mt-1"><?=!empty($loan['loan_date'])?date('d M Y H:i',strtotime($loan['loan_date'])):'-'?></div></div>
+      <div><div class="text-xs text-gray-500">Jatuh Tempo</div><div class="mt-1"><?=!empty($loan['due_date'])?date('d M Y',strtotime($loan['due_date'])):'-'?></div></div>
+      <div><div class="text-xs text-gray-500">Barang Keluar</div><div class="mt-1"><?php if(!empty($loan['outgoing_id'])):?><a class="text-blue-600 hover:underline" href="<?=url('/outgoing/show?id='.(int)$loan['outgoing_id'])?>">Lihat transaksi pengeluaran</a><?php else:?><span class="text-gray-400">Belum dibuat</span><?php endif;?></div></div>
+    </div>
+  </div>
 
-<?php if($role==='ADMIN' && $loan['status']==='APPROVED'): ?><div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6" id="serah-terima"><h2 class="font-semibold text-lg">Serah Terima</h2><p class="text-sm text-gray-600 mt-1 mb-3">Stok fisik tetap. Setelah serah terima, barang berubah menjadi <strong>Dipinjam</strong> dan, bila serial, holder berpindah ke teknisi.</p><form method="POST" action="<?=url('/loans/handover')?>"><input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>"><input type="hidden" name="id" value="<?=$loan['id']?>"><button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold" onclick="return confirm('Konfirmasi serah terima barang?')">Serahkan Barang</button></form></div><?php endif;?>
-<?php if($role==='TEKNISI_NOC' && in_array($loan['status'],['BORROWED','PARTIAL_RETURNED'],true)):?><div class="bg-orange-50 border border-orange-200 rounded-xl p-5 mb-6"><h2 class="font-semibold">Pengembalian</h2><p class="text-sm text-gray-600 mt-1 mb-3">Teknisi mengajukan pengembalian; Admin kemudian memeriksa kondisi barang.</p><a href="<?=url('/returns/create?loan_id='.(int)$loan['id'])?>" class="inline-block bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold">Ajukan Pengembalian</a></div><?php endif;?>
-<?php require __DIR__.'/../../components/audit_timeline.php'; ?></div>
-<script>function validateApproval(){let valid=true;document.querySelectorAll('.include').forEach(cb=>{if(!cb.checked)return;const key=cb.dataset.key;const qty=document.querySelector('.qty[data-key="'+key+'"]');if(!qty||parseInt(qty.value||0)<1){valid=false;}});document.querySelectorAll('.serial-select').forEach(sel=>{const key=sel.dataset.key;const cb=document.querySelector('.include[data-key="'+key+'"]');if(cb&&cb.checked){const qty=document.querySelector('.qty[data-key="'+key+'"]');if(qty&&sel.selectedOptions.length!==parseInt(qty.value||0))valid=false;}});if(!valid){alert('Periksa kembali barang yang dicentang, jumlah, dan nomor seri.');return false;}return true;}function rejectLoan(){const reason=prompt('Masukkan alasan penolakan:');if(!reason||!reason.trim())return false;document.getElementById('reject_notes').value=reason.trim();return true;}</script>
-<?php $content=ob_get_clean();require __DIR__.'/../../layouts/app.php'; ?>
+  <?php if($role==='ADMIN' && $loan['status']==='PENDING_APPROVAL'): ?>
+  <form method="POST" action="<?=url('/loans/approve')?>" class="bg-yellow-50 border border-yellow-200 rounded-xl p-5 mb-6" id="keputusan">
+    <input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>"><input type="hidden" name="id" value="<?=$loan['id']?>">
+    <div class="mb-4"><h2 class="font-semibold text-lg">Review Admin</h2><p class="text-sm text-gray-600 mt-1">Admin wajib menentukan barang yang benar-benar diberikan. Untuk permintaan manual, wajib dipetakan ke Master Barang terlebih dahulu. Serah terima belum membuat pengeluaran stok sampai tombol <strong>Proses & Serahkan</strong> dijalankan.</p></div>
+    <div class="space-y-4">
+    <?php foreach($items as $it): $isManual=($it['source_type']??'')==='MANUAL'; $key=$isManual?'m'.$it['id']:$it['id']; $requested=(int)$it['requested_quantity']; $serialChoices=$availableSerials[$key]??[]; ?>
+      <div class="bg-white rounded-lg border p-4">
+        <div class="grid lg:grid-cols-12 gap-4 items-start">
+          <div class="lg:col-span-4">
+            <label class="flex gap-2"><input type="checkbox" name="approved_include[<?=$key?>]" value="1" class="mt-1 review-include" data-key="<?=$key?>"><span><strong><?=htmlspecialchars($it['nama'])?></strong><span class="block text-xs text-gray-500 mt-1"><?=$isManual?'Manual / Custom request':'Dari Stok'?> · Diminta <?=$requested?></span><?php if($isManual && !empty($it['specification'])):?><span class="block text-xs text-gray-500 mt-1"><?=htmlspecialchars($it['specification'])?></span><?php endif;?></span></label>
+          </div>
+          <div class="lg:col-span-2"><label class="block text-xs font-semibold mb-1">Diberikan</label><input type="number" min="0" max="<?=$requested?>" value="<?=$requested?>" name="<?=$isManual?'approved_manual_qty['.$it['id'].']':'approved_qty['.$it['id'].']'?>" class="review-qty w-full border rounded-lg px-3 py-2 text-center" data-key="<?=$key?>"></div>
+          <div class="lg:col-span-6">
+            <?php if($isManual): ?>
+              <label class="block text-xs font-semibold mb-1">Mapping ke Master Barang</label>
+              <select name="mapped_master_item[<?=$it['id']?>]" class="review-master w-full border rounded-lg px-3 py-2" data-key="<?=$key?>"><option value="">Pilih barang inventory...</option><?php foreach($masterItems as $mi):?><option value="<?=$mi['id']?>" <?=((int)($it['master_item_id']??0)===(int)$mi['id'])?'selected':''?>><?=htmlspecialchars($mi['nama'])?></option><?php endforeach;?></select>
+              <?php if(!empty($it['mapped_name'])):?><div class="text-xs text-gray-500 mt-1">Saat ini dipetakan ke: <?=htmlspecialchars($it['mapped_name'])?></div><?php endif;?>
+              <?php if(!empty($serialChoices)): ?><label class="block text-xs font-semibold mt-3 mb-1">Pilih Serial</label><select name="approved_serials[<?=$key?>][]" multiple size="4" class="review-serial w-full border rounded-lg px-3 py-2" data-key="<?=$key?>"><?php foreach($serialChoices as $sn):?><option value="<?=$sn['id']?>"><?=htmlspecialchars($sn['serial_number'])?></option><?php endforeach;?></select><div class="text-xs text-gray-500 mt-1">Hanya serial yang tersedia di gudang yang muncul.</div><?php endif; ?>
+            <?php elseif((int)$it['is_serialized']===1): ?>
+              <label class="block text-xs font-semibold mb-1">Pilih Serial yang Diberikan</label><select name="approved_serials[<?=$key?>][]" multiple size="4" class="review-serial w-full border rounded-lg px-3 py-2" data-key="<?=$key?>"><?php foreach($serialChoices as $sn):?><option value="<?=$sn['id']?>"><?=htmlspecialchars($sn['serial_number'])?></option><?php endforeach;?></select><div class="text-xs text-gray-500 mt-1">Jumlah serial harus sama dengan jumlah diberikan.</div>
+            <?php else: ?>
+              <div class="text-sm text-gray-500 pt-6">Barang bulk: Admin cukup menentukan jumlah. Stok dicek ulang saat proses Barang Keluar.</div>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+    <?php endforeach; ?>
+    </div>
+    <textarea name="approval_notes" rows="2" placeholder="Catatan keputusan Admin (opsional)" class="w-full border rounded-lg px-3 py-2 mt-4"></textarea>
+    <div class="flex flex-wrap gap-2 mt-4"><button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold" onclick="return validateLoanApproval()">Setujui Keputusan Admin</button></div>
+  </form>
+  <form method="POST" action="<?=url('/loans/reject')?>" onsubmit="return rejectLoan()" class="mb-6"><input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>"><input type="hidden" name="id" value="<?=$loan['id']?>"><input type="hidden" name="approval_notes" id="reject_notes"><button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold">Tolak Peminjaman</button></form>
+  <?php endif; ?>
+
+  <div class="bg-white rounded-xl border shadow-sm p-6 mb-6">
+    <div class="flex justify-between items-center mb-4"><div><h2 class="text-lg font-semibold">Keputusan Barang</h2><p class="text-xs text-gray-500">Permintaan, jumlah yang diberikan, dan status pengembalian.</p></div></div>
+    <div class="space-y-3">
+      <?php foreach($items as $it): $remaining=max(0,(int)$it['quantity']-(int)$it['returned_quantity']); ?>
+      <div class="border rounded-lg p-4"><div class="flex flex-col md:flex-row md:justify-between gap-3"><div><div class="font-semibold"><?=htmlspecialchars($it['nama'])?></div><div class="text-xs text-gray-500 mt-1"><?=($it['source_type']??'STOCK')==='MANUAL'?'Manual / Custom → '.htmlspecialchars($it['mapped_name']??'belum dipetakan'):'Dari Stok'?></div><?php if(!empty($it['specification'])):?><div class="text-xs text-gray-500 mt-1"><?=htmlspecialchars($it['specification'])?></div><?php endif;?></div><div class="text-sm text-right"><div>Diminta <strong><?=$it['requested_quantity']?></strong></div><div>Diberikan <strong><?=$it['approved_quantity']?></strong></div><div>Sisa Dipinjam <strong><?=$remaining?></strong></div></div></div><?php if(!empty($it['serial_numbers'])):?><div class="mt-3 flex flex-wrap gap-2"><?php foreach($it['serial_numbers'] as $sn):?><span class="px-2 py-1 bg-gray-100 rounded text-sm"><?=htmlspecialchars($sn['serial_number'])?> · <?=$sn['status']?></span><?php endforeach;?></div><?php endif;?></div>
+      <?php endforeach; if(empty($items)):?><div class="p-8 text-center text-gray-500">Belum ada barang.</div><?php endif; ?>
+    </div>
+  </div>
+
+  <?php if($role==='ADMIN' && $loan['status']==='APPROVED'): ?>
+  <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6" id="serah-terima"><h2 class="font-semibold text-lg">Proses Barang Keluar & Serah Terima</h2><p class="text-sm text-gray-600 mt-1 mb-3">Langkah ini membuat satu transaksi <strong>Barang Keluar</strong> dengan jenis <strong>Peminjaman</strong>. Stok fisik tidak dikurangi; barang ditandai sedang dipinjam/custody.</p><form method="POST" action="<?=url('/loans/handover')?>"><input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>"><input type="hidden" name="id" value="<?=$loan['id']?>"><button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold" onclick="return confirm('Buat Barang Keluar untuk Peminjaman dan serahkan barang sekarang?')">Proses & Serahkan</button></form></div>
+  <?php endif; ?>
+
+  <?php if($role==='TEKNISI_NOC' && in_array($loan['status'],['BORROWED','PARTIAL_RETURNED'],true)): ?>
+  <div class="bg-orange-50 border border-orange-200 rounded-xl p-5 mb-6"><h2 class="font-semibold">Pengembalian</h2><p class="text-sm text-gray-600 mt-1 mb-3">Pengembalian diajukan teknisi, lalu diperiksa Admin. Barang baik kembali tersedia; barang rusak masuk status rusak.</p><a href="<?=url('/returns/create?loan_id='.(int)$loan['id'])?>" class="inline-block bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold">Ajukan Pengembalian</a></div>
+  <?php endif; ?>
+
+  <?php require __DIR__.'/../../components/audit_timeline.php'; ?>
+</div>
+<script>
+function validateLoanApproval(){
+  let ok=true;
+  document.querySelectorAll('.review-include').forEach(cb=>{if(!cb.checked)return;const key=cb.dataset.key;const qty=document.querySelector('.review-qty[data-key="'+key+'"]');if(!qty||parseInt(qty.value||0)<1)ok=false;const master=document.querySelector('.review-master[data-key="'+key+'"]');if(master&&parseInt(qty.value||0)>0&&!master.value)ok=false;const serial=document.querySelector('.review-serial[data-key="'+key+'"]');if(serial&&serial.options.length>0&&serial.selectedOptions.length!==parseInt(qty.value||0))ok=false;});
+  if(!ok){alert('Periksa barang, jumlah, mapping manual, dan nomor seri yang diberikan.');return false;}return true;
+}
+function rejectLoan(){const reason=prompt('Masukkan alasan penolakan:');if(!reason||!reason.trim())return false;document.getElementById('reject_notes').value=reason.trim();return true;}
+</script>
+<?php $content=ob_get_clean(); require __DIR__.'/../../layouts/app.php'; ?>
