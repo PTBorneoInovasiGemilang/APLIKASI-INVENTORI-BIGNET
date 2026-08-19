@@ -132,13 +132,27 @@ if (empty($_SESSION['csrf_token'])) {
         updateSummary();
     }
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function displayItemName(item) {
+        // UI hanya menampilkan nama barang. Identifier/kode tetap dikirim via value ke backend.
+        return escapeHtml(item.nama);
+    }
+
     function addItemRow() {
         const list = document.getElementById('itemsList');
         const id = rowCount;
 
         let stockSelect = '<select name="item_ids[]" class="stock-input w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-3 text-gray-700 dark:text-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"><option value="">Pilih Barang...</option>';
         masterItems.forEach(item => {
-            stockSelect += '<option value="' + item.id + '">' + item.nama + ' (' + item.kode_barang + ')</option>';
+            stockSelect += '<option value="' + item.id + '">' + displayItemName(item) + '</option>';
         });
         stockSelect += '</select>';
 
