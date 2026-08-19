@@ -28,35 +28,44 @@ $labels=[
 
   <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden border border-gray-200 dark:border-gray-700">
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[1080px]">
+      <table class="w-full min-w-[900px] table-fixed">
+        <colgroup>
+          <col class="w-[48px]">
+          <col class="w-[120px]">
+          <col class="w-[190px]">
+          <col class="w-[175px]">
+          <col class="w-[125px]">
+          <col class="w-[145px]">
+          <col class="w-[250px]">
+        </colgroup>
         <thead class="bg-gray-50 dark:bg-gray-900/40"><tr>
-          <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase w-12">No</th>
+          <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase">No</th>
           <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Tanggal</th>
           <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Peminjam</th>
           <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Gudang</th>
           <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Jatuh Tempo</th>
           <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-          <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase min-w-[260px]">Aksi</th>
+          <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase">Aksi</th>
         </tr></thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
         <?php $no=$offset+1; foreach($loans as $ln): $b=$labels[$ln['status']]??[$ln['status'],'gray']; $due=!empty($ln['due_date'])?date('d M Y',strtotime($ln['due_date'])):'-'; $isOverdue=!empty($ln['due_date']) && time()>strtotime($ln['due_date']) && !in_array($ln['status'],['RETURNED','REJECTED'],true); ?>
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40 align-middle">
             <td class="p-3 text-center text-sm"><?=$no++?></td>
             <td class="p-3 text-sm whitespace-nowrap"><?=date('d M Y',strtotime($ln['loan_date']))?></td>
-            <td class="p-3 text-sm font-medium"><?=htmlspecialchars($ln['borrower_name'])?></td>
-            <td class="p-3 text-sm"><?=htmlspecialchars($ln['warehouse_name'])?></td>
+            <td class="p-3 text-sm font-medium break-words"><?=htmlspecialchars($ln['borrower_name'])?></td>
+            <td class="p-3 text-sm break-words"><?=htmlspecialchars($ln['warehouse_name'])?></td>
             <td class="p-3 text-sm"><span class="<?= $isOverdue?'text-red-600 font-semibold':'' ?>"><?=htmlspecialchars($due)?></span><?php if($isOverdue): ?><div class="text-xs text-red-500 mt-1">Terlambat</div><?php endif; ?></td>
-            <td class="p-3"><span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-<?=$b[1]?>-100 text-<?=$b[1]?>-800"><?=$b[0]?></span></td>
-            <td class="p-3"><div class="flex flex-wrap gap-2 justify-center">
-              <a class="inline-flex items-center px-3 py-1.5 rounded-lg border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 text-sm font-semibold" href="<?=url('/loans/show?id='.(int)$ln['id'])?>"><i class="fas fa-eye mr-1.5"></i>Lihat</a>
+            <td class="p-3"><span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-<?=$b[1]?>-100 text-<?=$b[1]?>-800 whitespace-nowrap"><?=$b[0]?></span></td>
+            <td class="p-3 align-middle"><div class="flex flex-wrap gap-2 justify-center items-center">
+              <a class="inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 text-xs font-semibold whitespace-nowrap" href="<?=url('/loans/show?id='.(int)$ln['id'])?>"><i class="fas fa-eye mr-1"></i>Lihat</a>
               <?php if($role==='ADMIN' && $ln['status']==='PENDING_APPROVAL'): ?>
-                <a class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-semibold" href="<?=url('/loans/show?id='.(int)$ln['id'])?>#keputusan"><i class="fas fa-check mr-1.5"></i>Setujui / Tolak</a>
+                <a class="inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-semibold whitespace-nowrap" href="<?=url('/loans/show?id='.(int)$ln['id'])?>#keputusan"><i class="fas fa-check mr-1"></i>Setujui / Tolak</a>
               <?php elseif($role==='ADMIN' && $ln['status']==='APPROVED'): ?>
-                <a class="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold" href="<?=url('/loans/show?id='.(int)$ln['id'])?>#serah-terima"><i class="fas fa-hand-holding mr-1.5"></i>Serahkan</a>
+                <a class="inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold whitespace-nowrap" href="<?=url('/loans/show?id='.(int)$ln['id'])?>#serah-terima"><i class="fas fa-hand-holding mr-1"></i>Serahkan</a>
               <?php elseif($role==='TEKNISI_NOC' && in_array($ln['status'],['BORROWED','PARTIAL_RETURNED'],true)): ?>
-                <a class="inline-flex items-center px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold" href="<?=url('/returns/create?loan_id='.(int)$ln['id'])?>"><i class="fas fa-undo mr-1.5"></i>Ajukan Pengembalian</a>
+                <a class="inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold whitespace-nowrap" href="<?=url('/returns/create?loan_id='.(int)$ln['id'])?>"><i class="fas fa-undo mr-1"></i>Ajukan Pengembalian</a>
               <?php elseif($role==='ADMIN' && in_array($ln['status'],['BORROWED','PARTIAL_RETURNED'],true)): ?>
-                <a class="inline-flex items-center px-3 py-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-sm font-semibold" href="<?=url('/returns')?>"><i class="fas fa-inbox mr-1.5"></i>Lihat Pengembalian</a>
+                <a class="inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-semibold whitespace-nowrap" href="<?=url('/returns')?>"><i class="fas fa-inbox mr-1"></i>Lihat Pengembalian</a>
               <?php endif; ?>
             </div></td>
           </tr>
@@ -64,7 +73,6 @@ $labels=[
         </tbody>
       </table>
     </div>
-    <div class="p-3 text-sm text-gray-500">Menampilkan total <?=$totalItems?> data</div>
     <?php $paginationBaseUrl=url('/loans'); require __DIR__.'/../../components/table/pagination.php'; ?>
   </div>
 </div>
