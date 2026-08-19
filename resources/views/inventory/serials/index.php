@@ -7,7 +7,7 @@ ob_start();
 <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
     <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Nomor Seri</h1>
     <?php if (!empty($serials)): ?>
-    <a href="<?= url('/labels?serial_ids=' . implode(',', array_column($serials, 'id'))) ?>" class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm">
+    <a href="<?= url('/technician-labels?serial_ids=' . implode(',', array_column($serials, 'id'))) ?>" class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm">
         <i class="fas fa-print"></i> Cetak Semua Label (<?= count($serials) ?>)
     </a>
     <?php endif; ?>
@@ -73,7 +73,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
                         else if ($st === 'IN_TRANSIT') $badgeType = 'WARNING';
                         else if ($st === 'BROKEN' || $st === 'REPAIR') $badgeType = 'DANGER';
                         
-                        echo \App\Helpers\UIHelper::badge($st, $badgeType);
+                        echo \\App\\Helpers\\UIHelper::badge($st, $badgeType);
                         ?>
                     </td>
                     <?php
