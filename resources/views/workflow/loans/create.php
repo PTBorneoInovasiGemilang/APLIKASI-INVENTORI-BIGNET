@@ -60,15 +60,17 @@ if (empty($_SESSION['csrf_token'])) {
                     </select>
                 </div>
 
+                <?php if (!empty($submissions)): ?>
                 <div>
-                    <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Dasar Pengajuan <span class="font-normal text-gray-400">(opsional)</span></label>
+                    <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Terkait Pengajuan Barang <span class="font-normal text-gray-400">(opsional)</span></label>
                     <select name="submission_id" class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                        <option value="">Tidak terkait pengajuan lain</option>
+                        <option value="">Tidak menggunakan pengajuan</option>
                         <?php foreach ($submissions as $s): ?>
                             <option value="<?= $s['id'] ?>">Pengajuan yang sudah disetujui</option>
                         <?php endforeach; ?>
                     </select>
                 </div>
+                <?php endif; ?>
 
                 <div>
                     <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Tanggal Pengembalian</label>
