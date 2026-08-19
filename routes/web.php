@@ -181,6 +181,7 @@ $router->post('/notifications/read-all', 'NotificationController@markAllRead');
 $router->get('/labels', 'LabelController@index');
 $router->get('/labels/create', 'LabelController@create');
 $router->post('/labels/print', 'LabelController@printSheet');
+$router->get('/technician-labels', 'TechnicianLabelController@index');
 $router->get('/scan', 'LabelController@scan');
 $router->post('/scan', 'LabelController@scan');
 $router->get('/assets/js/qrcode.min.js', 'StaticController@qrcodeJs');
