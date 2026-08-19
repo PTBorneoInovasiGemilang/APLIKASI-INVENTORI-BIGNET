@@ -18,12 +18,15 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
 .dark .loan-ui input,.dark .loan-ui select{background:#1e293b!important;color:#f8fafc!important;border-color:#475569!important}
 .dark .loan-ui input::placeholder{color:#94a3b8!important}
 .dark .loan-ui input:focus,.dark .loan-ui select:focus{border-color:#60a5fa!important;box-shadow:0 0 0 2px rgba(96,165,250,.18)!important}
+.loan-items-cell .loan-item-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .5rem;border-radius:.5rem;background:#f8fafc;border:1px solid #e2e8f0;margin:.15rem .2rem .15rem 0;font-size:.75rem}
+.dark .loan-items-cell .loan-item-chip{background:#1e293b;border-color:#475569;color:#e2e8f0}
+.loan-items-cell .loan-items-muted{font-size:.75rem;color:#94a3b8}
 </style>
 <div class="loan-ui max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
     <div>
       <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Peminjaman Barang</h1>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Permintaan → keputusan Admin → Barang Keluar → custody → pengembalian.</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Permintaan → keputusan Admin → Barang Keluar → barang dipinjam → pengembalian.</p>
     </div>
     <?php if($role==='TEKNISI_NOC'): ?>
       <a href="<?=url('/loans/create')?>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold inline-flex items-center"><i class="fas fa-plus mr-2"></i>Peminjaman Baru</a>
@@ -45,16 +48,17 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
 
   <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="w-full">
+      <table class="w-full min-w-[1100px]">
         <thead class="bg-gray-50 dark:bg-gray-900/40">
           <tr>
             <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase w-14">No</th>
             <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Tanggal</th>
             <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Peminjam</th>
             <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Gudang</th>
+            <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase min-w-[280px]">Barang Dipinjam</th>
             <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Jatuh Tempo</th>
             <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-            <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase w-56">Aksi</th>
+            <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase w-44">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -63,12 +67,17 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
           $due=!empty($ln['due_date'])?date('d M Y',strtotime($ln['due_date'])):'-';
           $overdue=!empty($ln['due_date'])&&time()>strtotime($ln['due_date'])&&!in_array($ln['status'],['RETURNED','REJECTED'],true);
           $detail=url('/loans/show?id='.(int)$ln['id']);
+          $loanId=(int)$ln['id'];
+          $returnUrl=url('/returns/create?loan_id='.$loanId);
         ?>
           <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40 align-top">
             <td class="p-4 text-center text-sm"><?=$no++?></td>
             <td class="p-4 text-sm whitespace-nowrap"><?=date('d M Y',strtotime($ln['loan_date']))?></td>
             <td class="p-4 text-sm font-semibold leading-5 max-w-[180px]"><?=htmlspecialchars($ln['borrower_name'])?></td>
             <td class="p-4 text-sm leading-5 max-w-[180px]"><?=htmlspecialchars($ln['warehouse_name'])?></td>
+            <td class="p-4 text-sm loan-items-cell" data-loan-id="<?=$loanId?>">
+              <div class="loan-items-muted">Memuat barang...</div>
+            </td>
             <td class="p-4 text-sm"><?php if($due!=='-'): ?><span class="<?=$overdue?'text-red-600 font-semibold':''?>"><?=htmlspecialchars($due)?></span><?php if($overdue): ?><div class="text-xs text-red-500 mt-1">Terlambat</div><?php endif; ?><?php else: ?><span class="text-gray-400">-</span><?php endif; ?></td>
             <td class="p-4"><span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-<?=$b[1]?>-100 text-<?=$b[1]?>-800 whitespace-nowrap"><?=$b[0]?></span></td>
             <td class="p-4">
@@ -78,9 +87,9 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
                 <?php elseif($role==='ADMIN'&&$ln['status']==='APPROVED'): ?>
                   <a href="<?=$detail?>#handover" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold"><i class="fas fa-box-open mr-1.5"></i>Proses Keluar</a>
                 <?php elseif($role==='TEKNISI_NOC'&&in_array($ln['status'],['BORROWED','PARTIAL_RETURNED'],true)): ?>
-                  <a href="<?=url('/returns/create?loan_id='.(int)$ln['id'])?>" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold"><i class="fas fa-undo mr-1.5"></i>Kembalikan</a>
+                  <a href="<?=$returnUrl?>" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold"><i class="fas fa-undo mr-1.5"></i>Kembalikan</a>
                 <?php elseif($role==='ADMIN'&&in_array($ln['status'],['BORROWED','PARTIAL_RETURNED'],true)): ?>
-                  <a href="<?=url('/returns')?>" class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-orange-200 text-orange-700 bg-orange-50 text-xs font-semibold"><i class="fas fa-clipboard-check mr-1.5"></i>Proses Return</a>
+                  <a href="<?=$detail?>#return" class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-orange-200 text-orange-700 bg-orange-50 text-xs font-semibold"><i class="fas fa-clipboard-check mr-1.5"></i>Lihat Pengembalian</a>
                 <?php else: ?>
                   <a href="<?=$detail?>" class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-blue-200 text-blue-700 bg-blue-50 text-xs font-semibold"><i class="fas fa-eye mr-1.5"></i>Lihat</a>
                 <?php endif; ?>
@@ -88,7 +97,7 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
             </td>
           </tr>
         <?php endforeach; if(empty($loans)): ?>
-          <tr><td colspan="7" class="p-12 text-center text-gray-500">Belum ada peminjaman.</td></tr>
+          <tr><td colspan="8" class="p-12 text-center text-gray-500">Belum ada peminjaman.</td></tr>
         <?php endif; ?>
         </tbody>
       </table>
@@ -97,4 +106,27 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
     <?php $paginationBaseUrl=url('/loans'); require __DIR__.'/../../components/table/pagination.php'; ?>
   </div>
 </div>
+
+<script>
+(function(){
+  const cells=[...document.querySelectorAll('.loan-items-cell')];
+  if(!cells.length)return;
+  const escapeHtml=(v)=>String(v??'').replace(/[&<>'"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[s]));
+  cells.forEach(cell=>{
+    const loanId=cell.dataset.loanId;
+    fetch('<?=url('/loans/api/items?id=')?>'+encodeURIComponent(loanId))
+      .then(r=>{if(!r.ok)throw new Error('request');return r.json();})
+      .then(items=>{
+        if(!Array.isArray(items)||items.length===0){cell.innerHTML='<span class="loan-items-muted">Tidak ada barang aktif.</span>';return;}
+        const visible=items.slice(0,4);
+        cell.innerHTML=visible.map(it=>{
+          const name=escapeHtml(it.nama||it.name||'-');
+          const qty=Math.max(0,(Number(it.quantity)||0)-(Number(it.returned_quantity)||0));
+          return '<span class="loan-item-chip"><strong>'+name+'</strong><span>× '+qty+'</span></span>';
+        }).join('')+(items.length>4?'<div class="loan-items-muted mt-1">+ '+(items.length-4)+' barang lainnya</div>':'');
+      })
+      .catch(()=>{cell.innerHTML='<span class="loan-items-muted">Barang tidak dapat dimuat.</span>';});
+  });
+})();
+</script>
 <?php $content=ob_get_clean(); require __DIR__.'/../../layouts/app.php'; ?>
