@@ -8,6 +8,12 @@ class UpdateLoanReturnWorkflow {
   if(!$has('loans','approval_notes'))$pdo->exec("ALTER TABLE loans ADD approval_notes TEXT NULL AFTER approved_at");
   if(!$has('loans','handed_over_by'))$pdo->exec("ALTER TABLE loans ADD handed_over_by INT NULL AFTER approval_notes");
   if(!$has('loans','handed_over_at'))$pdo->exec("ALTER TABLE loans ADD handed_over_at DATETIME NULL AFTER handed_over_by");
+  if(!$has('loan_items','requested_quantity'))$pdo->exec("ALTER TABLE loan_items ADD requested_quantity INT NOT NULL DEFAULT 0 AFTER master_item_id");
+  if(!$has('loan_items','approved_quantity'))$pdo->exec("ALTER TABLE loan_items ADD approved_quantity INT NOT NULL DEFAULT 0 AFTER requested_quantity");
+  if(!$has('loan_manual_items','requested_quantity'))$pdo->exec("ALTER TABLE loan_manual_items ADD requested_quantity INT NOT NULL DEFAULT 0 AFTER name");
+  if(!$has('loan_manual_items','approved_quantity'))$pdo->exec("ALTER TABLE loan_manual_items ADD approved_quantity INT NOT NULL DEFAULT 0 AFTER requested_quantity");
+  $pdo->exec("UPDATE loan_items SET requested_quantity=quantity, approved_quantity=quantity WHERE requested_quantity=0 AND quantity>0");
+  $pdo->exec("UPDATE loan_manual_items SET requested_quantity=quantity, approved_quantity=quantity WHERE requested_quantity=0 AND quantity>0");
   if(!$fk('loans','fk_loans_approved_by'))$pdo->exec("ALTER TABLE loans ADD CONSTRAINT fk_loans_approved_by FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE RESTRICT");
   if(!$fk('loans','fk_loans_handed_over_by'))$pdo->exec("ALTER TABLE loans ADD CONSTRAINT fk_loans_handed_over_by FOREIGN KEY (handed_over_by) REFERENCES users(id) ON DELETE RESTRICT");
   $pdo->exec("ALTER TABLE loans MODIFY status VARCHAR(50) NOT NULL DEFAULT 'PENDING_APPROVAL'");
