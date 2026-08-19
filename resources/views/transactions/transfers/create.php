@@ -95,8 +95,9 @@ let activeSerialRow = null;
 let workingSerialSelection = new Set();
 let workingSerialOptions = [];
 
-function cleanCode(raw) { const value = String(raw ?? '').trim(); return /[A-Za-z0-9]/.test(value) ? value : ''; }
-function itemLabel(item) { const name = String(item.nama ?? '').trim(); const code = cleanCode(item.kode_barang); return code ? `${name} · ${code}` : name; }
+function itemLabel(item) {
+    return String(item.nama ?? '').trim();
+}
 function getSourceItems() { const sourceId = String(sourceWarehouse.value || ''); return sourceId ? itemsData.filter(item => String(item.warehouse_id) === sourceId && Number(item.stock_quantity) > 0) : []; }
 function getSerialOptions(itemId) { const sourceId = String(sourceWarehouse.value || ''); return (availableSerials[sourceId] && availableSerials[sourceId][String(itemId)]) ? availableSerials[sourceId][String(itemId)] : []; }
 function refreshDestinationOptions() { const sourceId = sourceWarehouse.value; const previous = destinationWarehouse.value; destinationWarehouse.innerHTML = '<option value="">Pilih gudang tujuan...</option>'; warehousesData.forEach(wh => { if (String(wh.id) === String(sourceId)) return; const option = document.createElement('option'); option.value = wh.id; option.textContent = wh.name; destinationWarehouse.appendChild(option); }); if ([...destinationWarehouse.options].some(o => o.value === previous)) destinationWarehouse.value = previous; warehouseHint.textContent = sourceId ? (destinationWarehouse.options.length === 1 ? 'Belum ada gudang tujuan lain yang tersedia.' : 'Gudang tujuan tidak boleh sama dengan gudang asal.') : 'Pilih gudang asal terlebih dahulu. Gudang tujuan yang sama akan otomatis disembunyikan.'; }
