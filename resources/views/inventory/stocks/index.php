@@ -8,7 +8,7 @@ ob_start();
     <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Stok Barang</h1>
         <p class="mt-1 max-w-3xl text-sm text-gray-500 dark:text-gray-400">
-            Pantau kondisi barang per gudang: yang tersedia, sedang dipinjam, dan sedang dalam pengiriman.
+            Pantau kondisi barang per gudang. Lihat jumlah yang siap digunakan, sedang dipinjam, dan sedang dikirim.
             Klik <strong>Lihat</strong> untuk membuka detail barang dan nomor seri.
         </p>
     </div>
@@ -67,18 +67,15 @@ require __DIR__ . '/../../components/table/toolbar.php';
 ?>
 
 <div class="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-    <table class="w-full min-w-[1250px] divide-y divide-gray-200 dark:divide-gray-700">
+    <table class="w-full min-w-[1120px] divide-y divide-gray-200 dark:divide-gray-700">
         <thead class="bg-gray-50 dark:bg-gray-900/50">
             <tr>
                 <th class="w-12 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">No</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Gudang</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Barang</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Pelacakan</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Fisik</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Tersedia</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Dipinjam</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Dalam Pengiriman</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Ringkasan Stok</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Kondisi</th>
                 <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Aksi</th>
             </tr>
         </thead>
@@ -93,6 +90,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
             $inTransit = (int)$stock['in_transit_quantity'];
             $isLow = !empty($stock['is_low_stock']);
             $unit = $stock['unit_name'] ?: 'unit';
+            $availablePercent = $physical > 0 ? min(100, round(($available / $physical) * 100)) : 0;
         ?>
             <tr class="group transition hover:bg-gray-50 dark:hover:bg-gray-700/40">
                 <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
@@ -104,9 +102,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
 
                 <td class="px-4 py-4 align-top">
                     <div class="text-sm font-semibold text-gray-900 dark:text-white"><?= htmlspecialchars($stock['item_name']) ?></div>
-                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        Satuan: <?= htmlspecialchars($unit) ?>
-                    </div>
+                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Satuan: <?= htmlspecialchars($unit) ?></div>
                 </td>
 
                 <td class="px-4 py-4 align-top">
@@ -117,34 +113,51 @@ require __DIR__ . '/../../components/table/toolbar.php';
                     <?php endif; ?>
                 </td>
 
-                <td class="px-4 py-4 text-right align-top">
-                    <div class="text-lg font-bold text-gray-900 dark:text-white"><?= number_format($physical) ?></div>
-                    <div class="text-[11px] text-gray-400">total aset</div>
-                </td>
+                <td class="px-4 py-4 align-top">
+                    <div class="min-w-[290px] max-w-[430px]">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+                                    <?= number_format($available) ?> <?= htmlspecialchars($unit) ?>
+                                </div>
+                                <div class="mt-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    tersedia dan siap digunakan
+                                </div>
+                            </div>
+                            <div class="rounded-full bg-green-50 px-2.5 py-1 text-xs font-bold text-green-700 dark:bg-green-950/30 dark:text-green-300">
+                                <?= $availablePercent ?>%
+                            </div>
+                        </div>
 
-                <td class="px-4 py-4 text-right align-top">
-                    <div class="text-lg font-bold text-green-600 dark:text-green-400"><?= number_format($available) ?></div>
-                    <div class="text-[11px] text-gray-400">siap digunakan</div>
-                </td>
+                        <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700" title="<?= $availablePercent ?>% dari total barang tersedia">
+                            <div class="h-full rounded-full bg-green-500 transition-all" style="width: <?= $availablePercent ?>%"></div>
+                        </div>
 
-                <td class="px-4 py-4 text-right align-top">
-                    <div class="text-lg font-bold text-orange-600 dark:text-orange-400"><?= number_format($borrowed) ?></div>
-                    <div class="text-[11px] text-gray-400">sedang dipegang</div>
-                </td>
-
-                <td class="px-4 py-4 text-right align-top">
-                    <div class="text-lg font-bold <?= $inTransit > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400' ?>"><?= number_format($inTransit) ?></div>
-                    <div class="text-[11px] text-gray-400">menuju gudang lain</div>
+                        <div class="mt-3 grid grid-cols-3 gap-2">
+                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-700 dark:bg-gray-900/40">
+                                <div class="text-sm font-bold text-gray-900 dark:text-gray-100"><?= number_format($physical) ?></div>
+                                <div class="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">Total</div>
+                            </div>
+                            <div class="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5 dark:border-orange-900/30 dark:bg-orange-950/20">
+                                <div class="text-sm font-bold text-orange-600 dark:text-orange-400"><?= number_format($borrowed) ?></div>
+                                <div class="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">Dipinjam</div>
+                            </div>
+                            <div class="rounded-xl border border-blue-100 bg-blue-50 px-3 py-2.5 dark:border-blue-900/30 dark:bg-blue-950/20">
+                                <div class="text-sm font-bold text-blue-600 dark:text-blue-400"><?= number_format($inTransit) ?></div>
+                                <div class="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">Dikirim</div>
+                            </div>
+                        </div>
+                    </div>
                 </td>
 
                 <td class="px-4 py-4 align-top">
-                    <div class="flex flex-wrap gap-1.5">
+                    <div class="flex max-w-[180px] flex-wrap gap-1.5">
                         <?php if (!$stock['is_active']): ?>
                             <?= \App\Helpers\UIHelper::badge('Nonaktif', 'DANGER') ?>
                         <?php else: ?>
-                            <?= $available > 0 ? \App\Helpers\UIHelper::badge('Tersedia', 'SUCCESS') : \App\Helpers\UIHelper::badge('Tidak Tersedia', 'NEUTRAL') ?>
+                            <?= $available > 0 ? \App\Helpers\UIHelper::badge('Stok Tersedia', 'SUCCESS') : \App\Helpers\UIHelper::badge('Tidak Ada Stok', 'NEUTRAL') ?>
                             <?php if ($borrowed > 0): ?>
-                                <?= \App\Helpers\UIHelper::badge('Dipinjam', 'INFO') ?>
+                                <?= \App\Helpers\UIHelper::badge('Sedang Dipinjam', 'INFO') ?>
                             <?php endif; ?>
                             <?php if ($inTransit > 0): ?>
                                 <?= \App\Helpers\UIHelper::badge('Dalam Pengiriman', 'INFO') ?>
@@ -170,7 +183,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
         <?php endforeach; ?>
 
         <?php if (empty($stocks)):
-            $colspan = 10;
+            $colspan = 7;
             if (($_GET['filter'] ?? '') === 'low_stock') {
                 $emptyMessage = 'Belum ada barang dengan stok rendah.';
             } elseif (($_GET['filter'] ?? '') === 'borrowed') {
