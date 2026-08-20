@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle='Detail Transfer';
 ob_start();
 if(empty($_SESSION['csrf_token'])) $_SESSION['csrf_token']=bin2hex(random_bytes(32));
@@ -18,11 +18,109 @@ $transactionCode = trim((string)($transfer['transaction_code'] ?? '')); if ($tra
 ?>
 <style>
 @media print {
+    @page { size: auto; margin: 8mm; }
+
+    html,
+    body {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        background: #fff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
     body * { visibility: hidden !important; }
     #surat-jalan, #surat-jalan * { visibility: visible !important; }
-    #surat-jalan { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 18mm !important; box-shadow: none !important; border: 0 !important; }
+
+    #surat-jalan {
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        box-sizing: border-box !important;
+        background: #fff !important;
+        border: 0 !important;
+        box-shadow: none !important;
+    }
+
     .no-print { display: none !important; }
-    @page { size: A4; margin: 0; }
+
+    #surat-jalan,
+    #surat-jalan table,
+    #surat-jalan td,
+    #surat-jalan th {
+        font-family: Arial, Helvetica, sans-serif !important;
+        color: #111827 !important;
+    }
+
+    #surat-jalan { font-size: 10pt !important; line-height: 1.35 !important; }
+
+    #surat-jalan h1,
+    #surat-jalan h2,
+    #surat-jalan h3 {
+        break-after: avoid !important;
+        page-break-after: avoid !important;
+    }
+
+    #surat-jalan table {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: fixed !important;
+    }
+
+    #surat-jalan thead { display: table-header-group !important; }
+    #surat-jalan tfoot { display: table-footer-group !important; }
+
+    #surat-jalan tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    #surat-jalan th,
+    #surat-jalan td {
+        box-sizing: border-box !important;
+        max-width: 100% !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+        vertical-align: top !important;
+    }
+
+    #surat-jalan .serial-list {
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    #surat-jalan img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    #surat-jalan .signature-section,
+    #surat-jalan .signature-box,
+    #surat-jalan .print-safe-block {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    #surat-jalan .signature-box { min-height: 34mm !important; }
+
+    #surat-jalan * { max-width: 100% !important; }
+
+    #surat-jalan .overflow-hidden,
+    #surat-jalan .overflow-x-auto,
+    #surat-jalan .overflow-visible {
+        overflow: visible !important;
+    }
 }
 .receive-serial-summary{min-height:44px}
 </style>
@@ -120,7 +218,7 @@ function openReceiveSerialModal(itemId){activeReceiveItemId=String(itemId);const
 function closeReceiveSerialModal(){const modal=document.getElementById('receiveSerialModal');if(modal){modal.classList.add('hidden');modal.classList.remove('flex');}document.body.classList.remove('overflow-hidden');activeReceiveItemId=null;}
 function renderReceiveSerialList(itemId){const available=receiveSerialData[String(itemId)]||[];const q=String(document.getElementById('receiveSerialSearch').value||'').trim().toLowerCase();const filtered=available.filter(sn=>sn.toLowerCase().includes(q));const set=ensureReceiveSelection(itemId);const qty=getReceiveQty(itemId);document.getElementById('receiveSerialCount').textContent=`${set.size} / ${qty} dipilih`;document.getElementById('receiveSerialAvailable').textContent=`${available.length} nomor seri dikirim`;const list=document.getElementById('receiveSerialList');if(!filtered.length){list.innerHTML='<div class="rounded-xl border border-dashed border-gray-300 p-8 text-center text-sm text-gray-500 dark:border-gray-600 dark:text-gray-400">Nomor seri tidak ditemukan.</div>';return;}list.innerHTML=filtered.map(sn=>{const checked=set.has(sn);return `<label class="mb-2 flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition ${checked?'border-blue-300 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30':'border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700'}"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" data-sn="${escapeHtmlTransfer(sn)}" ${checked?'checked':''} onchange="toggleReceiveSerial('${String(itemId)}',this)"><span class="font-mono text-sm text-gray-800 dark:text-gray-100">${escapeHtmlTransfer(sn)}</span></label>`;}).join('');}
 function toggleReceiveSerial(itemId,checkbox){const set=ensureReceiveSelection(itemId);const qty=getReceiveQty(itemId);const sn=checkbox.dataset.sn;if(checkbox.checked){if(set.size>=qty){checkbox.checked=false;return;}set.add(sn);}else set.delete(sn);renderReceiveSerialList(itemId);}
-function applyReceiveSerials(itemId,fromAuto=false){const set=ensureReceiveSelection(itemId);const qty=getReceiveQty(itemId);if(set.size!==qty){if(!fromAuto){const count=document.getElementById('receiveSerialCount');count.className='font-semibold text-red-600';count.textContent=`Harus memilih tepat ${qty} nomor seri`; }return false;}const input=document.getElementById(`receive-sn-${itemId}`);if(input)input.value=Array.from(set).join('\n');renderReceiveSummary(itemId);if(!fromAuto)closeReceiveSerialModal();return true;}
+function applyReceiveSerials(itemId,fromAuto=false){const set=ensureReceiveSelection(itemId);const qty=getReceiveQty(itemId);if(set.size!==qty){if(!fromAuto){const count=document.getElementById('receiveSerialCount');count.className='font-semibold text-red-600';count.textContent=`Harus memilih tepat ${qty} nomor seri`;}return false;}const input=document.getElementById(`receive-sn-${itemId}`);if(input)input.value=Array.from(set).join('\n');renderReceiveSummary(itemId);if(!fromAuto)closeReceiveSerialModal();return true;}
 function terimaSemua(){document.querySelectorAll('[data-receive-row]').forEach(row=>{const id=row.dataset.receiveRow;const remaining=parseInt(row.dataset.remaining||'0',10);const qty=row.querySelector('.receive-qty');if(qty)qty.value=remaining;if(row.dataset.serialized==='1')autoReceiveSerials(id);});}
 document.getElementById('receiveSerialSearch')?.addEventListener('input',()=>{if(activeReceiveItemId!==null)renderReceiveSerialList(activeReceiveItemId);});
 document.getElementById('receiveSerialModal')?.addEventListener('click',e=>{if(e.target.id==='receiveSerialModal')closeReceiveSerialModal();});
@@ -129,5 +227,3 @@ document.getElementById('receiveForm')?.addEventListener('submit',e=>{let valid=
 <?php endif; ?>
 </script>
 <?php $content=ob_get_clean(); require __DIR__.'/../../layouts/app.php'; ?>
-
-
