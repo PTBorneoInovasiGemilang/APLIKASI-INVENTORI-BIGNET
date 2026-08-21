@@ -332,7 +332,7 @@
 
         var portal = source.cloneNode(true);
         portal.classList.remove('hidden');
-        portal.setAttribute('data-actions-menu', '1'); // deteksi klik-di-dalam-menu
+        portal.setAttribute('data-actions-menu', '1');
         portal.setAttribute('data-actions-portal', '1');
         document.body.appendChild(portal);
 
@@ -342,12 +342,10 @@
         var vw = window.innerWidth || document.documentElement.clientWidth;
         var vh = window.innerHeight || document.documentElement.clientHeight;
 
-        // Horizontal: rata kanan ke sisi kanan tombol; bila kurang ruang -> flip ke kiri
         var left = rect.right - mrect.width;
         if (left < gap) left = rect.left;
         left = Math.max(gap, Math.min(left, vw - mrect.width - gap));
 
-        // Vertikal: buka ke bawah; bila kurang ruang di bawah -> flip ke atas
         var top = rect.bottom + gap;
         if (top + mrect.height > vh - gap) {
             top = rect.top - mrect.height - gap;
@@ -362,7 +360,6 @@
 
         toggle.setAttribute('aria-expanded', 'true');
 
-        // Fokus item pertama (tanpa scroll) agar menu keyboard accessible
         var first = portal.querySelector('a, button, input[type="submit"]');
         if (first) {
             try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); }
@@ -378,12 +375,10 @@
             if (!wasOpen) openActionsMenu(toggle);
             return;
         }
-        // Klik di luar menu mana pun -> tutup semua
         var inMenu = e.target && e.target.closest ? !!e.target.closest('[data-actions-menu]') : false;
         if (!inMenu) closeAllActionsMenus();
     });
 
-    // ESC menutup semua menu; panah atas/bawah navigasi item saat menu terbuka
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' || e.key === 'Esc') {
             closeAllActionsMenus();
@@ -401,8 +396,6 @@
         items[idx].focus();
     });
 
-    // Scroll/resize -> tutup (koordinat fixed tidak valid lagi); delegated agar
-    // tetap bekerja setelah pagination/filter/search merender ulang HTML.
     window.addEventListener('scroll', function () { closeAllActionsMenus(); }, true);
     window.addEventListener('resize', function () { closeAllActionsMenus(); });
 
@@ -523,4 +516,39 @@
     } else {
         initCodePolicy();
     }
+})(window, document);
+
+/* BIGNET PRINT FIX — Surat Jalan: batasi logo/foto header agar proporsional. */
+(function (window, document) {
+    'use strict';
+
+    function constrainSuratJalanImages() {
+        var section = document.getElementById('surat-jalan');
+        if (!section) return;
+
+        section.querySelectorAll('img').forEach(function (img) {
+            img.style.setProperty('width', 'auto', 'important');
+            img.style.setProperty('height', '16mm', 'important');
+            img.style.setProperty('max-width', '40mm', 'important');
+            img.style.setProperty('max-height', '16mm', 'important');
+            img.style.setProperty('object-fit', 'contain', 'important');
+            img.style.setProperty('flex', '0 0 auto', 'important');
+        });
+
+        var header = section.firstElementChild;
+        if (header) {
+            header.style.setProperty('display', 'flex', 'important');
+            header.style.setProperty('flex-wrap', 'nowrap', 'important');
+            header.style.setProperty('align-items', 'flex-start', 'important');
+
+            var right = header.querySelector(':scope > div:last-child');
+            if (right) {
+                right.style.setProperty('flex', '0 0 auto', 'important');
+                right.style.setProperty('margin-left', 'auto', 'important');
+                right.style.setProperty('min-width', '38mm', 'important');
+            }
+        }
+    }
+
+    window.addEventListener('beforeprint', constrainSuratJalanImages);
 })(window, document);
