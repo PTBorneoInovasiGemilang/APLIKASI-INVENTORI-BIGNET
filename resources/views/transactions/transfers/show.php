@@ -18,7 +18,7 @@ $transactionCode = trim((string)($transfer['transaction_code'] ?? '')); if ($tra
 ?>
 <style>
 @media print {
-    @page { size: auto; margin: 7mm; }
+    @page { size: auto; margin: 5mm; }
 
     html,
     body {
@@ -42,7 +42,7 @@ $transactionCode = trim((string)($transfer['transaction_code'] ?? '')); if ($tra
         min-width: 0 !important;
         height: auto !important;
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 4mm !important;
         overflow: visible !important;
         box-sizing: border-box !important;
         background: #fff !important;
@@ -62,89 +62,79 @@ $transactionCode = trim((string)($transfer['transaction_code'] ?? '')); if ($tra
 
     #surat-jalan { font-size: 9pt !important; line-height: 1.3 !important; }
 
-    /* Header Surat Jalan: compact, balanced, never vertically stretched */
+    /* Compact, always-horizontal print header */
     #surat-jalan > div:first-child {
-        display: grid !important;
-        grid-template-columns: minmax(0,1fr) auto !important;
-        align-items: center !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
         gap: 8mm !important;
         padding-bottom: 4mm !important;
-        flex-wrap: nowrap !important;
+        border-bottom: 2px solid #111827 !important;
+    }
+
+    #surat-jalan > div:first-child > div:first-child {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
     }
 
     #surat-jalan > div:first-child > div:first-child > div {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
         gap: 3mm !important;
+    }
+
+    #surat-jalan > div:first-child > div:last-child {
+        flex: 0 0 auto !important;
+        margin-left: auto !important;
+        text-align: right !important;
+        padding-top: 1mm !important;
     }
 
     #surat-jalan > div:first-child img {
         width: auto !important;
-        height: 14mm !important;
+        height: 12mm !important;
         max-width: 32mm !important;
-        max-height: 14mm !important;
+        max-height: 12mm !important;
         object-fit: contain !important;
         flex: 0 0 auto !important;
     }
 
     #surat-jalan > div:first-child .text-xl {
-        font-size: 14pt !important;
+        font-size: 13pt !important;
         line-height: 1.1 !important;
     }
 
     #surat-jalan > div:first-child .text-2xl {
         font-size: 18pt !important;
-        line-height: 1 !important;
-        white-space: nowrap !important;
+        line-height: 1.05 !important;
     }
 
-    /* Meta informasi: 2x2, bukan ditumpuk vertikal */
-    #surat-jalan > div:nth-of-type(2) {
+    #surat-jalan > div:nth-child(2) {
         display: grid !important;
-        grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important;
-        column-gap: 14mm !important;
-        row-gap: 3.5mm !important;
-        padding: 4mm 0 5mm !important;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+        column-gap: 12mm !important;
+        row-gap: 3mm !important;
+        padding: 4mm 0 !important;
     }
 
-    #surat-jalan > div:nth-of-type(2) > div {
-        min-width: 0 !important;
+    #surat-jalan h1,
+    #surat-jalan h2,
+    #surat-jalan h3 {
+        break-after: avoid !important;
+        page-break-after: avoid !important;
     }
 
-    /* Table: more balanced proportions and compact rows */
     #surat-jalan table {
         width: 100% !important;
         max-width: 100% !important;
         border-collapse: collapse !important;
         table-layout: fixed !important;
-        font-size: 8.5pt !important;
     }
 
     #surat-jalan thead { display: table-header-group !important; }
     #surat-jalan tfoot { display: table-footer-group !important; }
-
-    #surat-jalan thead th {
-        color: #fff !important;
-        background: #111827 !important;
-        font-weight: 700 !important;
-        padding: 2.2mm 2.5mm !important;
-    }
-
-    #surat-jalan tbody td {
-        padding: 2.2mm 2.5mm !important;
-        line-height: 1.25 !important;
-    }
-
-    #surat-jalan thead th:nth-child(1),
-    #surat-jalan tbody td:nth-child(1) { width: 6% !important; }
-    #surat-jalan thead th:nth-child(2),
-    #surat-jalan tbody td:nth-child(2) { width: 18% !important; }
-    #surat-jalan thead th:nth-child(3),
-    #surat-jalan tbody td:nth-child(3) { width: 15% !important; }
-    #surat-jalan thead th:nth-child(4),
-    #surat-jalan tbody td:nth-child(4) { width: 8% !important; }
-    #surat-jalan thead th:nth-child(5),
-    #surat-jalan tbody td:nth-child(5) { width: 15% !important; }
-    #surat-jalan thead th:nth-child(6),
-    #surat-jalan tbody td:nth-child(6) { width: 38% !important; }
 
     #surat-jalan tr {
         break-inside: avoid !important;
@@ -161,34 +151,15 @@ $transactionCode = trim((string)($transfer['transaction_code'] ?? '')); if ($tra
         vertical-align: top !important;
     }
 
-    #surat-jalan .serial-list,
-    #surat-jalan td:last-child {
+    #surat-jalan .serial-list {
         white-space: normal !important;
         overflow-wrap: anywhere !important;
         word-break: break-word !important;
     }
 
-    /* Note + description: stay compact and balanced */
-    #surat-jalan > div:nth-of-type(4) {
-        display: grid !important;
-        grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important;
-        gap: 5mm !important;
-        margin-top: 5mm !important;
-    }
-
-    #surat-jalan > div:nth-of-type(4) > div {
-        min-width: 0 !important;
-    }
-
-    /* Signatures: preserve block and reduce excessive vertical whitespace */
-    #surat-jalan > div:nth-of-type(5) {
-        margin-top: 10mm !important;
-        break-inside: avoid !important;
-        page-break-inside: avoid !important;
-    }
-
-    #surat-jalan > div:nth-of-type(5) .mt-20 {
-        margin-top: 12mm !important;
+    #surat-jalan img {
+        max-width: 100% !important;
+        height: auto !important;
     }
 
     #surat-jalan .signature-section,
@@ -200,12 +171,12 @@ $transactionCode = trim((string)($transfer['transaction_code'] ?? '')); if ($tra
 
     #surat-jalan .signature-box { min-height: 28mm !important; }
 
-    #surat-jalan img {
-        width: auto !important;
-        height: auto !important;
-        max-width: 32mm !important;
-        max-height: 14mm !important;
-        object-fit: contain !important;
+    #surat-jalan > div:nth-child(5) {
+        margin-top: 7mm !important;
+    }
+
+    #surat-jalan > div:nth-child(6) {
+        margin-top: 7mm !important;
     }
 
     #surat-jalan * { max-width: 100% !important; }
@@ -264,7 +235,7 @@ $transactionCode = trim((string)($transfer['transaction_code'] ?? '')); if ($tra
                         <?php if($remaining>0): ?>
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div class="min-w-[110px]"><label class="mb-1 block text-xs font-semibold text-gray-500">Jumlah diterima</label><input type="number" name="receive_qtys[<?=$item['id']?>]" min="0" max="<?=$remaining?>" value="<?=$remaining?>" class="receive-qty w-28 rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-center text-sm font-semibold dark:border-gray-600 dark:bg-gray-700 dark:text-white" data-item-id="<?=$item['id']?>"></div>
-                                <?php if($item['is_serialized']): ?><div class="min-w-0 flex-1"><label class="mb-1 block text-xs font-semibold text-gray-500">Nomor Seri yang Diterima</label><div class="receive-serial-summary receive-serial-summary-<?=$item['id']?> rounded-xl border border-dashed border-gray-300 bg-white px-3 py-2.5 text-xs dark:border-gray-600 dark:bg-gray-800">Belum dipilih</div><textarea name="receive_sns[<?=$item['id']?>]" id="receive-sn-<?=$item['id']?>" class="hidden" aria-hidden="true"></textarea><div class="mt-2 flex flex-wrap gap-2"><button type="button" onclick="openReceiveSerialModal(<?=$item['id']?>)" class="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300"><i class="fas fa-list-check"></i>Pilih Nomor Seri</button><button type="button" onclick="autoReceiveSerials(<?=$item['id']?>)" class="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-900/50 dark:bg-indigo-950/20 dark:text-indigo-300"><i class="fas fa-wand-magic-sparkles"></i>Pilih Otomatis</button></div><div class="mt-1 text-[11px] text-gray-500">Tersedia untuk dicocokkan: <?=count($pendingSns)?> nomor seri dalam transfer.</div></div>
+                                <?php if($item['is_serialized']): ?><div class="min-w-0 flex-1"><label class="mb-1 block text-xs font-semibold text-gray-500">Nomor Seri yang Diterima</label><div class="receive-serial-summary receive-serial-summary-<?=$item['id']?> rounded-xl border border-dashed border-gray-300 bg-white px-3 py-2.5 text-xs dark:border-gray-600 dark:bg-gray-800">Belum dipilih</div><textarea name="receive_sns[<?=$item['id']?>]" id="receive-sn-<?=$item['id']?>" class="hidden" aria-hidden="true"></textarea><div class="mt-2 flex flex-wrap gap-2"><button type="button" onclick="openReceiveSerialModal(<?=$item['id']?>)" class="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300"><i class="fas fa-list-check"></i>Pilih Nomor Seri</button><button type="button" onclick="autoReceiveSerials(<?=$item['id']?>)" class="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-300"><i class="fas fa-wand-magic-sparkles"></i>Pilih Otomatis</button></div><div class="mt-1 text-[11px] text-gray-500">Tersedia untuk dicocokkan: <?=count($pendingSns)?> nomor seri dalam transfer.</div></div>
                                 <?php else: ?><div class="flex-1 rounded-xl bg-white px-3 py-2.5 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">Barang ini tidak memakai nomor seri. Cukup tentukan jumlah yang benar-benar tiba.</div><?php endif; ?>
                             </div>
                         <?php else: ?><span class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700 dark:bg-green-950/30 dark:text-green-300"><i class="fas fa-check"></i>Sudah lengkap</span><?php endif; ?>
