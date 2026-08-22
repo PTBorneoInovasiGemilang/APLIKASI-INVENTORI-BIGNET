@@ -1,5 +1,5 @@
 -- Transfer shipping/receiving data + immutable Surat Jalan versions.
--- Safe to run on existing databases; columns are added only when absent.
+-- FK types follow existing schema: transfers.id and users.id are INT.
 
 SET @sql = IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'transfers' AND COLUMN_NAME = 'driver_name') = 0,
     'ALTER TABLE transfers ADD COLUMN driver_name VARCHAR(150) NULL AFTER sent_by',
@@ -25,10 +25,14 @@ SET @sql = IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEM
     'ALTER TABLE transfers ADD COLUMN receiver_phone VARCHAR(50) NULL AFTER receiver_role',
     'SELECT 1'); PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+-- The previous version used BIGINT/UNSIGNED for FK columns, which does not match
+-- the existing INT primary keys on transfers/users and causes MySQL error #1005.
+DROP TABLE IF EXISTS transfer_surat_jalan_versions;
+
 CREATE TABLE IF NOT EXISTS transfer_surat_jalan_versions (
-    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id INT NOT NULL AUTO_INCREMENT,
     transfer_id INT NOT NULL,
-    version_no INT UNSIGNED NOT NULL,
+    version_no INT NOT NULL,
     document_no VARCHAR(80) NOT NULL,
     document_type VARCHAR(30) NOT NULL DEFAULT 'TRANSFER',
     event_label VARCHAR(100) NOT NULL,
