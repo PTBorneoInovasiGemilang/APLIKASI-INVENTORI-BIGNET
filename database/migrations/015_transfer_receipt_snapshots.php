@@ -19,8 +19,8 @@ class TransferReceiptSnapshots {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
         // The receive workflow updates transfer_items before inserting transfer_receipts.
-        // This BEFORE trigger therefore enriches the existing history notes with the
-        // exact delta received in this event, without changing the controller contract.
+        // This BEFORE trigger enriches the existing history notes with the exact delta
+        // received in this event, while keeping the controller contract unchanged.
         $pdo->exec("DROP TRIGGER IF EXISTS trg_transfer_receipt_history_note");
         $pdo->exec("CREATE TRIGGER trg_transfer_receipt_history_note
             BEFORE INSERT ON transfer_receipts
@@ -47,13 +47,12 @@ class TransferReceiptSnapshots {
                 LEFT JOIN (
                     SELECT s.transfer_item_id, s.cumulative_quantity
                     FROM transfer_receipt_item_snapshots s
-                    JOIN transfer_receipts pr ON pr.id = s.receipt_id
-                    JOIN (
-                        SELECT transfer_id, MAX(id) AS receipt_id
-                        FROM transfer_receipts
-                        WHERE transfer_id = NEW.transfer_id
-                        GROUP BY transfer_id
-                    ) latest ON latest.receipt_id = pr.id
+                    WHERE s.receipt_id = (
+                        SELECT MAX(s2.receipt_id)
+                        FROM transfer_receipt_item_snapshots s2
+                        JOIN transfer_items ti2 ON ti2.id = s2.transfer_item_id
+                        WHERE ti2.transfer_id = NEW.transfer_id
+                    )
                 ) prev ON prev.transfer_item_id = ti.id
                 WHERE ti.transfer_id = NEW.transfer_id;
 
