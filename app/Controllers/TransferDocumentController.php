@@ -21,11 +21,19 @@ class TransferDocumentController {
         }
 
         $pdo = Database::getInstance()->getConnection();
-        $stmt = $pdo->prepare("SELECT t.*, sw.name AS source_warehouse, dw.name AS destination_warehouse, u.name AS sender_name
+        $stmt = $pdo->prepare("SELECT t.*, sw.name AS source_warehouse, dw.name AS dest_warehouse, u.name AS sender_name,
+                r.receiver_name AS latest_receiver_name, r.receiver_role AS latest_receiver_role,
+                r.receiver_phone AS latest_receiver_phone, r.received_at AS latest_received_at,
+                r.notes AS latest_receiver_notes
             FROM transfers t
             JOIN warehouses sw ON sw.id = t.source_warehouse_id
             JOIN warehouses dw ON dw.id = t.destination_warehouse_id
             JOIN users u ON u.id = t.sent_by
+            LEFT JOIN transfer_receipts r ON r.id = (
+                SELECT tr2.id FROM transfer_receipts tr2
+                WHERE tr2.transfer_id = t.id
+                ORDER BY tr2.id DESC LIMIT 1
+            )
             WHERE t.id = ?");
         $stmt->execute([$id]);
         $transfer = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -33,6 +41,17 @@ class TransferDocumentController {
             $_SESSION['error'] = 'Transfer tidak ditemukan.';
             header('Location: ' . url('/transfers'));
             exit;
+        }
+
+        // Receipt identity belongs to transfer_receipts. Prefer the latest receipt
+        // over legacy nullable fields on transfers so a receipt version is frozen
+        // with the actual receiver/time of the event.
+        if ($transfer['latest_receiver_name'] !== null) {
+            $transfer['receiver_name'] = $transfer['latest_receiver_name'];
+            $transfer['receiver_role'] = $transfer['latest_receiver_role'];
+            $transfer['receiver_phone'] = $transfer['latest_receiver_phone'];
+            $transfer['received_at'] = $transfer['latest_received_at'];
+            $transfer['receiver_notes'] = $transfer['latest_receiver_notes'];
         }
 
         $this->ensureSnapshot($pdo, $transfer, $id);
@@ -97,6 +116,7 @@ class TransferDocumentController {
             'receiver_name'=>$transfer['receiver_name'] ?? null,
             'receiver_role'=>$transfer['receiver_role'] ?? null,
             'receiver_phone'=>$transfer['receiver_phone'] ?? null,
+            'received_at'=>$transfer['received_at'] ?? null,
             'items'=>$currentItems,
         ];
         $fingerprint = hash('sha256', json_encode($state, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
@@ -114,6 +134,7 @@ class TransferDocumentController {
                 'receiver_name'=>$last['receiver_name'],
                 'receiver_role'=>$last['receiver_role'],
                 'receiver_phone'=>$last['receiver_phone'],
+                'received_at'=>$last['received_at'] ?? null,
                 'items'=>is_array($lastItems)?$lastItems:[],
             ];
             $lastFingerprint = hash('sha256', json_encode($lastState, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
