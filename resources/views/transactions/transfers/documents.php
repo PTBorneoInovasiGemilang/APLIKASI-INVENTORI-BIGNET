@@ -7,6 +7,17 @@ $items = $version ? json_decode($version['items_json'] ?? '[]', true) : [];
 $items = is_array($items) ? $items : [];
 ?>
 <style>
+/* Screen: keep the company logo compact. The source image may be large. */
+#surat-jalan-version img.logo {
+    display: block;
+    width: 72px;
+    height: 48px;
+    max-width: 72px;
+    max-height: 48px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
 @media print {
     @page { size: auto; margin: 5mm; }
     body { margin:0!important; padding:0!important; background:#fff!important; }
