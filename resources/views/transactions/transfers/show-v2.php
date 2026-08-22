@@ -12,29 +12,49 @@ $totalSent=0;$totalReceived=0;foreach($items as $it){$totalSent+=(int)$it['quant
 $code=trim((string)($transfer['transaction_code']??''));if($code==='')$code='TRF-'.str_pad((string)$transfer['id'],6,'0',STR_PAD_LEFT);$sj='SJ-'.$code;
 ?>
 <style>
-/* Transfer detail dark-mode contrast. Keep the printable Surat Jalan white. */
-.dark body:has(#surat-jalan) .no-print .bg-white{background:#111827!important;color:#e5e7eb!important;border-color:#374151!important}
+/* Transfer detail: explicit dark-mode surfaces/typography. Printable Surat Jalan stays white. */
+.dark body:has(#surat-jalan) .no-print.bg-white,
+.dark body:has(#surat-jalan) .no-print .bg-white{background:#111827!important;color:#f3f4f6!important;border-color:#374151!important}
+.dark body:has(#surat-jalan) .no-print.bg-gray-50,
 .dark body:has(#surat-jalan) .no-print .bg-gray-50{background:#1f2937!important;color:#e5e7eb!important;border-color:#374151!important}
-.dark body:has(#surat-jalan) .no-print .bg-gray-100{background:#374151!important;color:#e5e7eb!important}
+.dark body:has(#surat-jalan) .no-print.bg-gray-100,
+.dark body:has(#surat-jalan) .no-print .bg-gray-100{background:#374151!important;color:#f3f4f6!important}
+.dark body:has(#surat-jalan) .no-print.bg-blue-50,
+.dark body:has(#surat-jalan) .no-print .bg-blue-50{background:#172554!important;color:#dbeafe!important}
+.dark body:has(#surat-jalan) .no-print h1,
+.dark body:has(#surat-jalan) .no-print h2,
+.dark body:has(#surat-jalan) .no-print h3,
+.dark body:has(#surat-jalan) .no-print label,
+.dark body:has(#surat-jalan) .no-print .font-semibold,
+.dark body:has(#surat-jalan) .no-print .font-bold{color:#f9fafb!important}
 .dark body:has(#surat-jalan) .no-print .text-gray-900,
 .dark body:has(#surat-jalan) .no-print .text-gray-800,
 .dark body:has(#surat-jalan) .no-print .text-gray-700{color:#f3f4f6!important}
 .dark body:has(#surat-jalan) .no-print .text-gray-600{color:#d1d5db!important}
-.dark body:has(#surat-jalan) .no-print .text-gray-500,
+.dark body:has(#surat-jalan) .no-print .text-gray-500{color:#9ca3af!important}
 .dark body:has(#surat-jalan) .no-print .text-gray-400{color:#9ca3af!important}
+.dark body:has(#surat-jalan) .no-print .text-blue-600{color:#60a5fa!important}
+.dark body:has(#surat-jalan) .no-print .text-green-600{color:#4ade80!important}
+.dark body:has(#surat-jalan) .no-print .text-orange-600{color:#fb923c!important}
+.dark body:has(#surat-jalan) .no-print .text-blue-700{color:#93c5fd!important}
+.dark body:has(#surat-jalan) .no-print .border,
 .dark body:has(#surat-jalan) .no-print .border-gray-200,
-.dark body:has(#surat-jalan) .no-print .border-gray-300{border-color:#374151!important}
+.dark body:has(#surat-jalan) .no-print .border-gray-300,
+.dark body:has(#surat-jalan) .no-print .border-blue-200{border-color:#374151!important}
+.dark body:has(#surat-jalan) .no-print .bg-gray-200{background:#4b5563!important}
 .dark body:has(#surat-jalan) .no-print input,
 .dark body:has(#surat-jalan) .no-print textarea,
-.dark body:has(#surat-jalan) .no-print select{background:#111827!important;color:#f3f4f6!important;border-color:#4b5563!important}
+.dark body:has(#surat-jalan) .no-print select{background:#0f172a!important;color:#f9fafb!important;border-color:#4b5563!important}
 .dark body:has(#surat-jalan) .no-print input::placeholder,
 .dark body:has(#surat-jalan) .no-print textarea::placeholder{color:#6b7280!important}
-.dark body:has(#surat-jalan) #receiveModal{background:rgba(0,0,0,.7)!important}
+.dark body:has(#surat-jalan) .no-print .shadow-sm{box-shadow:0 8px 24px rgba(0,0,0,.28)!important}
+.dark body:has(#surat-jalan) #receiveModal{background:rgba(0,0,0,.72)!important}
 .dark body:has(#surat-jalan) #receiveModal>div{background:#111827!important;color:#f3f4f6!important;border:1px solid #374151}
 .dark body:has(#surat-jalan) #receiveModal .bg-gray-50{background:#1f2937!important;border-color:#374151!important}
 .dark body:has(#surat-jalan) #receiveModal .text-gray-500{color:#9ca3af!important}
 .dark body:has(#surat-jalan) #receiveModal input{background:#0f172a!important;color:#f3f4f6!important;border-color:#4b5563!important}
-.dark body:has(#surat-jalan) .no-print .shadow-sm{box-shadow:0 8px 24px rgba(0,0,0,.28)!important}
+.dark body:has(#surat-jalan) .serial-summary-1,
+.dark body:has(#surat-jalan) [class^="serial-summary-"]{background:#111827!important;color:#d1d5db!important;border-color:#4b5563!important}
 
 @media print{
 @page{size:auto;margin:5mm}html,body{margin:0!important;padding:0!important;background:#fff!important;overflow:visible!important}body>*{visibility:hidden!important}#surat-jalan,#surat-jalan *{visibility:visible!important}#surat-jalan{position:static!important;width:100%!important;max-width:100%!important;margin:0!important;padding:5mm!important;background:#fff!important;box-shadow:none!important;border:0!important}#surat-jalan .print-only-hide{display:none!important}#surat-jalan table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important}#surat-jalan thead{display:table-header-group!important}#surat-jalan tr{break-inside:avoid!important;page-break-inside:avoid!important}#surat-jalan th,#surat-jalan td{white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;vertical-align:top!important}#surat-jalan img.logo{width:30mm!important;height:12mm!important;max-width:30mm!important;max-height:12mm!important;object-fit:contain!important}.signature-box{break-inside:avoid!important;page-break-inside:avoid!important}}
