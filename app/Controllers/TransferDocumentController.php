@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Helpers\AuthHelper;
 use App\Core\Database;
-use Exception;
 use PDO;
 
 class TransferDocumentController {
@@ -52,9 +51,7 @@ class TransferDocumentController {
             $selectedStmt = $pdo->prepare('SELECT * FROM transfer_surat_jalan_versions WHERE transfer_id = ? AND version_no = ? LIMIT 1');
             $selectedStmt->execute([$id, $versionNo]);
             $selectedVersion = $selectedStmt->fetch(PDO::FETCH_ASSOC);
-            if (!$selectedVersion) {
-                $selectedVersion = $versions[0];
-            }
+            if (!$selectedVersion) $selectedVersion = $versions[0];
         } else {
             $selectedVersion = $versions[0];
         }
@@ -63,11 +60,10 @@ class TransferDocumentController {
     }
 
     private function ensureSnapshot(PDO $pdo, array $transfer, int $transferId): void {
-        $itemsStmt = $pdo->prepare("SELECT ti.id, ti.master_item_id, ti.quantity_sent, ti.quantity_received, m.kode_barang, m.nama, m.is_serialized
+        $itemsStmt = $pdo->prepare("SELECT ti.id, ti.quantity_sent, ti.quantity_received, m.kode_barang, m.nama, m.is_serialized
             FROM transfer_items ti
             JOIN master_items m ON m.id = ti.master_item_id
-            WHERE ti.transfer_id = ?
-            ORDER BY ti.id ASC");
+            WHERE ti.transfer_id = ? ORDER BY ti.id ASC");
         $itemsStmt->execute([$transferId]);
         $items = $itemsStmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -79,34 +75,29 @@ class TransferDocumentController {
         $serialStmt->execute([$transferId]);
         $serialMap = [];
         foreach ($serialStmt->fetchAll(PDO::FETCH_ASSOC) as $sn) {
-            $serialMap[(int)$sn['transfer_item_id']][] = [
-                'serial_number' => $sn['serial_number'],
-                'status' => $sn['status'],
-            ];
+            $serialMap[(int)$sn['transfer_item_id']][] = ['serial_number'=>$sn['serial_number'],'status'=>$sn['status']];
         }
 
         $currentItems = [];
         foreach ($items as $item) {
             $currentItems[] = [
-                'kode_barang' => $item['kode_barang'],
-                'nama' => $item['nama'],
-                'is_serialized' => (int)$item['is_serialized'],
-                'quantity_sent' => (int)$item['quantity_sent'],
-                'quantity_received' => (int)$item['quantity_received'],
-                'serial_numbers' => $serialMap[(int)$item['id']] ?? [],
+                'kode_barang'=>$item['kode_barang'],
+                'nama'=>$item['nama'],
+                'is_serialized'=>(int)$item['is_serialized'],
+                'quantity_sent'=>(int)$item['quantity_sent'],
+                'quantity_received'=>(int)$item['quantity_received'],
+                'serial_numbers'=>$serialMap[(int)$item['id']] ?? [],
             ];
         }
 
         $state = [
-            'status' => $transfer['status'],
-            'driver_name' => $transfer['driver_name'] ?? null,
-            'driver_phone' => $transfer['driver_phone'] ?? null,
-            'vehicle_number' => $transfer['vehicle_number'] ?? null,
-            'receiver_name' => $transfer['receiver_name'] ?? null,
-            'receiver_role' => $transfer['receiver_role'] ?? null,
-            'receiver_phone' => $transfer['receiver_phone'] ?? null,
-            'quantity_received' => array_sum(array_column($currentItems, 'quantity_received')),
-            'items' => $currentItems,
+            'driver_name'=>$transfer['driver_name'] ?? null,
+            'driver_phone'=>$transfer['driver_phone'] ?? null,
+            'vehicle_number'=>$transfer['vehicle_number'] ?? null,
+            'receiver_name'=>$transfer['receiver_name'] ?? null,
+            'receiver_role'=>$transfer['receiver_role'] ?? null,
+            'receiver_phone'=>$transfer['receiver_phone'] ?? null,
+            'items'=>$currentItems,
         ];
         $fingerprint = hash('sha256', json_encode($state, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
@@ -117,38 +108,30 @@ class TransferDocumentController {
         if ($last) {
             $lastItems = json_decode($last['items_json'] ?? '[]', true);
             $lastState = [
-                'status' => $last['event_label'],
-                'driver_name' => $last['driver_name'],
-                'driver_phone' => $last['driver_phone'],
-                'vehicle_number' => $last['vehicle_number'],
-                'receiver_name' => $last['receiver_name'],
-                'receiver_role' => $last['receiver_role'],
-                'receiver_phone' => $last['receiver_phone'],
-                'quantity_received' => array_sum(array_map(fn($i) => (int)($i['quantity_received'] ?? 0), is_array($lastItems) ? $lastItems : [])),
-                'items' => is_array($lastItems) ? $lastItems : [],
+                'driver_name'=>$last['driver_name'],
+                'driver_phone'=>$last['driver_phone'],
+                'vehicle_number'=>$last['vehicle_number'],
+                'receiver_name'=>$last['receiver_name'],
+                'receiver_role'=>$last['receiver_role'],
+                'receiver_phone'=>$last['receiver_phone'],
+                'items'=>is_array($lastItems)?$lastItems:[],
             ];
             $lastFingerprint = hash('sha256', json_encode($lastState, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-            if ($lastFingerprint === $fingerprint) {
-                return;
-            }
+            if ($lastFingerprint === $fingerprint) return;
         }
 
         $nextVersion = $last ? ((int)$last['version_no'] + 1) : 1;
         if ($nextVersion === 1) {
             $eventLabel = 'Pengiriman Awal';
-            $receiverName = null;
-            $receiverRole = null;
-            $receiverPhone = null;
+            $receiverName = null; $receiverRole = null; $receiverPhone = null;
             $snapshotItems = $currentItems;
             foreach ($snapshotItems as &$snapshotItem) {
                 $snapshotItem['quantity_received'] = 0;
-                foreach ($snapshotItem['serial_numbers'] as &$serial) {
-                    $serial['status'] = 'IN_TRANSIT';
-                }
+                foreach ($snapshotItem['serial_numbers'] as &$serial) $serial['status'] = 'IN_TRANSIT';
             }
             unset($snapshotItem, $serial);
         } else {
-            $receivedEvents = max(1, $nextVersion - 1);
+            $receivedEvents = $nextVersion - 1;
             $eventLabel = 'Pembaruan Penerimaan #' . $receivedEvents;
             $receiverName = $transfer['receiver_name'] ?? null;
             $receiverRole = $transfer['receiver_role'] ?? null;
@@ -164,26 +147,13 @@ class TransferDocumentController {
              sender_name, driver_name, driver_phone, vehicle_number, receiver_name, receiver_role, receiver_phone,
              source_warehouse, destination_warehouse, notes, items_json)
             VALUES (?, ?, ?, 'TRANSFER', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
         $insert->execute([
-            $transferId,
-            $nextVersion,
-            $documentNo,
-            $eventLabel,
-            $createdBy > 0 ? $createdBy : null,
-            $transfer['sent_at'] ?? null,
-            $nextVersion > 1 ? ($transfer['received_at'] ?? date('Y-m-d H:i:s')) : null,
-            $transfer['sender_name'] ?? null,
-            $transfer['driver_name'] ?? null,
-            $transfer['driver_phone'] ?? null,
-            $transfer['vehicle_number'] ?? null,
-            $receiverName,
-            $receiverRole,
-            $receiverPhone,
-            $transfer['source_warehouse'] ?? null,
-            $transfer['destination_warehouse'] ?? null,
-            $transfer['notes'] ?? null,
-            json_encode($snapshotItems, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            $transferId,$nextVersion,$documentNo,$eventLabel,$createdBy>0?$createdBy:null,
+            $transfer['sent_at']??null,$nextVersion>1?($transfer['received_at']??date('Y-m-d H:i:s')):null,
+            $transfer['sender_name']??null,$transfer['driver_name']??null,$transfer['driver_phone']??null,
+            $transfer['vehicle_number']??null,$receiverName,$receiverRole,$receiverPhone,
+            $transfer['source_warehouse']??null,$transfer['destination_warehouse']??null,
+            $transfer['notes']??null,json_encode($snapshotItems,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)
         ]);
     }
 }
