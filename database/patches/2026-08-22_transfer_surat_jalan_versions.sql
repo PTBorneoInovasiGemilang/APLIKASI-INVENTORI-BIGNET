@@ -1,4 +1,30 @@
--- Surat Jalan versions / immutable snapshots for transfer documents
+-- Transfer shipping/receiving data + immutable Surat Jalan versions.
+-- Safe to run on existing databases; columns are added only when absent.
+
+SET @sql = IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'transfers' AND COLUMN_NAME = 'driver_name') = 0,
+    'ALTER TABLE transfers ADD COLUMN driver_name VARCHAR(150) NULL AFTER sent_by',
+    'SELECT 1'); PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'transfers' AND COLUMN_NAME = 'driver_phone') = 0,
+    'ALTER TABLE transfers ADD COLUMN driver_phone VARCHAR(50) NULL AFTER driver_name',
+    'SELECT 1'); PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'transfers' AND COLUMN_NAME = 'vehicle_number') = 0,
+    'ALTER TABLE transfers ADD COLUMN vehicle_number VARCHAR(80) NULL AFTER driver_phone',
+    'SELECT 1'); PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'transfers' AND COLUMN_NAME = 'receiver_name') = 0,
+    'ALTER TABLE transfers ADD COLUMN receiver_name VARCHAR(150) NULL AFTER received_by',
+    'SELECT 1'); PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'transfers' AND COLUMN_NAME = 'receiver_role') = 0,
+    'ALTER TABLE transfers ADD COLUMN receiver_role VARCHAR(150) NULL AFTER receiver_name',
+    'SELECT 1'); PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'transfers' AND COLUMN_NAME = 'receiver_phone') = 0,
+    'ALTER TABLE transfers ADD COLUMN receiver_phone VARCHAR(50) NULL AFTER receiver_role',
+    'SELECT 1'); PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 CREATE TABLE IF NOT EXISTS transfer_surat_jalan_versions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     transfer_id BIGINT UNSIGNED NOT NULL,
