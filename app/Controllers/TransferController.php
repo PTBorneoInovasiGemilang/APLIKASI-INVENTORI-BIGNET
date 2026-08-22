@@ -45,6 +45,64 @@ class TransferController
         $itemsStmt=$pdo->prepare("SELECT ti.*,m.kode_barang,m.nama,m.is_serialized FROM transfer_items ti JOIN master_items m ON ti.master_item_id=m.id WHERE ti.transfer_id=? ORDER BY ti.id ASC"); $itemsStmt->execute([$id]); $items=$itemsStmt->fetchAll();
         $attachmentStmt=$pdo->prepare("SELECT * FROM attachments WHERE reference_id=? AND reference_type IN ('transfer_dispatch','transfer_receive') ORDER BY id ASC"); $attachmentStmt->execute([$id]); $attachments=$attachmentStmt->fetchAll();
         $receiptStmt=$pdo->prepare("SELECT tr.*,u.name AS processed_by_name FROM transfer_receipts tr LEFT JOIN users u ON tr.processed_by=u.id WHERE tr.transfer_id=? ORDER BY tr.id DESC"); $receiptStmt->execute([$id]); $receipts=$receiptStmt->fetchAll();
+
+        // Enrich receipt history from immutable receipt snapshots when available.
+        // The UI already renders receipt.notes, so we append an event-level summary
+        // here without changing historical data in the database.
+        $snapshotStmt=$pdo->prepare("SELECT s.receipt_id,s.transfer_item_id,s.master_item_id,s.cumulative_quantity,s.serial_numbers_json,m.nama,m.kode_barang,m.is_serialized FROM transfer_receipt_item_snapshots s JOIN master_items m ON m.id=s.master_item_id JOIN transfer_items ti ON ti.id=s.transfer_item_id WHERE ti.transfer_id=? ORDER BY s.receipt_id ASC,s.transfer_item_id ASC");
+        $snapshotStmt->execute([$id]);
+        $snapshotRows=$snapshotStmt->fetchAll(PDO::FETCH_ASSOC);
+        $byReceipt=[]; $previousByItem=[];
+        foreach($snapshotRows as $sr){
+            $receiptId=(int)$sr['receipt_id']; $itemId=(int)$sr['transfer_item_id'];
+            $currentQty=(int)$sr['cumulative_quantity'];
+            $prevQty=(int)($previousByItem[$itemId]['qty'] ?? 0);
+            $deltaQty=max(0,$currentQty-$prevQty);
+            $currentSn=[];
+            if(!empty($sr['serial_numbers_json'])){
+                $decoded=json_decode($sr['serial_numbers_json'],true);
+                if(is_array($decoded)) $currentSn=array_values(array_filter(array_map('strval',$decoded)));
+            }
+            $prevSn=$previousByItem[$itemId]['sns'] ?? [];
+            $deltaSn=array_values(array_diff($currentSn,$prevSn));
+            if($deltaQty>0 || !empty($deltaSn)){
+                $byReceipt[$receiptId][]=[
+                    'nama'=>$sr['nama'],
+                    'kode_barang'=>$sr['kode_barang'],
+                    'qty'=>$deltaQty,
+                    'is_serialized'=>(int)$sr['is_serialized']===1,
+                    'serials'=>$deltaSn,
+                ];
+            }
+            $previousByItem[$itemId]=['qty'=>$currentQty,'sns'=>$currentSn];
+        }
+
+        foreach($receipts as &$receipt){
+            $receiptId=(int)$receipt['id'];
+            $historyItems=$byReceipt[$receiptId] ?? [];
+            if(!empty($historyItems)){
+                $parts=[]; $totalQty=0; $kindCount=0;
+                foreach($historyItems as $hi){
+                    $qty=(int)$hi['qty'];
+                    if($qty<=0 && empty($hi['serials'])) continue;
+                    $kindCount++; $totalQty += $qty;
+                    $part=htmlspecialchars($hi['nama']) . ' — ' . number_format($qty) . ' unit';
+                    if($hi['is_serialized'] && !empty($hi['serials'])){
+                        $part .= ' · SN: ' . implode(', ', array_map('htmlspecialchars',$hi['serials']));
+                    }
+                    $parts[]=$part;
+                }
+                if($parts){
+                    $summary='[Barang diterima] ' . $kindCount . ' jenis · ' . number_format($totalQty) . ' unit — ' . implode('; ', $parts);
+                    $existing=trim((string)($receipt['notes'] ?? ''));
+                    if(stripos($existing,'[Barang diterima]')===false){
+                        $receipt['notes']=$existing!=='' ? $existing."\n".$summary : $summary;
+                    }
+                }
+            }
+        }
+        unset($receipt);
+
         require __DIR__ . '/../../resources/views/transactions/transfers/show-v2.php';
     }
 
