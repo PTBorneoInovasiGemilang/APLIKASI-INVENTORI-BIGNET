@@ -5,6 +5,7 @@ $version = $selectedVersion ?? null;
 $versions = $versions ?? [];
 $items = $version ? json_decode($version['items_json'] ?? '[]', true) : [];
 $items = is_array($items) ? $items : [];
+$isReceiptVersion = $version && (int)$version['version_no'] > 1;
 ?>
 <style>
 #surat-jalan-version { width:100%; max-width:100%; box-sizing:border-box; }
@@ -28,11 +29,14 @@ $items = is_array($items) ? $items : [];
 .sj-meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px 28px; padding:16px 0; }
 .sj-meta-label { font-size:9px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#6b7280; }
 .sj-meta-value { margin-top:3px; font-size:12px; font-weight:700; line-height:1.25; }
-.sj-table { width:100%; border-collapse:collapse; table-layout:fixed; }
-.sj-table th,.sj-table td { overflow-wrap:anywhere; word-break:break-word; vertical-align:top; }
+.sj-receipt-banner { margin:0 0 14px; border:1px solid #bfdbfe; background:#eff6ff; border-radius:12px; padding:9px 12px; font-size:10px; line-height:1.35; color:#1e3a8a; }
+.sj-receipt-banner strong { color:#1d4ed8; }
+.sj-table { display:table!important; width:100%!important; min-width:100%!important; max-width:100%!important; border-collapse:collapse; table-layout:fixed; box-sizing:border-box; }
+.sj-table thead,.sj-table tbody,.sj-table tr { width:100%!important; }
+.sj-table th,.sj-table td { box-sizing:border-box; overflow-wrap:anywhere; word-break:break-word; vertical-align:top; }
 .sj-table th { font-size:10px; }
 .sj-table td { font-size:10px; line-height:1.35; }
-.sj-table .col-no{width:7%;}.sj-table .col-code{width:14%;}.sj-table .col-name{width:22%;}.sj-table .col-qty{width:10%;}.sj-table .col-track{width:17%;}.sj-table .col-sn{width:30%;}
+.sj-table .col-no{width:7%!important;}.sj-table .col-code{width:14%!important;}.sj-table .col-name{width:22%!important;}.sj-table .col-qty{width:10%!important;}.sj-table .col-track{width:17%!important;}.sj-table .col-sn{width:30%!important;}
 .sj-bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
 .sj-signatures { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:26px; text-align:center; }
 .sj-signature-box { break-inside:avoid; page-break-inside:avoid; }
@@ -71,8 +75,12 @@ $items = is_array($items) ? $items : [];
     .sj-meta-grid { gap:2.5mm 10mm!important; padding:3.5mm 0!important; }
     .sj-meta-label { font-size:7pt!important; }
     .sj-meta-value { font-size:9pt!important; }
+    .sj-receipt-banner { margin-bottom:3.5mm!important; padding:2.5mm 3mm!important; font-size:7.5pt!important; }
+    .sj-table { display:table!important; width:100%!important; min-width:100%!important; max-width:100%!important; table-layout:fixed!important; }
+    .sj-table thead,.sj-table tbody,.sj-table tr { width:100%!important; }
     .sj-table th { font-size:7.5pt!important; padding:2.2mm 2mm!important; }
     .sj-table td { font-size:7.5pt!important; padding:2mm!important; line-height:1.25!important; }
+    .sj-table .col-no{width:7%!important;}.sj-table .col-code{width:14%!important;}.sj-table .col-name{width:22%!important;}.sj-table .col-qty{width:10%!important;}.sj-table .col-track{width:17%!important;}.sj-table .col-sn{width:30%!important;}
     .sj-bottom-grid { gap:3mm!important; margin-top:3.5mm!important; }
     .sj-signatures { gap:6mm!important; margin-top:7mm!important; }
     .sj-signature-line { margin-top:14mm!important; padding-top:2mm!important; }
@@ -120,7 +128,11 @@ $items = is_array($items) ? $items : [];
             <div><div class="sj-meta-label">Penerima</div><div class="sj-meta-value"><?=htmlspecialchars($version['receiver_name'] ?? 'Belum menerima')?></div><div class="text-[10px] text-gray-500"><?=htmlspecialchars($version['receiver_role'] ?? '')?><?=($version['receiver_phone']??'')?' · '.htmlspecialchars($version['receiver_phone']):''?></div></div>
         </div>
 
-        <div class="overflow-hidden rounded-xl border border-gray-900"><table class="sj-table"><colgroup><col class="col-no"><col class="col-code"><col class="col-name"><col class="col-qty"><col class="col-track"><col class="col-sn"></colgroup><thead><tr class="bg-gray-900 text-white"><th class="px-2.5 py-2 text-center">No.</th><th class="px-2.5 py-2 text-left">Kode Barang</th><th class="px-2.5 py-2 text-left">Nama Barang</th><th class="px-2.5 py-2 text-center">Jumlah</th><th class="px-2.5 py-2 text-left">Pelacakan</th><th class="px-2.5 py-2 text-left">Nomor Seri</th></tr></thead><tbody><?php $no=1; foreach($items as $item): $sns=$item['serial_numbers']??[]; ?><tr class="border-b border-gray-300"><td class="px-2.5 py-2 text-center font-semibold"><?=$no++?></td><td class="px-2.5 py-2 font-semibold"><?=htmlspecialchars($item['kode_barang']??'-')?></td><td class="px-2.5 py-2 font-semibold"><?=htmlspecialchars($item['nama']??'-')?></td><td class="px-2.5 py-2 text-center font-bold"><?=number_format((int)($item['quantity_sent']??0))?></td><td class="px-2.5 py-2"><?=!empty($item['is_serialized'])?'Pakai Nomor Seri':'Tanpa Nomor Seri'?></td><td class="px-2.5 py-2 text-[9px] leading-4"><?php if($sns): ?><?=implode(', ',array_map(fn($s)=>htmlspecialchars($s['serial_number']??$s),$sns))?><?php else: ?>&mdash;<?php endif; ?></td></tr><?php endforeach; ?></tbody></table></div>
+        <?php if($isReceiptVersion): ?>
+            <div class="sj-receipt-banner"><strong>PENERIMAAN LEMBAR <?= (int)$version['version_no'] - 1 ?>:</strong> <?=htmlspecialchars($version['receiver_name'] ?? 'Belum menerima')?><?php if(!empty($version['received_at'])): ?> · <?=date('d F Y, H:i',strtotime($version['received_at']))?><?php endif; ?>. Dokumen ini merekam kondisi Surat Jalan pada saat penerimaan.</div>
+        <?php endif; ?>
+
+        <div class="overflow-hidden rounded-xl border border-gray-900"><table class="sj-table"><colgroup><col class="col-no"><col class="col-code"><col class="col-name"><col class="col-qty"><col class="col-track"><col class="col-sn"></colgroup><thead><tr class="bg-gray-900 text-white"><th class="px-2.5 py-2 text-center">No.</th><th class="px-2.5 py-2 text-left">Kode Barang</th><th class="px-2.5 py-2 text-left">Nama Barang</th><th class="px-2.5 py-2 text-center"><?=$isReceiptVersion?'Jumlah Diterima':'Jumlah Dikirim'?></th><th class="px-2.5 py-2 text-left">Pelacakan</th><th class="px-2.5 py-2 text-left">Nomor Seri</th></tr></thead><tbody><?php $no=1; foreach($items as $item): $sns=$item['serial_numbers']??[]; $displayQty=$isReceiptVersion ? (int)($item['quantity_received']??0) : (int)($item['quantity_sent']??0); ?><tr class="border-b border-gray-300"><td class="px-2.5 py-2 text-center font-semibold"><?=$no++?></td><td class="px-2.5 py-2 font-semibold"><?=htmlspecialchars($item['kode_barang']??'-')?></td><td class="px-2.5 py-2 font-semibold"><?=htmlspecialchars($item['nama']??'-')?></td><td class="px-2.5 py-2 text-center font-bold"><?=number_format($displayQty)?></td><td class="px-2.5 py-2"><?=!empty($item['is_serialized'])?'Pakai Nomor Seri':'Tanpa Nomor Seri'?></td><td class="px-2.5 py-2 text-[9px] leading-4"><?php if($sns): ?><?=implode(', ',array_map(fn($s)=>htmlspecialchars($s['serial_number']??$s),$sns))?><?php else: ?>&mdash;<?php endif; ?></td></tr><?php endforeach; ?></tbody></table></div>
 
         <div class="sj-bottom-grid"><div><div class="sj-meta-label">Catatan</div><div class="mt-1 min-h-14 rounded-xl border border-gray-300 p-2.5 text-[11px] whitespace-pre-line"><?=htmlspecialchars($version['notes']??'')?></div></div><div class="rounded-xl border border-gray-300 p-3"><div class="sj-meta-label">Keterangan Dokumen</div><div class="mt-1 text-[11px] leading-4">Lembar ini adalah salinan Surat Jalan yang dibekukan pada saat <?=htmlspecialchars(strtolower($version['event_label']))?>. Lembar sebelumnya tetap menjadi arsip dan tidak diperbarui.</div></div></div>
 
@@ -130,4 +142,4 @@ $items = is_array($items) ? $items : [];
     </section>
     <?php endif; ?>
 </div>
-<?php $content=ob_get_clean(); require __DIR__.'/../../layouts/app.php'; ?>
+<?php $content=ob_get_clean(); require __DIR__ . '/../../layouts/app.php'; ?>
