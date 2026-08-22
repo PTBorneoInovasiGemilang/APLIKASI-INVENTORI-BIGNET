@@ -111,5 +111,34 @@ class TransferReceiptSnapshots {
                 GROUP BY transfer_id
                 HAVING COUNT(*) = 1
             ) only_one ON only_one.transfer_id = tr.transfer_id");
+
+        // Existing single-receipt histories can be enriched deterministically as well.
+        $pdo->exec("UPDATE transfer_receipts tr
+            JOIN (
+                SELECT
+                    s.receipt_id,
+                    COUNT(CASE WHEN s.cumulative_quantity > 0 THEN 1 END) AS kind_count,
+                    COALESCE(SUM(s.cumulative_quantity), 0) AS total_qty,
+                    GROUP_CONCAT(
+                        CASE WHEN s.cumulative_quantity > 0
+                            THEN CONCAT(m.nama, ' — ', s.cumulative_quantity, ' unit')
+                            ELSE NULL END
+                        ORDER BY m.nama SEPARATOR '; '
+                    ) AS summary
+                FROM transfer_receipt_item_snapshots s
+                JOIN master_items m ON m.id = s.master_item_id
+                GROUP BY s.receipt_id
+            ) x ON x.receipt_id = tr.id
+            JOIN (
+                SELECT transfer_id
+                FROM transfer_receipts
+                GROUP BY transfer_id
+                HAVING COUNT(*) = 1
+            ) only_one ON only_one.transfer_id = tr.transfer_id
+            SET tr.notes = CASE
+                WHEN tr.notes IS NULL OR tr.notes = '' THEN CONCAT('[Barang diterima] ', x.kind_count, ' jenis · ', x.total_qty, ' unit — ', x.summary)
+                WHEN tr.notes LIKE '%[Barang diterima]%' THEN tr.notes
+                ELSE CONCAT(tr.notes, '\n[Barang diterima] ', x.kind_count, ' jenis · ', x.total_qty, ' unit — ', x.summary)
+            END");
     }
 }
