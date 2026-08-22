@@ -91,10 +91,7 @@ function renderMenu($label, $icon, $path, $currentPath, $sidebarActive, $sidebar
     $cls = menuClass($path, $currentPath, $sidebarActive, $sidebarHover);
     $iCls = iconClass($path, $currentPath, $primaryText, $sidebarIcon);
     $url = url($path);
-    return "<a href=\"{$url}\" class=\"sidebar-link flex items-center px-3 py-2 rounded-lg text-sm {$cls}\">
-                <i class=\"{$icon} w-5 text-center text-sm {$iCls}\"></i>
-                <span class=\"ml-3\">{$label}</span>
-            </a>";
+    return "<a href=\"{$url}\" class=\"sidebar-link flex items-center px-3 py-2 rounded-lg text-sm {$cls}\">\n                <i class=\"{$icon} w-5 text-center text-sm {$iCls}\"></i>\n                <span class=\"ml-3\">{$label}</span>\n            </a>";
 }
 
 function renderHeader($label, $sidebarGroupText) {
@@ -150,9 +147,6 @@ function renderHeader($label, $sidebarGroupText) {
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         .sidebar-scroll::-webkit-scrollbar { width: 4px; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-        /* === GLOBAL TABLE LAYOUT RULE (2026-08-16) ===
-           Sticky No (kiri) & Aksi (kanan) pada tabel lebar; background solid agar
-           sel yang menempel tidak transparan saat scroll horizontal. */
         .table-sticky thead th:first-child,
         .table-sticky tbody td:first-child { position: sticky; left: 0; z-index: 10; background-color: #ffffff; }
         .table-sticky thead th:first-child { background-color: #f9fafb; }
@@ -163,13 +157,8 @@ function renderHeader($label, $sidebarGroupText) {
         .dark .table-sticky thead th:last-child { background-color: rgba(17, 24, 39, 0.5); }
         .dark .table-sticky tbody td:first-child,
         .dark .table-sticky tbody td:last-child { background-color: #1f2937; }
-        /* Baris empty-state (satu sel colspan) tidak boleh menempel */
         .table-sticky tbody tr td:only-child { position: static; left: auto; right: auto; }
 
-        /* === DEDICATED PRINT LAYOUT (2026-08-16) ===
-           Cetak laporan: hanya judul + periode + filter + tabel + footer.
-           Sidebar, header aplikasi, Page Guide, tombol, dan elemen UI lain disembunyikan.
-           Header tabel berulang otomatis di tiap halaman (thead repeat). */
         @media print {
             body { background: #fff !important; }
             #sidebar, #sidebarOverlay, header, footer, #toastContainer, #userDropdownMenu, .no-print { display: none !important; }
@@ -179,9 +168,7 @@ function renderHeader($label, $sidebarGroupText) {
             .table-sticky thead th:first-child, .table-sticky tbody td:first-child,
             .table-sticky thead th:last-child, .table-sticky tbody td:last-child { position: static !important; }
             .print-area { display: block !important; }
-            /* Header laporan cetak: judul, periode, filter, timestamp */
             .print-header { display: block !important; }
-            /* Page number via CSS counter */
             @page { margin: 14mm 12mm; }
             .print-footer { display: block !important; position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 10px; color: #6b7280; }
             .print-footer .page-count::after { content: counter(page); }
@@ -189,20 +176,84 @@ function renderHeader($label, $sidebarGroupText) {
             .dark .bg-gray-800, .dark .bg-gray-900, .dark .bg-gray-950, .dark .bg-white { background: #fff !important; color: #111 !important; }
             .dark .text-gray-100, .dark .text-gray-200, .dark .text-gray-300, .dark .text-gray-400 { color: #111 !important; }
             .dark .border-gray-700, .dark .border-gray-800 { border-color: #d1d5db !important; }
+
+            /* === SURAT JALAN PRINT TABLE FIX (2026-08-23) ===
+               Keep the document table full-width and make the header span all columns.
+               Quantity stays on one line; other columns may wrap only inside their cells. */
+            #surat-jalan { box-sizing: border-box !important; }
+            #surat-jalan .overflow-hidden { overflow: visible !important; }
+            #surat-jalan table {
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+                margin: 0 !important;
+            }
+            #surat-jalan table col.col-no { width: 7% !important; }
+            #surat-jalan table col.col-name { width: 33% !important; }
+            #surat-jalan table col.col-qty { width: 12% !important; }
+            #surat-jalan table col.col-tracking { width: 20% !important; }
+            #surat-jalan table col.col-serial { width: 28% !important; }
+            #surat-jalan table thead { display: table-header-group !important; width: 100% !important; }
+            #surat-jalan table thead tr {
+                display: table-row !important;
+                width: 100% !important;
+                background: #111827 !important;
+            }
+            #surat-jalan table thead th {
+                display: table-cell !important;
+                background: #111827 !important;
+                color: #fff !important;
+                width: auto !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
+                vertical-align: middle !important;
+            }
+            #surat-jalan table tbody { display: table-row-group !important; width: 100% !important; }
+            #surat-jalan table tbody tr { display: table-row !important; width: 100% !important; }
+            #surat-jalan table tbody td { display: table-cell !important; box-sizing: border-box !important; }
+            #surat-jalan table th:nth-child(1),
+            #surat-jalan table td:nth-child(1) {
+                text-align: center !important;
+                white-space: nowrap !important;
+                word-break: normal !important;
+                overflow-wrap: normal !important;
+            }
+            #surat-jalan table th:nth-child(2),
+            #surat-jalan table td:nth-child(2) {
+                white-space: normal !important;
+                overflow-wrap: anywhere !important;
+                word-break: break-word !important;
+            }
+            #surat-jalan table th:nth-child(3),
+            #surat-jalan table td:nth-child(3) {
+                text-align: center !important;
+                white-space: nowrap !important;
+                word-break: normal !important;
+                overflow-wrap: normal !important;
+                min-width: 18mm !important;
+            }
+            #surat-jalan table th:nth-child(4),
+            #surat-jalan table td:nth-child(4) {
+                white-space: normal !important;
+                overflow-wrap: anywhere !important;
+                word-break: break-word !important;
+            }
+            #surat-jalan table th:nth-child(5),
+            #surat-jalan table td:nth-child(5) {
+                white-space: normal !important;
+                overflow-wrap: anywhere !important;
+                word-break: break-word !important;
+            }
         }
         .print-header, .print-footer, .print-area { display: none; }
 
-        /* === GLOBAL FEEDBACK UI (2026-08-17) ===
-           Modal konfirmasi & toast internal BIGNET (lihat public/assets/js/app-feedback.js). */
         body.modal-open { overflow: hidden; }
         .app-modal-backdrop { animation: fadeIn 0.15s ease-out; }
         .app-modal-panel { animation: modalIn 0.18s ease-out; }
         @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        /* === MOBILE CARD TABLE (2026-08-17) — TEKNISI/NOC mobile-first ===
-           Hanya aktif ≤640px: tabel menjadi stack card (label + nilai per baris).
-           Desktop & viewport lebar TIDAK berubah (desktop table tetap normal).
-           Setiap <td> wajib membawa data-label="..." agar label tampil di mobile. */
         @media (max-width: 640px) {
             .mobile-card-table thead { display: none; }
             .mobile-card-table,
@@ -216,14 +267,11 @@ function renderHeader($label, $sidebarGroupText) {
             .mobile-card-table td:last-child { border-bottom: none; }
             .mobile-card-table td::before { content: attr(data-label); font-weight: 600; color: #6b7280; text-align: left; flex-shrink: 0; }
             .dark .mobile-card-table td::before { color: #9ca3af; }
-            /* sticky No/Aksi (table-sticky) TIDAK berlaku di card mode */
             .mobile-card-table td { position: static !important; left: auto !important; right: auto !important; }
             .mobile-card-table td:first-child,
             .mobile-card-table td:last-child { background-color: transparent !important; }
-            /* empty-state satu sel: tampil sebagai blok tengah tanpa label */
             .mobile-card-table tr td:only-child { display: block; text-align: center; }
             .mobile-card-table tr td:only-child::before { content: none; }
-            /* cell aksi: tanpa label, rata kanan */
             .mobile-card-table td[data-label="Aksi"] { justify-content: flex-end; }
             .mobile-card-table td[data-label="Aksi"]::before { display: none; }
             .mobile-card-table td[data-label="No"] { justify-content: flex-start; }
@@ -233,12 +281,9 @@ function renderHeader($label, $sidebarGroupText) {
 </head>
 <body class="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200 fade-in">
 
-    <!-- Mobile Overlay -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
-    <!-- Sidebar -->
     <aside id="sidebar" class="w-64 h-screen <?= $sidebarBg ?> shadow-lg flex flex-col fixed left-0 top-0 overflow-hidden z-30 transition-transform -translate-x-full lg:translate-x-0">
-        <!-- Logo -->
         <a href="<?= url('/dashboard') ?>" class="px-5 py-4 flex items-center border-b <?= $sidebarBorder ?> min-h-[64px] flex-shrink-0 hover:opacity-80 transition-opacity">
             <?php if ($logo): ?>
                 <img src="<?= $logo ?>" alt="Logo" class="h-8 mr-3 object-contain">
@@ -252,25 +297,21 @@ function renderHeader($label, $sidebarGroupText) {
                 <p class="text-xs <?= $sidebarGroupText ?> -mt-0.5">Sistem Gudang</p>
             </div>
         </a>
-        
         <div id="sidebarScrollArea" class="flex-1 overflow-y-auto sidebar-scroll py-3 px-3 space-y-0.5" onscroll="saveSidebarScroll(this)">
             <?php if ($userRole === 'SUPERADMIN'): ?>
                 <?= renderHeader('Utama', $sidebarGroupText) ?>
                 <?= renderMenu('Dasbor', 'fas fa-th-large', '/dashboard', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Pencarian Barang', 'fas fa-search', '/search', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Monitoring Master Data', $sidebarGroupText) ?>
                 <?= renderMenu('Kategori Barang', 'fas fa-tags', '/categories', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Satuan', 'fas fa-ruler', '/units', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Gudang', 'fas fa-warehouse', '/warehouses', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Lokasi', 'fas fa-map-marker-alt', '/locations', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Master Barang', 'fas fa-box', '/items', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Inventaris Monitoring', $sidebarGroupText) ?>
                 <?= renderMenu('Stok Barang', 'fas fa-cubes', '/stocks', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Nomor Seri', 'fas fa-barcode', '/serials', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Cetak Label Massal', 'fas fa-print', '/labels/create', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Transaksi Monitoring', $sidebarGroupText) ?>
                 <?= renderMenu('Pengajuan Barang', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Barang Masuk', 'fas fa-arrow-down', '/incoming', $currentPath, $sidebarActive, $sidebarHover, 'text-green-500', 'text-green-500') ?>
@@ -282,7 +323,6 @@ function renderHeader($label, $sidebarGroupText) {
                 <?= renderMenu('Penyesuaian Stok', 'fas fa-sliders-h', '/adjustments', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Insiden (Damage/Lost)', 'fas fa-exclamation-triangle', '/incidents', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Stock Opname', 'fas fa-clipboard-check', '/opnames', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Laporan', $sidebarGroupText) ?>
                 <?= renderMenu('Laporan Stok & Mutasi', 'fas fa-chart-bar', '/reports/ledger', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Laporan Nomor Seri', 'fas fa-barcode', '/reports/serials', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
@@ -296,32 +336,25 @@ function renderHeader($label, $sidebarGroupText) {
                 <?= renderMenu('Laporan Penyesuaian', 'fas fa-sliders-h', '/reports/adjustments', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Riwayat Timeline', 'fas fa-history', '/timeline', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Log Aktivitas', 'fas fa-shield-alt', '/reports/audit', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
-
-
                 <?= renderHeader('Sistem', $sidebarGroupText) ?>
                 <?= renderMenu('Pengguna', 'fas fa-users-cog', '/users', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Pengaturan Sistem', 'fas fa-cogs', '/settings', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
             <?php endif; ?>
-
             <?php if ($userRole === 'ADMIN'): ?>
                 <?= renderHeader('Utama', $sidebarGroupText) ?>
                 <?= renderMenu('Dasbor', 'fas fa-th-large', '/dashboard', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Pencarian Barang', 'fas fa-search', '/search', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Master Data', $sidebarGroupText) ?>
                 <?= renderMenu('Kategori Barang', 'fas fa-tags', '/categories', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Satuan', 'fas fa-ruler', '/units', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Gudang', 'fas fa-warehouse', '/warehouses', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Lokasi', 'fas fa-map-marker-alt', '/locations', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Master Barang', 'fas fa-box', '/items', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Inventaris', $sidebarGroupText) ?>
                 <?= renderMenu('Stok Barang', 'fas fa-cubes', '/stocks', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Nomor Seri', 'fas fa-barcode', '/serials', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Cetak Label Massal', 'fas fa-print', '/labels/create', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Riwayat Timeline', 'fas fa-history', '/timeline', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Transaksi', $sidebarGroupText) ?>
                 <?= renderMenu('Pengajuan Barang', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Barang Masuk', 'fas fa-arrow-down', '/incoming', $currentPath, $sidebarActive, $sidebarHover, 'text-green-500', 'text-green-500') ?>
@@ -333,7 +366,6 @@ function renderHeader($label, $sidebarGroupText) {
                 <?= renderMenu('Penyesuaian Stok', 'fas fa-sliders-h', '/adjustments', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Insiden (Damage/Lost)', 'fas fa-exclamation-triangle', '/incidents', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Stock Opname', 'fas fa-clipboard-check', '/opnames', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Laporan', $sidebarGroupText) ?>
                 <?= renderMenu('Laporan Stok & Mutasi', 'fas fa-chart-bar', '/reports/ledger', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Laporan Nomor Seri', 'fas fa-barcode', '/reports/serials', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
@@ -346,25 +378,20 @@ function renderHeader($label, $sidebarGroupText) {
                 <?= renderMenu('Laporan Instalasi', 'fas fa-tools', '/reports/installations', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Laporan Penyesuaian', 'fas fa-sliders-h', '/reports/adjustments', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Riwayat Timeline', 'fas fa-history', '/timeline', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Import Data', $sidebarGroupText) ?>
                 <?= renderMenu('Import Data', 'fas fa-file-import', '/import-export?tab=import', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
             <?php endif; ?>
-
             <?php if ($userRole === 'TEKNISI_NOC'): ?>
                 <?= renderHeader('Utama', $sidebarGroupText) ?>
                 <?= renderMenu('Dasbor Saya', 'fas fa-th-large', '/dashboard', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Permintaan', $sidebarGroupText) ?>
                 <?= renderMenu('Pengajuan Barang Saya', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Barang Saya', $sidebarGroupText) ?>
                 <?= renderMenu('Barang Dipinjam', 'fas fa-hand-holding', '/loans', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Pengembalian Barang', 'fas fa-undo', '/returns', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Nomor Seri Saya', 'fas fa-barcode', '/serials', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Barang Terpasang', 'fas fa-tools', '/installations/my_items', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Riwayat Saya', 'fas fa-history', '/timeline', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-
                 <?= renderHeader('Operasional', $sidebarGroupText) ?>
                 <?= renderMenu('Instalasi', 'fas fa-tools', '/installations', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
                 <?= renderMenu('Foto Instalasi', 'fas fa-camera', '/installations/photos', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
@@ -373,115 +400,49 @@ function renderHeader($label, $sidebarGroupText) {
         </div>
     </aside>
 
-    <!-- Main Content -->
     <div class="lg:ml-64 min-h-screen flex flex-col transition-all">
-        
-        <!-- Topbar -->
         <header class="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800 min-h-[64px] flex items-center justify-between px-4 lg:px-6 sticky top-0 z-20">
             <div class="flex items-center flex-1 min-w-0 mr-4">
-                <button class="lg:hidden shrink-0 text-gray-500 dark:text-gray-400 focus:outline-none mr-3 p-1" onclick="toggleSidebar()" aria-label="Toggle menu">
-                    <i class="fas fa-bars text-lg"></i>
-                </button>
-                <div class="min-w-0">
-                    <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h2>
-                </div>
+                <button class="lg:hidden shrink-0 text-gray-500 dark:text-gray-400 focus:outline-none mr-3 p-1" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="fas fa-bars text-lg"></i></button>
+                <div class="min-w-0"><h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h2></div>
             </div>
             <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
-                <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode">
-                    <i class="fas fa-moon text-sm"></i>
-                </button>
+                <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-sm"></i></button>
                 <span class="text-xs text-gray-400 dark:text-gray-500 hidden sm:block font-medium"><?= strftime('%A, %d %B %Y') ?: date('l, d M Y') ?></span>
-
-                <!-- Notifications Bell -->
                 <?php if (isset($_SESSION['user_id'])): ?>
                 <?php $unreadCount = \App\Helpers\NotificationHelper::unreadCount((int)$_SESSION['user_id']); ?>
-                <a href="<?= url('/notifications') ?>" class="relative text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Notifikasi">
-                    <i class="fas fa-bell text-sm"></i>
-                    <?php if ($unreadCount > 0): ?>
-                        <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span>
-                    <?php endif; ?>
-                </a>
+                <a href="<?= url('/notifications') ?>" class="relative text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Notifikasi"><i class="fas fa-bell text-sm"></i><?php if ($unreadCount > 0): ?><span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span><?php endif; ?></a>
                 <?php endif; ?>
-
-                <!-- User Dropdown -->
                 <div class="relative ml-3">
                     <button id="userDropdownBtn" class="flex items-center space-x-2 focus:outline-none">
-                        <?php if ($photo_path): ?>
-                            <img src="<?= url('/file?path='.urlencode($photo_path)) ?>" class="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700" alt="Foto">
-                        <?php else: ?>
-                            <div class="w-8 h-8 rounded-full bg-<?= $primaryColor ?>-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-gray-200 dark:ring-gray-700">
-                                <?= strtoupper(substr($userName, 0, 1)) ?>
-                            </div>
-                        <?php endif; ?>
-                        <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                        <?php if ($photo_path): ?><img src="<?= url('/file?path='.urlencode($photo_path)) ?>" class="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700" alt="Foto"><?php else: ?><div class="w-8 h-8 rounded-full bg-<?= $primaryColor ?>-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-gray-200 dark:ring-gray-700"><?= strtoupper(substr($userName, 0, 1)) ?></div><?php endif; ?><i class="fas fa-chevron-down text-xs text-gray-400"></i>
                     </button>
-                    <!-- Dropdown Menu -->
                     <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                        <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><?= htmlspecialchars($userName) ?></p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate"><?= $roleLabel ?></p>
-                        </div>
-                        <a href="<?= url('/profile') ?>" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <i class="fas fa-user-circle mr-2 w-4 text-center"></i> Profil Saya
-                        </a>
-                        <a href="<?= url('/profile?tab=password') ?>" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <i class="fas fa-key mr-2 w-4 text-center"></i> Ubah Password
-                        </a>
-                        <a href="<?= url('/logout') ?>" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 border-t border-gray-100 dark:border-gray-700 mt-1">
-                            <i class="fas fa-sign-out-alt mr-2 w-4 text-center"></i> Keluar
-                        </a>
+                        <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700"><p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><?= htmlspecialchars($userName) ?></p><p class="text-xs text-gray-500 dark:text-gray-400 truncate"><?= $roleLabel ?></p></div>
+                        <a href="<?= url('/profile') ?>" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fas fa-user-circle mr-2 w-4 text-center"></i> Profil Saya</a>
+                        <a href="<?= url('/profile?tab=password') ?>" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fas fa-key mr-2 w-4 text-center"></i> Ubah Password</a>
+                        <a href="<?= url('/logout') ?>" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 border-t border-gray-100 dark:border-gray-700 mt-1"><i class="fas fa-sign-out-alt mr-2 w-4 text-center"></i> Keluar</a>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- Flash Messages -->
         <div id="toastContainer" class="fixed top-4 right-4 z-[110] space-y-2 pointer-events-none">
-            <?php if (isset($_SESSION['success'])): ?>
-                <div class="toast bg-green-50 border border-green-200 text-green-800 dark:bg-green-900/80 dark:border-green-700 dark:text-green-200 px-4 py-3 rounded-lg shadow-lg flex items-center max-w-sm">
-                    <i class="fas fa-check-circle mr-3 text-green-500"></i>
-                    <span class="text-sm"><?= htmlspecialchars($_SESSION['success']) ?></span>
-                </div>
-                <?php unset($_SESSION['success']); ?>
-            <?php endif; ?>
-            <?php if (isset($_SESSION['error'])): ?>
-                <div class="toast bg-red-50 border border-red-200 text-red-800 dark:bg-red-900/80 dark:border-red-700 dark:text-red-200 px-4 py-3 rounded-lg shadow-lg flex items-center max-w-sm">
-                    <i class="fas fa-exclamation-circle mr-3 text-red-500"></i>
-                    <span class="text-sm"><?= htmlspecialchars($_SESSION['error']) ?></span>
-                </div>
-                <?php unset($_SESSION['error']); ?>
-            <?php endif; ?>
+            <?php if (isset($_SESSION['success'])): ?><div class="toast bg-green-50 border border-green-200 text-green-800 dark:bg-green-900/80 dark:border-green-700 dark:text-green-200 px-4 py-3 rounded-lg shadow-lg flex items-center max-w-sm"><i class="fas fa-check-circle mr-3 text-green-500"></i><span class="text-sm"><?= htmlspecialchars($_SESSION['success']) ?></span></div><?php unset($_SESSION['success']); endif; ?>
+            <?php if (isset($_SESSION['error'])): ?><div class="toast bg-red-50 border border-red-200 text-red-800 dark:bg-red-900/80 dark:border-red-700 dark:text-red-200 px-4 py-3 rounded-lg shadow-lg flex items-center max-w-sm"><i class="fas fa-exclamation-circle mr-3 text-red-500"></i><span class="text-sm"><?= htmlspecialchars($_SESSION['error']) ?></span></div><?php unset($_SESSION['error']); endif; ?>
         </div>
 
-        <!-- Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-950 p-4 lg:p-6 lg:flex lg:gap-6">
-            <div class="flex-1 min-w-0">
-                <div class="fade-in">
-                    <?= $content ?>
-                </div>
-            </div>
-
+            <div class="flex-1 min-w-0"><div class="fade-in"><?= $content ?></div></div>
             <?php
-            // Global Page Guide: halaman boleh mengeset $guide (structured) atau $guide_content (legacy);
-            // jika tidak, gunakan sumber terpusat PageGuideHelper berdasarkan route saat ini.
-            if (!isset($guide) && !isset($guide_content)) {
-                $guide = \App\Helpers\PageGuideHelper::forPath($currentPath);
-            }
+            if (!isset($guide) && !isset($guide_content)) $guide = \App\Helpers\PageGuideHelper::forPath($currentPath);
             if (isset($guide) || (isset($guide_content) && !empty($guide_content))):
             ?>
-            <!-- Guide Panel (Right Sidebar) -->
-            <div class="w-full lg:w-80 shrink-0 mt-6 lg:mt-0">
-                <div class="sticky top-6">
-                    <?php require __DIR__ . '/../components/page_guide.php'; ?>
-                </div>
-            </div>
+            <div class="w-full lg:w-80 shrink-0 mt-6 lg:mt-0"><div class="sticky top-6"><?php require __DIR__ . '/../components/page_guide.php'; ?></div></div>
             <?php endif; ?>
         </main>
 
-        <!-- Footer -->
-        <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-4 py-3">
-            <p class="text-xs text-center text-gray-400 dark:text-gray-600">© 2026 GUDANG PT.BIG - Dibuat oleh Tommy Ryan Dwiputra</p>
-        </footer>
+        <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-4 py-3"><p class="text-xs text-center text-gray-400 dark:text-gray-600">© 2026 GUDANG PT.BIG - Dibuat oleh Tommy Ryan Dwiputra</p></footer>
     </div>
 
     <script>
@@ -491,49 +452,24 @@ function renderHeader($label, $sidebarGroupText) {
         sidebar.classList.toggle('-translate-x-full');
         overlay.classList.toggle('hidden');
     }
-
-    // Dropdown logic
     document.addEventListener("DOMContentLoaded", function() {
         const dropdownBtn = document.getElementById('userDropdownBtn');
         const dropdownMenu = document.getElementById('userDropdownMenu');
-        
         if (dropdownBtn && dropdownMenu) {
-            dropdownBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                dropdownMenu.classList.toggle('hidden');
-            });
-
-            document.addEventListener('click', function(e) {
-                if (!dropdownMenu.contains(e.target) && !dropdownBtn.contains(e.target)) {
-                    dropdownMenu.classList.add('hidden');
-                }
-            });
+            dropdownBtn.addEventListener('click', function(e) { e.stopPropagation(); dropdownMenu.classList.toggle('hidden'); });
+            document.addEventListener('click', function(e) { if (!dropdownMenu.contains(e.target) && !dropdownBtn.contains(e.target)) dropdownMenu.classList.add('hidden'); });
         }
     });
-
-    // Restore and save sidebar scroll position
     document.addEventListener("DOMContentLoaded", function() {
         const sidebarScrollArea = document.getElementById("sidebarScrollArea");
         if (sidebarScrollArea) {
             const scrollPos = localStorage.getItem("sidebar_scroll_top");
-            if (scrollPos) {
-                sidebarScrollArea.scrollTop = parseInt(scrollPos, 10);
-            }
+            if (scrollPos) sidebarScrollArea.scrollTop = parseInt(scrollPos, 10);
         }
     });
-
-    function saveSidebarScroll(element) {
-        localStorage.setItem("sidebar_scroll_top", element.scrollTop);
-    }
-
-    // Auto-dismiss toasts
-    setTimeout(() => {
-        const toasts = document.querySelectorAll('.toast');
-        toasts.forEach(t => t.remove());
-    }, 5000);
+    function saveSidebarScroll(element) { localStorage.setItem("sidebar_scroll_top", element.scrollTop); }
+    setTimeout(() => { document.querySelectorAll('.toast').forEach(t => t.remove()); }, 5000);
     </script>
-
-    <!-- Global Feedback UI (AppModal + AppToast) — lihat public/assets/js/app-feedback.js -->
     <script src="<?= url('/assets/js/app-feedback.js') ?>"></script>
 </body>
 </html>
