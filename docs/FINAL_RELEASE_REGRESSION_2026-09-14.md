@@ -203,6 +203,34 @@ Setiap halaman telah diverifikasi menggunakan standar Tailwind CSS BIGNET:
 
 ## 25. Bugs Fixed
 - Menambahkan panduan spesifik `/audit` (`Panduan Log Audit`) pada `app/Helpers/PageGuideHelper.php` untuk melengkapi cakupan 100% Panduan Cepat Context-Aware.
+- **Sidebar Initial Scroll Position Fix**: Memperbaiki masalah posisi scroll sidebar yang tidak berada di paling atas saat membuka `/dashboard`.
+
+---
+
+## 30. Sidebar Initial Scroll Position Fix
+- **Root Cause**:
+  1. Pada `resources/views/layouts/app.php`, event handler `onscroll="saveSidebarScroll(this)"` menyimpan nilai `scrollTop` ke `localStorage.sidebar_scroll_top` saat pengguna melakukan scroll pada halaman mana pun.
+  2. Variabel PHP `$isDashboardPage` tidak didefinisikan sebelumnya, sehingga `json_encode($isDashboardPage)` bernilai `null` (`false` di JS). Akibatnya, logika pembersihan scroll pada halaman `/dashboard` tidak tereksekusi.
+  3. Saat pengguna login atau kembali ke `/dashboard`, skrip `DOMContentLoaded` membaca nilai `sidebar_scroll_top` lama dari `localStorage` dan mengatur `scrollTop = 350`, sehingga menu atas ("Dasbor") tergeser ke atas dan tidak terlihat.
+- **File Yang Diperbaiki**:
+  - [`resources/views/layouts/app.php`](file:///C:/xampp/htdocs/APLIKASI-INVENTORI-BIGNET-CLEAN/resources/views/layouts/app.php):
+    - Mengindikasikan variabel PHP `$isDashboardPage = ($currentPath === '/dashboard' || $currentPath === '/');`.
+    - Memperbarui fungsi `resetSidebarScroll()` dan `saveSidebarScroll(element)` agar pada `/dashboard`, nilai `scrollTop` selalu diset ke `0` dan `localStorage.sidebar_scroll_top` dihapus.
+    - Menambahkan listener `DOMContentLoaded`, `load`, `pageshow`, link click `a[href*="/dashboard"]`, dan `toggleSidebar()` untuk menjamin posisi scroll sidebar 100% berada di posisi paling atas (`scrollTop === 0`).
+    - Untuk halaman deep non-dashboard, navigasi active menu tetap didukung tanpa merusak UX.
+- **Behavior Before**:
+  - Setelah login/navigasi ke `/dashboard`, posisi scroll sidebar terdorong ke bawah (misalnya `scrollTop = 350px`), menyembunyikan menu "Dasbor" dan menu paling atas.
+- **Behavior After**:
+  - Setelah login, refresh, logout/re-login, navigasi back/forward, maupun pembukaan drawer mobile pada `/dashboard`, posisi scroll sidebar 100% selalu di paling atas (`scrollTop === 0`) dan menu "Dasbor" langsung terlihat.
+- **Desktop Test**: Verified 1366x768 & 1920x1080 (0 layout shift, no flicker, `scrollTop === 0`).
+- **Mobile Test**: Verified 375x812, 390x844, 430x932, 768x1024 (drawer opening on `/dashboard` is 100% top-aligned, `scrollTop === 0`).
+- **Role Test**: SUPERADMIN, ADMIN, TEKNISI_NOCsemua PASS 100%.
+- **Screenshot Evidence**:
+  - `scratch/admin_dashboard.png`
+  - `scratch/superadmin_dashboard.png`
+  - `scratch/teknisi_dashboard.png`
+  - `scratch/mobile_dashboard.png`
+- **SQL Changes**: **NO SQL CHANGES**.
 
 ---
 

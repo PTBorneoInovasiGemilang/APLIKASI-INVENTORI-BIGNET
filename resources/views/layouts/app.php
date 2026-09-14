@@ -31,6 +31,7 @@ if ($scriptDir !== '/') {
     $currentPath = str_replace($scriptDir, '', $currentPath);
 }
 $currentPath = $currentPath ?: '/dashboard';
+$isDashboardPage = ($currentPath === '/dashboard' || $currentPath === '/');
 
 if (!function_exists('isActive')) {
     function isActive($path, $currentPath) {
@@ -446,12 +447,74 @@ function renderHeader($label, $sidebarGroupText) {
     </div>
 
     <script>
+    const isDashboardPage = <?= json_encode($isDashboardPage) ?>;
+
+    function resetSidebarScroll() {
+        const sidebarScrollArea = document.getElementById("sidebarScrollArea");
+        if (sidebarScrollArea) {
+            sidebarScrollArea.scrollTop = 0;
+        }
+        try {
+            localStorage.removeItem("sidebar_scroll_top");
+        } catch (e) {}
+    }
+
+    function saveSidebarScroll(element) {
+        if (isDashboardPage) {
+            if (element.scrollTop !== 0) {
+                element.scrollTop = 0;
+            }
+            try {
+                localStorage.removeItem("sidebar_scroll_top");
+            } catch (e) {}
+        } else {
+            try {
+                localStorage.setItem("sidebar_scroll_top", element.scrollTop);
+            } catch (e) {}
+        }
+    }
+
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
-        sidebar.classList.toggle('-translate-x-full');
-        overlay.classList.toggle('hidden');
+        if (sidebar) {
+            sidebar.classList.toggle('-translate-x-full');
+            if (isDashboardPage && !sidebar.classList.contains('-translate-x-full')) {
+                resetSidebarScroll();
+            }
+        }
+        if (overlay) {
+            overlay.classList.toggle('hidden');
+        }
     }
+
+    function initSidebarScroll() {
+        const sidebarScrollArea = document.getElementById("sidebarScrollArea");
+        if (!sidebarScrollArea) return;
+
+        if (isDashboardPage) {
+            resetSidebarScroll();
+        } else {
+            const scrollPos = localStorage.getItem("sidebar_scroll_top");
+            if (scrollPos !== null) {
+                sidebarScrollArea.scrollTop = parseInt(scrollPos, 10);
+            } else {
+                const activeLink = sidebarScrollArea.querySelector(".sidebar-link.bg-gray-800, .sidebar-link.bg-blue-50");
+                if (activeLink) {
+                    const rect = activeLink.getBoundingClientRect();
+                    const containerRect = sidebarScrollArea.getBoundingClientRect();
+                    if (rect.top < containerRect.top || rect.bottom > containerRect.bottom) {
+                        activeLink.scrollIntoView({ block: "nearest" });
+                    }
+                }
+            }
+        }
+    }
+
+    if (isDashboardPage) {
+        resetSidebarScroll();
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         const dropdownBtn = document.getElementById('userDropdownBtn');
         const dropdownMenu = document.getElementById('userDropdownMenu');
@@ -459,15 +522,17 @@ function renderHeader($label, $sidebarGroupText) {
             dropdownBtn.addEventListener('click', function(e) { e.stopPropagation(); dropdownMenu.classList.toggle('hidden'); });
             document.addEventListener('click', function(e) { if (!dropdownMenu.contains(e.target) && !dropdownBtn.contains(e.target)) dropdownMenu.classList.add('hidden'); });
         }
-    });
-    document.addEventListener("DOMContentLoaded", function() {
-        const sidebarScrollArea = document.getElementById("sidebarScrollArea");
-        if (sidebarScrollArea) {
-            const scrollPos = localStorage.getItem("sidebar_scroll_top");
-            if (scrollPos) sidebarScrollArea.scrollTop = parseInt(scrollPos, 10);
-        }
-    });
-    document.addEventListener("DOMContentLoaded", function() {
+
+        initSidebarScroll();
+
+        document.querySelectorAll('a[href*="/dashboard"]').forEach(function(link) {
+            link.addEventListener('click', function() {
+                try {
+                    localStorage.removeItem("sidebar_scroll_top");
+                } catch (e) {}
+            });
+        });
+
         document.querySelectorAll('#sidebar .sidebar-link').forEach(function(link) {
             link.addEventListener('click', function() {
                 if (window.innerWidth < 1024) {
@@ -483,7 +548,19 @@ function renderHeader($label, $sidebarGroupText) {
             });
         });
     });
-    function saveSidebarScroll(element) { localStorage.setItem("sidebar_scroll_top", element.scrollTop); }
+
+    window.addEventListener("load", function() {
+        if (isDashboardPage) {
+            resetSidebarScroll();
+        }
+    });
+
+    window.addEventListener("pageshow", function(event) {
+        if (isDashboardPage) {
+            resetSidebarScroll();
+        }
+    });
+
     setTimeout(() => { document.querySelectorAll('.toast').forEach(t => t.remove()); }, 5000);
     </script>
     <script src="<?= url('/assets/js/app-feedback.js') ?>"></script>
