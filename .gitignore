@@ -33,6 +33,7 @@ graphify-out/
 .claude/
 
 # Runtime / environment
+.env
 storage/database/installed.lock
 storage/private_uploads/
 

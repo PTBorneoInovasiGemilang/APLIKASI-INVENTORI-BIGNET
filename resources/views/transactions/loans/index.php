@@ -116,7 +116,7 @@ $labels = [
                     </tr>
                 <?php endforeach; ?>
                 <?php if (empty($loans)): ?>
-                    <tr><td colspan="7" class="px-6 py-12 text-center text-gray-500">Belum ada transaksi peminjaman.</td></tr>
+                    <?php $colspan = 7; $emptyMessage = "Belum ada transaksi peminjaman."; require __DIR__ . '/../../components/table/empty_state.php'; ?>
                 <?php endif; ?>
                 </tbody>
             </table>

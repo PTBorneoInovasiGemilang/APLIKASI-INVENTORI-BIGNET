@@ -97,7 +97,7 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
             </td>
           </tr>
         <?php endforeach; if(empty($loans)): ?>
-          <tr><td colspan="8" class="p-12 text-center text-gray-500">Belum ada peminjaman.</td></tr>
+          <?php $colspan = 8; $emptyMessage = "Belum ada peminjaman."; require __DIR__ . '/../../components/table/empty_state.php'; ?>
         <?php endif; ?>
         </tbody>
       </table>
