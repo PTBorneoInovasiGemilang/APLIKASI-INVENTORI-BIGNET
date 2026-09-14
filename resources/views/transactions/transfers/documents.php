@@ -8,12 +8,12 @@ $items = is_array($items) ? $items : [];
 $isReceiptVersion = $version && (int)$version['version_no'] > 1;
 
 $baseCode = trim((string)($transfer['transaction_code'] ?? ''));
-if ($baseCode === '' || $baseCode === 'SJ-') {
+if ($baseCode === '' || preg_match('/^SJ-?$/i', $baseCode)) {
     $baseCode = 'TRF-' . str_pad((string)($transfer['id'] ?? 0), 6, '0', STR_PAD_LEFT);
 }
 $documentNoFor = static function (array $row, string $baseCode): string {
     $stored = trim((string)($row['document_no'] ?? ''));
-    if ($stored !== '' && $stored !== 'SJ-' && $stored !== 'SJ--01') {
+    if ($stored !== '' && !preg_match('/^SJ-?$/i', $stored) && $stored !== 'SJ--01') {
         return $stored;
     }
     return 'SJ-' . $baseCode . '-' . str_pad((string)max(1, (int)($row['version_no'] ?? 1)), 2, '0', STR_PAD_LEFT);
@@ -37,8 +37,10 @@ $documentNoFor = static function (array $row, string $baseCode): string {
 .sj-receipt-banner strong{color:#1d4ed8}
 .sj-grid-wrap{display:block;width:100%;min-width:100%;max-width:100%;overflow:hidden;box-sizing:border-box;border:1px solid #111827;border-radius:12px}
 .sj-grid{display:grid;grid-template-columns:7% 14% 22% 10% 17% 30%;width:100%;box-sizing:border-box}
-.sj-grid-head>div{background:#111827;color:#fff;font-size:10px;font-weight:700;padding:8px 10px;box-sizing:border-box;min-width:0}
-.sj-grid-row>div{font-size:10px;line-height:1.35;padding:8px 10px;border-bottom:1px solid #d1d5db;box-sizing:border-box;min-width:0;overflow-wrap:anywhere;word-break:break-word;vertical-align:top}
+.sj-grid-head>div{background:#111827;color:#fff;font-size:10px;font-weight:700;padding:8px 10px;box-sizing:border-box;min-width:0;border-right:1px solid #374151}
+.sj-grid-head>div:last-child{border-right:0}
+.sj-grid-row>div{font-size:10px;line-height:1.35;padding:8px 10px;border-right:1px solid #e5e7eb;border-bottom:1px solid #d1d5db;box-sizing:border-box;min-width:0;overflow-wrap:anywhere;word-break:break-word;vertical-align:top}
+.sj-grid-row>div:last-child{border-right:0}
 .sj-grid-row:last-child>div{border-bottom:0}
 .sj-grid-row>div:nth-child(1),.sj-grid-head>div:nth-child(1){text-align:center}
 .sj-grid-row>div:nth-child(4),.sj-grid-head>div:nth-child(4){text-align:center}
@@ -49,13 +51,14 @@ $documentNoFor = static function (array $row, string $baseCode): string {
 .sj-footer{margin-top:16px;display:flex;justify-content:space-between;border-top:1px solid #d1d5db;padding-top:7px;font-size:8px;color:#6b7280}
 @media screen{.sj-document-card{padding:28px}}
 @media print{
- @page{size:A4 portrait;margin:8mm}
+ @page{size:A4 portrait;margin:8mm 9mm 9mm}
  html,body{margin:0!important;padding:0!important;background:#fff!important;min-height:0!important;height:auto!important;overflow:visible!important}
+ body{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
  body *{visibility:hidden!important}
  #surat-jalan-version,#surat-jalan-version *{visibility:visible!important}
- #surat-jalan-version{position:absolute!important;top:0!important;left:0!important;width:100%!important;max-width:100%!important;margin:0!important;padding:5mm!important;box-sizing:border-box!important;background:#fff!important;border:1px solid #cbd5e1!important;border-radius:0!important;box-shadow:none!important;color:#111827!important;font-size:9pt!important;break-inside:avoid!important;page-break-inside:avoid!important}
- #surat-jalan-version img.logo{width:19mm!important;height:11mm!important;max-width:19mm!important;max-height:11mm!important}
- .sj-doc-header{gap:12mm!important;padding-bottom:3.5mm!important;border-bottom-width:1.2px!important}
+ #surat-jalan-version{position:absolute!important;top:0!important;left:0!important;width:100%!important;max-width:100%!important;margin:0!important;padding:5mm!important;box-sizing:border-box!important;background:#fff!important;border:1px solid #cbd5e1!important;border-radius:0!important;box-shadow:none!important;color:#111827!important;font-size:9pt!important;break-inside:avoid!important;page-break-inside:avoid!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+ #surat-jalan-version img.logo{width:20mm!important;height:10mm!important;max-width:20mm!important;max-height:10mm!important}
+ .sj-doc-header{gap:10mm!important;padding-bottom:3.5mm!important;border-bottom:1.2px solid #111827!important}
  .sj-company{gap:3mm!important}
  .sj-company-name{font-size:13pt!important}
  .sj-company-sub{font-size:7pt!important}
@@ -66,10 +69,13 @@ $documentNoFor = static function (array $row, string $baseCode): string {
  .sj-meta-label{font-size:6.5pt!important}
  .sj-meta-value{margin-top:1mm!important;font-size:8.5pt!important}
  .sj-receipt-banner{margin:0 0 3mm!important;border-radius:6px!important;padding:2mm 2.5mm!important;font-size:7pt!important;line-height:1.25!important}
- .sj-grid-wrap{border-radius:5px!important;overflow:visible!important}
- .sj-grid{grid-template-columns:7% 14% 22% 10% 17% 30%!important}
- .sj-grid-head>div{font-size:7.2pt!important;padding:1.8mm 1.7mm!important;line-height:1.15!important}
- .sj-grid-row>div{font-size:7.2pt!important;padding:1.8mm 1.7mm!important;line-height:1.2!important}
+ .sj-grid-wrap{width:100%!important;min-width:100%!important;max-width:100%!important;overflow:visible!important;border:0.35mm solid #111827!important;border-radius:2mm!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+ .sj-grid{grid-template-columns:7% 14% 22% 10% 17% 30%!important;width:100%!important}
+ .sj-grid-head>div{font-size:7.2pt!important;padding:1.9mm 1.7mm!important;line-height:1.15!important;background:#111827!important;color:#fff!important;border-right:0.25mm solid #374151!important;border-bottom:0.35mm solid #111827!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+ .sj-grid-head>div:last-child{border-right:0!important}
+ .sj-grid-row>div{font-size:7.2pt!important;padding:1.9mm 1.7mm!important;line-height:1.2!important;border-right:0.25mm solid #d1d5db!important;border-bottom:0.25mm solid #d1d5db!important}
+ .sj-grid-row>div:last-child{border-right:0!important}
+ .sj-grid-row:last-child>div{border-bottom:0!important}
  .sj-grid-head>div:nth-child(2),.sj-grid-head>div:nth-child(3),.sj-grid-head>div:nth-child(5),.sj-grid-head>div:nth-child(6){text-align:left!important}
  .sj-grid-head>div:nth-child(4),.sj-grid-row>div:nth-child(4){white-space:nowrap!important}
  .sj-grid-row>div:nth-child(6){font-size:7pt!important;line-height:1.15!important}
