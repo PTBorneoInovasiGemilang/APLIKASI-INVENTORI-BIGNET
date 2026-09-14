@@ -641,6 +641,23 @@ class PageGuideHelper
                 ],
             ],
 
+            '/audit' => [
+                'title' => 'Panduan Log Audit',
+                'sections' => [
+                    ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
+                        'Melihat log aktivitas dan jejak perubahan data di dalam sistem.',
+                    ]],
+                    ['icon' => 'fa-list-check', 'title' => 'Fungsi Utama', 'items' => [
+                        'Melacak pelaku (actor), tindakan (action), entitas (entity), dan waktu kejadian (timestamp).',
+                        'Gunakan pencarian dan filter untuk menelusuri aktivitas tertentu.',
+                    ]],
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan & Keamanan', 'items' => [
+                        'Log audit dicatat otomatis oleh sistem dan tidak dapat diubah atau dihapus.',
+                        'Akses halaman audit dibatasi khusus untuk Superadmin.',
+                    ]],
+                ],
+            ],
+
             '/profile' => [
                 'title' => 'Panduan Profil',
                 'sections' => [
