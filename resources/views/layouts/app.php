@@ -408,7 +408,7 @@ function renderHeader($label, $sidebarGroupText) {
             </div>
             <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
                 <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-sm"></i></button>
-                <span class="text-xs text-gray-400 dark:text-gray-500 hidden sm:block font-medium"><?= strftime('%A, %d %B %Y') ?: date('l, d M Y') ?></span>
+                <span class="text-xs text-gray-400 dark:text-gray-500 hidden sm:block font-medium"><?= date('l, d M Y') ?></span>
                 <?php if (isset($_SESSION['user_id'])): ?>
                 <?php $unreadCount = \App\Helpers\NotificationHelper::unreadCount((int)$_SESSION['user_id']); ?>
                 <a href="<?= url('/notifications') ?>" class="relative text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Notifikasi"><i class="fas fa-bell text-sm"></i><?php if ($unreadCount > 0): ?><span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span><?php endif; ?></a>
