@@ -39,7 +39,7 @@ Aplikasi dinyatakan **READY FOR PRODUCTION** tanpa ditemukannya **P0/P1 defect**
 
 ---
 
-## 5. Authentication Regression
+## 5. Authentication Regression & Login UI/UX Refinement
 - **Login Valid**: Lulus. Pengguna dengan kredensial benar berhasil login dan mendapatkan session ID.
 - **Password Salah**: Lulus. Sistem menolak login dan menampilkan pesan kesalahan validasi.
 - **Email Salah**: Lulus. Sistem menolak login dan tidak membocorkan keberadaan email internal.
@@ -47,6 +47,12 @@ Aplikasi dinyatakan **READY FOR PRODUCTION** tanpa ditemukannya **P0/P1 defect**
 - **Logout**: Lulus. Session dihancurkan sepenuhnya dan redirect ke `/login`.
 - **Session Persistence**: Lulus. Cookie session tersimpan aman dengan flag HTTP-Only.
 - **Protected Route Tanpa Login**: Lulus. Direct access ke `/dashboard`, `/items`, `/stocks`, dll. tanpa login otomatis di-redirect ke `/login` (302).
+- **Login Page UI/UX Refinement**:
+  - **Branding Header**: Logo BIGNET terpusat horizontal dengan ukuran proporsional (`max-h-[80px]`), dilengkapi tagline ringkas `"Sistem Inventori • PT. BIG"`.
+  - **Heading & Subtext**: Menggunakan heading `"Selamat Datang Kembali"` dan subtext `"Masuk untuk melanjutkan ke sistem inventori."`.
+  - **Compact Mobile Spacing**: Mengoptimalkan padding container (`px-4 py-6`) dan kartu login terpusat (`bg-white dark:bg-gray-800/95 rounded-2xl shadow-xl`) sehingga form login dan tombol "Masuk" langsung terlihat pada viewport mobile (375x812, 390x844, 430x932) tanpa perlunya scroll.
+  - **Primary & Secondary Buttons**: Tombol utama `"Masuk"` menggunakan BIGNET primary blue full width dengan ikon subtle; CTA pendaftaran `"Buat Akun Baru"` menggunakan tombol sekunder yang tidak mendominasi.
+  - **Dark Mode**: Dukungan penuh mode gelap pada kartu, input, label, dan perbatasan.
 - **Authentication Regression Count**: **0 Authentication Regression**.
 
 ---
