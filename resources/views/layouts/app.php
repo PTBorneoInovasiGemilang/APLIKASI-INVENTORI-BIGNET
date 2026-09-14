@@ -433,7 +433,7 @@ function renderHeader($label, $sidebarGroupText) {
             <?php if (isset($_SESSION['error'])): ?><div class="toast bg-red-50 border border-red-200 text-red-800 dark:bg-red-900/80 dark:border-red-700 dark:text-red-200 px-4 py-3 rounded-lg shadow-lg flex items-center max-w-sm"><i class="fas fa-exclamation-circle mr-3 text-red-500"></i><span class="text-sm"><?= htmlspecialchars($_SESSION['error']) ?></span></div><?php unset($_SESSION['error']); endif; ?>
         </div>
 
-        <main class="flex-1 overflow-x-hidden bg-gray-50 dark:bg-gray-950 p-4 lg:p-6 lg:flex lg:gap-6">
+        <main class="flex-1 overflow-x-clip bg-gray-50 dark:bg-gray-950 p-4 lg:p-6 lg:flex lg:gap-6">
             <div class="flex-1 min-w-0"><div class="fade-in"><?= $content ?></div></div>
             <?php
             if (!isset($guide) && !isset($guide_content)) $guide = \App\Helpers\PageGuideHelper::forPath($currentPath);

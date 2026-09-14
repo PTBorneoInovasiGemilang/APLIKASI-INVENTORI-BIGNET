@@ -4,15 +4,15 @@
 
 ## LAST UPDATED
 - Date: 2026-09-14
-- Updated by: Antigravity — sesi FIX DASHBOARD PAGE VERTICAL SCROLL REGRESSION
+- Updated by: Antigravity — sesi DEFINITIVE FIX FOR DASHBOARD REAL USER SCROLL
 
 ## CURRENT PHASE
-- P0: **DASHBOARD VERTICAL PAGE SCROLL REGRESSION FIXED** — Resolved vertical scrolling regression on `/dashboard` by removing scroll event trapping `overflow-y-auto` from main layout container in `resources/views/layouts/app.php`. Verified 10 Playwright automated tests across 6 viewports (1366x768, 1920x1080, 768x1024, 375x812, 390x844, 430x932), 3 roles (SUPERADMIN, ADMIN, TEKNISI_NOC), mobile drawer toggle, modal state, 16 long pages, and zero console errors.
+- P0: **DASHBOARD REAL USER SCROLL FIX COMPLETED** — Definitive fix for mouse wheel and touch swipe scrolling on `/dashboard`. Replaced `overflow-x-hidden` with `overflow-x-clip` on `<main>` in `resources/views/layouts/app.php`, preventing CSS computed `overflow-y: auto` from turning `<main>` into a trapped scroll container. Verified via Playwright real user mouse wheel (`page.mouse.wheel()`) and touch gestures across 6 viewports, 3 roles, mobile drawer, modal state, 16 long pages, and 0 console errors.
 
 ## CURRENT TASK
-- Task: FIX-DASHBOARD-VERTICAL-SCROLL-REGRESSION
-- Objective: Restore vertical page scrolling on `/dashboard` while keeping `sidebar.scrollTop === 0` top-aligned on dashboard.
-- Status: COMPLETED. 10/10 Playwright automated tests pass. Working tree clean. Documentation updated in `docs/FINAL_RELEASE_REGRESSION_2026-09-14.md`.
+- Task: DEFINITIVE-FIX-FOR-DASHBOARD-REAL-USER-SCROLL
+- Objective: Fix real user mouse wheel and touch swipe scrolling on `/dashboard` while maintaining top-aligned sidebar (`sidebar.scrollTop === 0`).
+- Status: COMPLETED. 11/11 Playwright automated real input tests pass (100%). Screenshots generated in `scratch/`. Documentation updated in `docs/FINAL_RELEASE_REGRESSION_2026-09-14.md`. Working tree clean.
 
 
 

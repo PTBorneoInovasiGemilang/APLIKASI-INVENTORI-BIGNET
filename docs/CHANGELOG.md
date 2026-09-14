@@ -15,6 +15,22 @@
 **Remaining:**
 **Next:**
 
+## 2026-09-14 — DEFINITIVE-FIX-FOR-DASHBOARD-REAL-USER-SCROLL
+**Task:** Definitive Fix for Dashboard Real User Scroll (Mouse Wheel & Touch Swipe).
+**Goal:** Restore real user mouse wheel and touch swipe scrolling on `/dashboard` across desktop, tablet, and mobile viewports while keeping `sidebar.scrollTop === 0` top-aligned on `/dashboard`.
+**Changed:**
+- `resources/views/layouts/app.php`: Replaced Tailwind CSS `overflow-x-hidden` on `<main>` with `overflow-x-clip` (`<main class="flex-1 overflow-x-clip ...">`). This prevents browser engines from computing `overflow-y: auto` (which converted `<main>` into a scroll container that trapped mouse wheel & touch drag events).
+- `tests/playwright/test_dashboard_real_user_scroll.spec.js`: Created 11 Playwright automated E2E tests using real mouse wheel (`page.mouse.wheel()`) and touch gestures covering 6 viewports, 3 roles, mobile drawer toggle, modal scroll lock state, 16 long pages, and 0 console errors.
+- `scratch/`: Saved screenshots `dashboard-before-scroll.png`, `dashboard-after-wheel.png`, `dashboard-after-wheel-2.png`, `dashboard-after-wheel-up.png`, `mobile-dashboard-before.png`, and `mobile-dashboard-after-swipe.png`.
+- `docs/FINAL_RELEASE_REGRESSION_2026-09-14.md`: Added Section 32 with technical root cause, CSS computed evidence (`overflowX: clip`, `overflowY: visible`), before/after behavior, desktop/tablet/mobile metrics, and Playwright verification results.
+- `docs/PROJECT_STATE.md` & `docs/CHANGELOG.md`: Updated living project memory.
+**Business impact:** Real users using physical mouse wheel, laptop trackpads, and mobile touch screens can smoothly scroll `/dashboard` up and down to view all KPI cards, quick actions, movement trends, and full dashboard content without event trapping or sidebar regression.
+**Database impact:** NO SQL CHANGES.
+**Verification:** Playwright `tests/playwright/test_dashboard_real_user_scroll.spec.js` (11/11 PASS — 100%).
+**Result:** PASS 100%.
+**Remaining:** 0 P0/P1 bugs.
+**Next:** Production Deployment.
+
 ## 2026-09-14 — FIX-DASHBOARD-VERTICAL-SCROLL-REGRESSION
 **Task:** Fix Dashboard Page Vertical Scroll Regression.
 **Goal:** Restore vertical page scrolling on `/dashboard` across desktop, tablet, and mobile viewports while keeping `sidebar.scrollTop === 0` top-aligned on `/dashboard`.

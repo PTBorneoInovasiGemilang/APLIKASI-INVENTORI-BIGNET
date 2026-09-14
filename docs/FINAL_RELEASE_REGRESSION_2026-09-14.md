@@ -205,6 +205,7 @@ Setiap halaman telah diverifikasi menggunakan standar Tailwind CSS BIGNET:
 - Menambahkan panduan spesifik `/audit` (`Panduan Log Audit`) pada `app/Helpers/PageGuideHelper.php` untuk melengkapi cakupan 100% Panduan Cepat Context-Aware.
 - **Sidebar Initial Scroll Position Fix**: Memperbaiki masalah posisi scroll sidebar yang tidak berada di paling atas saat membuka `/dashboard`.
 - **Dashboard Vertical Scroll Regression Fix**: Memperbaiki masalah halaman `/dashboard` yang tidak dapat di-scroll secara vertikal ke bawah.
+- **Dashboard Real User Scroll Verification**: Solusi definitif untuk event scroll mouse wheel & touch drag pengguna pada `/dashboard` dengan mengganti `overflow-x-hidden` menjadi `overflow-x-clip` pada elemen `<main>`.
 
 ---
 
@@ -260,6 +261,51 @@ Setiap halaman telah diverifikasi menggunakan standar Tailwind CSS BIGNET:
 - **Sidebar Regression**: `sidebar.scrollTop === 0` (PASS).
 - **Modal & Drawer Regression**: Mobile drawer toggling & modal hide/show (PASS).
 - **Playwright Test Result**: `tests/playwright/test_dashboard_vertical_scroll.spec.js` 10/10 PASS (100%).
+- **SQL Changes**: **NO SQL CHANGES**.
+
+---
+
+## 32. Dashboard Real User Scroll Verification (Mouse Wheel & Touch Swipe Fix)
+- **Root Cause & Computed CSS Evidence**:
+  - **Elemen**: `<main>` pada [`resources/views/layouts/app.php`](file:///C:/xampp/htdocs/APLIKASI-INVENTORI-BIGNET-CLEAN/resources/views/layouts/app.php).
+  - **Specified CSS Class**: `overflow-x-hidden`.
+  - **Browser Computed Value (Before Fix)**: `overflow-x: hidden; overflow-y: auto;` (`computedOverflow: "hidden auto"`).
+  - **Alasan Teknis**: Menurut spesifikasi standar CSS Box Model Overflow Module Level 3, jika salah satu sumbu (mis. `overflow-x`) diset ke `hidden`, maka sumbu lainnya yang secara implisit `visible` (mis. `overflow-y`) **otomatis dihitung (computed) oleh browser engine menjadi `auto`**.
+  - **Mengapa Mouse Wheel & Touch Pengguna Terkunci**:
+    - Karena `overflow-y` terhitung sebagai `auto`, browser mendaftarkan elemen `<main>` sebagai **CSS Scroll Container**.
+    - Ketika pengguna menggerakkan mouse wheel atau swipe touch di atas area `<main>`, browser mengarahkan event scroll langsung ke elemen `<main>`.
+    - Namun, karena tinggi `<main>` meregang sesuai seluruh kontennya (`clientHeight === scrollHeight === 2614px`), `<main>` memiliki `scrollTop` maksimal `0`.
+    - Akibatnya, event mouse wheel & touch terperangkap (*trapped*) di dalam elemen `<main>` tanpa bisa menggeser `<main>` dan **tidak diteruskan (bubbled up)** ke `window`/`document.documentElement`.
+  - **Mengapa Test Programmatic Sebelumnya Melaporkan PASS (False Positive)**:
+    - Test otomatis sebelumnya mengeksekusi `window.scrollTo(0, 500)` via JavaScript evaluation. Eksekusi `window.scrollTo()` secara langsung mengubah koordinat scroll window secara programmatic tanpa melalui pipeline event target dispatch mouse wheel & touch browser.
+- **File Yang Diperbaiki & Solusi**:
+  - [`resources/views/layouts/app.php`](file:///C:/xampp/htdocs/APLIKASI-INVENTORI-BIGNET-CLEAN/resources/views/layouts/app.php): Mengganti class `overflow-x-hidden` pada `<main>` menjadi `overflow-x-clip` (`<main class="flex-1 overflow-x-clip bg-gray-50 dark:bg-gray-950 p-4 lg:p-6 lg:flex lg:gap-6">`).
+  - **Computed Value (After Fix)**: `{ overflowX: 'clip', overflowY: 'visible', overflow: 'clip visible' }`.
+  - Elemen `<main>` kini tidak lagi menjadi scroll container (`overflowY` = `visible`). Event mouse wheel dan touch drag pengguna langsung menggerakkan scrollbar utama `window`/`document.documentElement` secara mulus.
+- **Desktop Real Mouse Wheel Verification**:
+  - `page.mouse.move(500, 300)` lalu `page.mouse.wheel(0, 500)` -> `window.scrollY` berubah dari `0` ke `500` (PASS).
+  - `page.mouse.wheel(0, 500)` -> `window.scrollY` bertambah ke `1000` (PASS).
+  - `page.mouse.wheel(0, -600)` -> `window.scrollY` berkurang kembali ke `400` (PASS).
+  - `sidebar.scrollTop` pada `/dashboard` tetap `0` (PASS).
+- **Mobile Real Touch Swipe Verification**:
+  - Viewports: `375x812`, `390x844`, `430x932` dengan `hasTouch: true` dan `isMobile: true`.
+  - Real touch gesture/wheel swipe di atas dashboard -> `window.scrollY` bertambah ke `500` (PASS).
+- **Sidebar & Mobile Drawer Regression**:
+  - `sidebar.scrollTop === 0` pada `/dashboard` (PASS).
+  - Toggling mobile drawer + closing drawer -> page real user mouse wheel scrolling tetap berfungsi normal 100% (PASS).
+- **Modal Regression**:
+  - Membuka modal (`#addModal`) mengunci scroll body (PASS).
+  - Menutup modal merilis scroll body, dan real mouse wheel setelah modal ditutup kembali menggerakkan `window.scrollY` (PASS).
+- **Other 16 Long Pages Real Mouse Wheel Verification**:
+  - `/categories`, `/items`, `/stocks`, `/serials`, `/incoming`, `/outgoing`, `/transfers`, `/loans`, `/returns`, `/installations`, `/incidents`, `/adjustments`, `/opnames`, `/reports/ledger`, `/reports/submissions`, `/timeline` -> Real mouse wheel `mouse.wheel(0, 400)` menggerakkan seluruh halaman (PASS 100%).
+- **Screenshot Evidence**:
+  - `scratch/dashboard-before-scroll.png`
+  - `scratch/dashboard-after-wheel.png`
+  - `scratch/dashboard-after-wheel-2.png`
+  - `scratch/dashboard-after-wheel-up.png`
+  - `scratch/mobile-dashboard-before.png`
+  - `scratch/mobile-dashboard-after-swipe.png`
+- **Playwright Test Result**: `tests/playwright/test_dashboard_real_user_scroll.spec.js` **11/11 PASS (100%)**.
 - **SQL Changes**: **NO SQL CHANGES**.
 
 ---
