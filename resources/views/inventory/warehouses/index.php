@@ -123,8 +123,8 @@ if (empty($_SESSION['csrf_token'])) {
 </div>
 
 <!-- Add Modal -->
-<div id="addModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full z-50 transition-opacity">
-    <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-2xl rounded-xl bg-white dark:bg-gray-800 dark:border-gray-700 fade-in">
+<div id="addModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 p-4 flex items-center justify-center overflow-y-auto transition-opacity">
+    <div class="relative my-auto p-5 border w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl rounded-xl bg-white dark:bg-gray-800 dark:border-gray-700 fade-in">
         <div class="mt-3">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">Tambah Gudang Baru</h3>

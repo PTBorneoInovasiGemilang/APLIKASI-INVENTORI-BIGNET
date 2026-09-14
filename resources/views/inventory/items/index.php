@@ -156,8 +156,8 @@ require __DIR__ . '/../../components/table/toolbar.php';
 </div>
 
 <!-- Add Modal -->
-<div id="addModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700 fade-in">
+<div id="addModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 p-4 flex items-center justify-center overflow-y-auto transition-opacity">
+    <div class="relative my-auto p-5 border w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl rounded-xl bg-white dark:bg-gray-800 dark:border-gray-700 fade-in">
         <div class="mt-3">
             <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100 mb-4">Tambah Master Barang Baru</h3>
             <form action="<?php echo url('/items'); ?>" method="POST" enctype="multipart/form-data">

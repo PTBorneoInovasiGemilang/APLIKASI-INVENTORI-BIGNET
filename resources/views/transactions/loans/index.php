@@ -125,15 +125,21 @@ $labels = [
     </div>
 </div>
 
-<div id="rejectModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-4">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
-        <div class="flex justify-between items-center mb-4"><h3 class="text-lg font-bold">Tolak Peminjaman</h3><button type="button" onclick="closeReject()">✕</button></div>
+<div id="rejectModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Tolak Peminjaman</h3>
+            <button type="button" onclick="closeReject()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="fas fa-times"></i></button>
+        </div>
         <form method="POST" action="<?= url('/loans/reject') ?>">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
             <input type="hidden" name="id" id="rejectLoanId">
-            <label class="block text-sm font-semibold mb-2">Alasan penolakan</label>
-            <textarea name="approval_notes" required rows="4" class="w-full border rounded-lg px-3 py-2" placeholder="Jelaskan alasan penolakan..."></textarea>
-            <div class="flex justify-end gap-2 mt-4"><button type="button" onclick="closeReject()" class="px-4 py-2 rounded-lg bg-gray-100">Batal</button><button class="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold">Tolak Peminjaman</button></div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Alasan penolakan</label>
+            <textarea name="approval_notes" required rows="4" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Jelaskan alasan penolakan..."></textarea>
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button type="button" onclick="closeReject()" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 font-bold text-sm">Batal</button>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-sm">Tolak Peminjaman</button>
+            </div>
         </form>
     </div>
 </div>

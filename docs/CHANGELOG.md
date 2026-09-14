@@ -15,6 +15,20 @@
 **Remaining:**
 **Next:**
 
+## 2026-09-14 — MOBILE-UI-UX-HARDENING
+**Task:** Mobile UI/UX Hardening & Responsive Finalization across all BIGNET modules.
+**Goal:** Ensure 100% comfortable smartphone usability, single-hand navigation, modal max-h bounds, touch targets, and zero horizontal page overflow.
+**Changed:**
+- `resources/views/layouts/app.php`: Added auto-close listener for mobile sidebar drawer when links are tapped; increased touch targets to `min-h-[44px]` & `py-2.5`.
+- `resources/views/inventory/categories/index.php`, `units/index.php`, `warehouses/index.php`, `locations/index.php`, `items/index.php`: Updated modal containers to flex-centered `max-h-[90vh] overflow-y-auto` backdrops for small screen heights.
+- `resources/views/transactions/loans/index.php`: Updated `rejectModal` to flex-centered `max-h-[90vh]` with dark mode support.
+- `docs/MOBILE_UI_UX_HARDENING_2026-09-14.md`: Created comprehensive mobile audit and verification report.
+**Business impact:** No changes to business logic, inventory calculation, or authorization contracts.
+**Database impact:** NO SQL CHANGES.
+**Verification:** All PHP files linted clean (0 errors). Tested across 6 viewports (375x812, 390x844, 430x932, 768x1024, 1366x768, 1920x1080) for SUPERADMIN, ADMIN, TEKNISI_NOC. Passed zero page overflow check (`scrollWidth <= innerWidth`).
+**Result:** READY FOR PRODUCTION.
+
+---
 
 ## 2026-09-14 — UI-STANDARDIZATION-PRODUCTION-HARDENING
 **Task:** Standardize UI/UX across all inventory modules and complete repository-level production security hardening.

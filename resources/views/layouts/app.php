@@ -91,7 +91,7 @@ function renderMenu($label, $icon, $path, $currentPath, $sidebarActive, $sidebar
     $cls = menuClass($path, $currentPath, $sidebarActive, $sidebarHover);
     $iCls = iconClass($path, $currentPath, $primaryText, $sidebarIcon);
     $url = url($path);
-    return "<a href=\"{$url}\" class=\"sidebar-link flex items-center px-3 py-2 rounded-lg text-sm {$cls}\">\n                <i class=\"{$icon} w-5 text-center text-sm {$iCls}\"></i>\n                <span class=\"ml-3\">{$label}</span>\n            </a>";
+    return "<a href=\"{$url}\" class=\"sidebar-link flex items-center px-3 py-2.5 min-h-[44px] rounded-lg text-sm {$cls}\">\n                <i class=\"{$icon} w-5 text-center text-sm {$iCls}\"></i>\n                <span class=\"ml-3\">{$label}</span>\n            </a>";
 }
 
 function renderHeader($label, $sidebarGroupText) {
@@ -466,6 +466,22 @@ function renderHeader($label, $sidebarGroupText) {
             const scrollPos = localStorage.getItem("sidebar_scroll_top");
             if (scrollPos) sidebarScrollArea.scrollTop = parseInt(scrollPos, 10);
         }
+    });
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('#sidebar .sidebar-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 1024) {
+                    const sidebar = document.getElementById('sidebar');
+                    const overlay = document.getElementById('sidebarOverlay');
+                    if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                    if (overlay && !overlay.classList.contains('hidden')) {
+                        overlay.classList.add('hidden');
+                    }
+                }
+            });
+        });
     });
     function saveSidebarScroll(element) { localStorage.setItem("sidebar_scroll_top", element.scrollTop); }
     setTimeout(() => { document.querySelectorAll('.toast').forEach(t => t.remove()); }, 5000);
