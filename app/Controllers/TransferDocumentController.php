@@ -93,7 +93,9 @@ class TransferDocumentController {
     }
 
     private function getReceiptEvents(PDO $pdo, int $transferId): array {
-        $stmt = $pdo->prepare("SELECT id, receiver_name, receiver_role, receiver_phone, received_at, notes, created_at
+        // transfer_receipts in the current schema does not have created_at.
+        // The event timestamp is received_at, so do not request a non-existent column.
+        $stmt = $pdo->prepare("SELECT id, receiver_name, receiver_role, receiver_phone, received_at, notes
             FROM transfer_receipts
             WHERE transfer_id = ?
             ORDER BY id ASC");
