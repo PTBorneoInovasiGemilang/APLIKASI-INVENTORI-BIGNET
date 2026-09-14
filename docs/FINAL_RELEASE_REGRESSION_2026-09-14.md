@@ -204,6 +204,7 @@ Setiap halaman telah diverifikasi menggunakan standar Tailwind CSS BIGNET:
 ## 25. Bugs Fixed
 - Menambahkan panduan spesifik `/audit` (`Panduan Log Audit`) pada `app/Helpers/PageGuideHelper.php` untuk melengkapi cakupan 100% Panduan Cepat Context-Aware.
 - **Sidebar Initial Scroll Position Fix**: Memperbaiki masalah posisi scroll sidebar yang tidak berada di paling atas saat membuka `/dashboard`.
+- **Dashboard Vertical Scroll Regression Fix**: Memperbaiki masalah halaman `/dashboard` yang tidak dapat di-scroll secara vertikal ke bawah.
 
 ---
 
@@ -230,6 +231,35 @@ Setiap halaman telah diverifikasi menggunakan standar Tailwind CSS BIGNET:
   - `scratch/superadmin_dashboard.png`
   - `scratch/teknisi_dashboard.png`
   - `scratch/mobile_dashboard.png`
+- **SQL Changes**: **NO SQL CHANGES**.
+
+---
+
+## 31. Dashboard Vertical Scroll Regression Fix
+- **Root Cause**:
+  - Pada [`resources/views/layouts/app.php`](file:///C:/xampp/htdocs/APLIKASI-INVENTORI-BIGNET-CLEAN/resources/views/layouts/app.php), elemen `<main>` memiliki class `overflow-y-auto` sedangkan pembungkus utamanya `<div class="lg:ml-64 min-h-screen flex flex-col">` menggunakan `min-h-screen` (tinggi fleksibel tanpa batasan `h-screen`).
+  - Hal ini menyebabkan `<main>` meregang mengikuti seluruh tinggi konten dashboard (misalnya `2697px`). Karena `clientHeight` sama dengan `scrollHeight`, `<main>` tidak memiliki scrollbar internal, namun aturan `overflow-y-auto` menangkap (*trapping*) event wheel, trackpad, dan touch drag pada area main content sehingga event scroll tidak diteruskan (*bubble up*) ke `window`/`document.documentElement`.
+- **File Yang Diperbaiki**:
+  - [`resources/views/layouts/app.php`](file:///C:/xampp/htdocs/APLIKASI-INVENTORI-BIGNET-CLEAN/resources/views/layouts/app.php): Menghapus `overflow-y-auto` pada elemen `<main>` (`<main class="flex-1 overflow-x-hidden bg-gray-50 dark:bg-gray-950 p-4 lg:p-6 lg:flex lg:gap-6">`).
+- **Behavior Before**:
+  - Pada `/dashboard`, pengguna tidak dapat melakukan scroll vertikal ke bawah. Komponen KPI cards, Aksi Cepat, Trend Pergerakan, dan bagian bawah dashboard yang berada di bawah viewport terpotong dan tidak dapat dicapai.
+- **Behavior After**:
+  - `window.scrollY` bertambah normal saat pengguna melakukan scroll ke bawah (`window.scrollY > 0`).
+  - Seluruh konten dashboard paling bawah dapat diakses hingga 100%.
+  - Sidebar tetap `position: fixed` dengan `scrollTop === 0` pada `/dashboard`.
+  - Mobile drawer dan modal scroll locking tetap bekerja normal (dikunci saat aktif, dilepas saat ditutup).
+- **Desktop Results**:
+  - `1366x768`: `scrollHeight` = 2697px > `innerHeight` = 768px, `scrollY` scroll bawah = 1929px (PASS).
+  - `1920x1080`: `scrollHeight` = 2507px > `innerHeight` = 1080px, `scrollY` scroll bawah = 1427px (PASS).
+- **Tablet Results**:
+  - `768x1024`: `scrollHeight` = 2969px > `innerHeight` = 1024px, `scrollY` scroll bawah = 1945px (PASS).
+- **Mobile Results**:
+  - `375x812`: `scrollHeight` = 3737px > `innerHeight` = 812px, `scrollY` scroll bawah = 2925px (PASS).
+  - `390x844`: `scrollHeight` = 3737px > `innerHeight` = 844px, `scrollY` scroll bawah = 2893px (PASS).
+  - `430x932`: `scrollHeight` = 3737px > `innerHeight` = 932px, `scrollY` scroll bawah = 2805px (PASS).
+- **Sidebar Regression**: `sidebar.scrollTop === 0` (PASS).
+- **Modal & Drawer Regression**: Mobile drawer toggling & modal hide/show (PASS).
+- **Playwright Test Result**: `tests/playwright/test_dashboard_vertical_scroll.spec.js` 10/10 PASS (100%).
 - **SQL Changes**: **NO SQL CHANGES**.
 
 ---

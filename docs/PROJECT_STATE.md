@@ -4,15 +4,15 @@
 
 ## LAST UPDATED
 - Date: 2026-09-14
-- Updated by: Antigravity — sesi PRODUCTION DEPLOYMENT EXECUTION PREPARATION
+- Updated by: Antigravity — sesi FIX DASHBOARD PAGE VERTICAL SCROLL REGRESSION
 
 ## CURRENT PHASE
-- P0: **PRODUCTION DEPLOYMENT EXECUTION PREPARATION COMPLETED (READY FOR DEPLOYMENT)** — Full preparation for production deployment executed on Release SHA `ffe259d6591eac2bc8a758267f4ab24681acc53e`. Artifact security verified, `.env` template & setup runbook created, domain & HTTPS Nginx/Apache configs generated, DocumentRoot `/public` verified, PHP runtime requirements specified, dedicated DB application user template created, backup & restore procedures written, storage permissions & upload security hardening documented, monitoring & health check checklist created, 14-step deployment sequence established, emergency rollback runbook created, production data isolation checklist drafted, and 20-item Go-Live checklist verified.
+- P0: **DASHBOARD VERTICAL PAGE SCROLL REGRESSION FIXED** — Resolved vertical scrolling regression on `/dashboard` by removing scroll event trapping `overflow-y-auto` from main layout container in `resources/views/layouts/app.php`. Verified 10 Playwright automated tests across 6 viewports (1366x768, 1920x1080, 768x1024, 375x812, 390x844, 430x932), 3 roles (SUPERADMIN, ADMIN, TEKNISI_NOC), mobile drawer toggle, modal state, 16 long pages, and zero console errors.
 
 ## CURRENT TASK
-- Task: PRODUCTION-DEPLOYMENT-PREPARATION
-- Objective: Complete all deployment runbooks, configuration templates, security checks, and readiness reports for production release.
-- Status: COMPLETED (READY FOR DEPLOYMENT). Working tree clean, Release SHA `ffe259d6591eac2bc8a758267f4ab24681acc53e` locked. Final report saved to `docs/PRODUCTION_DEPLOYMENT_EXECUTION_READINESS_2026-09-14.md`.
+- Task: FIX-DASHBOARD-VERTICAL-SCROLL-REGRESSION
+- Objective: Restore vertical page scrolling on `/dashboard` while keeping `sidebar.scrollTop === 0` top-aligned on dashboard.
+- Status: COMPLETED. 10/10 Playwright automated tests pass. Working tree clean. Documentation updated in `docs/FINAL_RELEASE_REGRESSION_2026-09-14.md`.
 
 
 

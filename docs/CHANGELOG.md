@@ -15,6 +15,21 @@
 **Remaining:**
 **Next:**
 
+## 2026-09-14 — FIX-DASHBOARD-VERTICAL-SCROLL-REGRESSION
+**Task:** Fix Dashboard Page Vertical Scroll Regression.
+**Goal:** Restore vertical page scrolling on `/dashboard` across desktop, tablet, and mobile viewports while keeping `sidebar.scrollTop === 0` top-aligned on `/dashboard`.
+**Changed:**
+- `resources/views/layouts/app.php`: Removed CSS `overflow-y-auto` from `<main>` container which trapped scroll events when parent wrapper used `min-h-screen`.
+- `tests/playwright/test_dashboard_vertical_scroll.spec.js`: Added 10 Playwright automated E2E tests covering 6 viewports, 3 roles, mobile drawer, modal state, 16 long pages, and 0 console errors.
+- `docs/FINAL_RELEASE_REGRESSION_2026-09-14.md`: Documented root cause analysis, before/after behavior, desktop/tablet/mobile test metrics, and verification results.
+- `docs/PROJECT_STATE.md` & `docs/CHANGELOG.md`: Updated living project memory.
+**Business impact:** Users can smoothly scroll down to view all KPI cards, quick actions, movement trends, and full dashboard analytics across all screen resolutions without sidebar scroll regression.
+**Database impact:** NO SQL CHANGES.
+**Verification:** Playwright `tests/playwright/test_dashboard_vertical_scroll.spec.js` (10/10 PASS).
+**Result:** PASS 100%.
+**Remaining:** 0 P0/P1 bugs.
+**Next:** Production Deployment.
+
 ## 2026-09-14 — PRODUCTION-DEPLOYMENT-PREPARATION
 **Task:** Production Deployment Execution Preparation.
 **Goal:** Prepare all deployment runbooks, configuration templates, security checks, and readiness reports for production release.
