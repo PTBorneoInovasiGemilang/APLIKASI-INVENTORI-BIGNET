@@ -34,6 +34,41 @@ foreach ($rowActions as $act) {
         $menuItems[] = $act;
     }
 }
+
+// Users are the only rows that get a hard-delete action from this shared component.
+// The backend remains the actual security/data-integrity boundary.
+if ($viewItem && preg_match('#/users/show/([0-9]+)$#', (string)(parse_url($viewItem['url'] ?? '', PHP_URL_PATH) ?? ''), $userMatch)) {
+    $hasDeleteAction = false;
+    foreach ($menuItems as $existingAction) {
+        if (strtolower(trim((string)($existingAction['label'] ?? ''))) === 'hapus') {
+            $hasDeleteAction = true;
+            break;
+        }
+    }
+
+    if (!$hasDeleteAction) {
+        $menuItems[] = [
+            'type' => 'form',
+            'action' => url('/users/delete'),
+            'fields' => [
+                'csrf_token' => $_SESSION['csrf_token'] ?? '',
+                'id' => (int)$userMatch[1],
+            ],
+            'label' => 'Hapus',
+            'icon' => 'fa-trash',
+            'danger' => true,
+            'confirm' => [
+                'title' => 'Hapus User?',
+                'message' => 'User ini akan dihapus secara permanen jika tidak memiliki data yang masih mereferensikannya.',
+                'description' => 'Untuk user yang sudah dipakai dalam transaksi atau data sistem, Anda harus menonaktifkannya, bukan menghapusnya.',
+                'type' => 'danger',
+                'icon' => 'fa-trash',
+                'confirm' => 'Hapus',
+                'loading' => 'Menghapus...',
+            ],
+        ];
+    }
+}
 ?>
 <td data-label="Aksi" class="px-4 py-3 whitespace-nowrap text-sm font-medium min-w-[140px] text-center align-middle">
     <div class="flex w-full items-center justify-center gap-2">
