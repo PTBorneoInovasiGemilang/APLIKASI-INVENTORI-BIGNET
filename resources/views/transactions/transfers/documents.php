@@ -49,21 +49,40 @@ $documentNoFor = static function (array $row, string $baseCode): string {
 .sj-footer{margin-top:16px;display:flex;justify-content:space-between;border-top:1px solid #d1d5db;padding-top:7px;font-size:8px;color:#6b7280}
 @media screen{.sj-document-card{padding:28px}}
 @media print{
- @page{size:auto;margin:5mm}
- html,body{margin:0!important;padding:0!important;background:#fff!important}
+ @page{size:A4 portrait;margin:8mm}
+ html,body{margin:0!important;padding:0!important;background:#fff!important;min-height:0!important;height:auto!important;overflow:visible!important}
  body *{visibility:hidden!important}
  #surat-jalan-version,#surat-jalan-version *{visibility:visible!important}
- #surat-jalan-version{position:static!important;width:100%!important;max-width:100%!important;margin:0!important;padding:3mm!important;box-sizing:border-box!important;background:#fff!important;border:0!important;box-shadow:none!important;color:#111827!important;font-size:9pt!important}
+ #surat-jalan-version{position:absolute!important;top:0!important;left:0!important;width:100%!important;max-width:100%!important;margin:0!important;padding:5mm!important;box-sizing:border-box!important;background:#fff!important;border:1px solid #cbd5e1!important;border-radius:0!important;box-shadow:none!important;color:#111827!important;font-size:9pt!important;break-inside:avoid!important;page-break-inside:avoid!important}
+ #surat-jalan-version img.logo{width:19mm!important;height:11mm!important;max-width:19mm!important;max-height:11mm!important}
+ .sj-doc-header{gap:12mm!important;padding-bottom:3.5mm!important;border-bottom-width:1.2px!important}
+ .sj-company{gap:3mm!important}
+ .sj-company-name{font-size:13pt!important}
+ .sj-company-sub{font-size:7pt!important}
+ .sj-title-main{font-size:18pt!important;letter-spacing:.18em!important}
+ .sj-title-no{margin-top:2mm!important;font-size:8pt!important}
+ .sj-title-meta{margin-top:1mm!important;font-size:6.5pt!important}
+ .sj-meta-grid{gap:2.5mm 10mm!important;padding:3.5mm 0!important}
+ .sj-meta-label{font-size:6.5pt!important}
+ .sj-meta-value{margin-top:1mm!important;font-size:8.5pt!important}
+ .sj-receipt-banner{margin:0 0 3mm!important;border-radius:6px!important;padding:2mm 2.5mm!important;font-size:7pt!important;line-height:1.25!important}
+ .sj-grid-wrap{border-radius:5px!important;overflow:visible!important}
+ .sj-grid{grid-template-columns:7% 14% 22% 10% 17% 30%!important}
+ .sj-grid-head>div{font-size:7.2pt!important;padding:1.8mm 1.7mm!important;line-height:1.15!important}
+ .sj-grid-row>div{font-size:7.2pt!important;padding:1.8mm 1.7mm!important;line-height:1.2!important}
+ .sj-grid-head>div:nth-child(2),.sj-grid-head>div:nth-child(3),.sj-grid-head>div:nth-child(5),.sj-grid-head>div:nth-child(6){text-align:left!important}
+ .sj-grid-head>div:nth-child(4),.sj-grid-row>div:nth-child(4){white-space:nowrap!important}
+ .sj-grid-row>div:nth-child(6){font-size:7pt!important;line-height:1.15!important}
+ .sj-bottom-grid{gap:3mm!important;margin-top:3mm!important}
+ .sj-bottom-grid>div{min-height:18mm!important}
+ .sj-meta-label{letter-spacing:.09em!important}
+ .sj-bottom-grid .text-\[11px\]{font-size:7pt!important;line-height:1.25!important}
+ .sj-signatures{gap:6mm!important;margin-top:6mm!important}
+ .sj-signature-line{margin-top:11mm!important;padding-top:1.5mm!important}
+ .sj-signatures .text-\[11px\]{font-size:7pt!important}
+ .sj-signatures .text-\[9px\]{font-size:6pt!important}
+ .sj-footer{margin-top:3mm!important;padding-top:1.5mm!important;font-size:6pt!important}
  .no-print{display:none!important}
- #surat-jalan-version img.logo{width:24mm!important;height:10mm!important;max-width:24mm!important;max-height:10mm!important}
- .sj-company-name{font-size:12pt!important}.sj-company-sub{font-size:8pt!important}.sj-title-main{font-size:17pt!important}.sj-title-no{font-size:9pt!important}.sj-title-meta{font-size:7.5pt!important}
- .sj-meta-grid{gap:2.5mm 10mm!important;padding:3.5mm 0!important}.sj-meta-label{font-size:7pt!important}.sj-meta-value{font-size:9pt!important}
- .sj-receipt-banner{margin-bottom:3.5mm!important;padding:2.5mm 3mm!important;font-size:7.5pt!important}
- .sj-grid-wrap{width:100%!important;min-width:100%!important;max-width:100%!important;overflow:visible!important;border-radius:0!important}
- .sj-grid{grid-template-columns:7% 14% 22% 10% 17% 30%!important;width:100%!important}
- .sj-grid-head>div{font-size:7.5pt!important;padding:2.2mm 2mm!important}
- .sj-grid-row>div{font-size:7.5pt!important;padding:2mm!important;line-height:1.25!important}
- .sj-bottom-grid{gap:3mm!important;margin-top:3.5mm!important}.sj-signatures{gap:6mm!important;margin-top:7mm!important}.sj-signature-line{margin-top:14mm!important;padding-top:2mm!important}.sj-footer{margin-top:4mm!important;padding-top:2mm!important;font-size:6.5pt!important}
 }
 </style>
 
@@ -109,9 +128,7 @@ $documentNoFor = static function (array $row, string $baseCode): string {
    <?php if($isReceiptVersion): ?><div class="sj-receipt-banner"><strong>PENERIMAAN LEMBAR <?= (int)$version['version_no'] - 1 ?>:</strong> <?=htmlspecialchars($version['receiver_name'] ?? 'Belum menerima')?><?php if(!empty($version['received_at'])): ?> · <?=date('d F Y, H:i',strtotime($version['received_at']))?><?php endif; ?>. Dokumen ini merekam kondisi Surat Jalan pada saat penerimaan.</div><?php endif; ?>
 
    <div class="sj-grid-wrap">
-    <div class="sj-grid sj-grid-head">
-     <div>No.</div><div>Kode Barang</div><div>Nama Barang</div><div><?=$isReceiptVersion?'Jumlah Diterima':'Jumlah Dikirim'?></div><div>Pelacakan</div><div>Nomor Seri</div>
-    </div>
+    <div class="sj-grid sj-grid-head"><div>No.</div><div>Kode Barang</div><div>Nama Barang</div><div><?=$isReceiptVersion?'Jumlah Diterima':'Jumlah Dikirim'?></div><div>Pelacakan</div><div>Nomor Seri</div></div>
     <?php $no=1; foreach($items as $item): $sns=$item['serial_numbers']??[]; $displayQty=$isReceiptVersion?(int)($item['quantity_received']??0):(int)($item['quantity_sent']??0); ?>
     <div class="sj-grid sj-grid-row">
      <div><?=$no++?></div>
