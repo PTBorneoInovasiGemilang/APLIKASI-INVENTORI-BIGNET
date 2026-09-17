@@ -67,7 +67,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
 ?>
 
 <div class="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-    <table class="w-full min-w-[1120px] divide-y divide-gray-200 dark:divide-gray-700">
+    <table class="w-full min-w-[800px] lg:min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead class="bg-gray-50 dark:bg-gray-900/50">
             <tr>
                 <th class="w-12 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">No</th>

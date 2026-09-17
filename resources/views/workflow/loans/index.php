@@ -48,7 +48,7 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
 
   <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[1100px]">
+      <table class="w-full min-w-[800px] lg:min-w-full">
         <thead class="bg-gray-50 dark:bg-gray-900/40">
           <tr>
             <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase w-14">No</th>

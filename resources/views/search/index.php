@@ -190,7 +190,7 @@ ob_start();
         </div>
         
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[1100px] table-sticky divide-y divide-gray-200 dark:divide-gray-700">
+            <table class="w-full min-w-[800px] lg:min-w-full table-sticky divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>
@@ -375,7 +375,7 @@ ob_start();
     results.innerHTML =
       '<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center"><h2 class="text-lg font-semibold text-gray-800 dark:text-white">Daftar Barang</h2>' +
       '<span class="bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-700/50">' + data.total.toLocaleString('id-ID') + ' Ditemukan</span></div>' +
-      '<div class="overflow-x-auto"><table class="w-full min-w-[1100px] table-sticky divide-y divide-gray-200 dark:divide-gray-700">' +
+      '<div class="overflow-x-auto"><table class="w-full min-w-[800px] lg:min-w-full table-sticky divide-y divide-gray-200 dark:divide-gray-700">' +
       '<thead class="bg-gray-50 dark:bg-gray-900/50"><tr>' +
       '<th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>' +
       '<th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tipe</th>' +

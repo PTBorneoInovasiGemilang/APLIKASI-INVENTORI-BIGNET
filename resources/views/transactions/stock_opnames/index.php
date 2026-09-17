@@ -24,7 +24,7 @@ ob_start();
     <?php require __DIR__ . '/../../components/table/toolbar.php'; ?>
 
     <div class="overflow-x-auto">
-        <table class="w-full min-w-[1000px] text-sm text-left text-gray-500 dark:text-gray-400">
+        <table class="w-full min-w-[800px] lg:min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
                 <tr>
                     <th scope="col" class="px-4 py-3 w-16">No</th>

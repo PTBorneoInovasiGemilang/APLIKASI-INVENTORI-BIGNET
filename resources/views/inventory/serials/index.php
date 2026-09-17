@@ -37,7 +37,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
 
 <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
     <div class="overflow-x-auto">
-        <table class="w-full min-w-[1000px] table-sticky mobile-card-table divide-y divide-gray-200 dark:divide-gray-700">
+        <table class="w-full min-w-[800px] lg:min-w-full table-sticky mobile-card-table divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
                     <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">No</th>
