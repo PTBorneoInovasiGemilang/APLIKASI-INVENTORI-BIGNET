@@ -886,3 +886,7 @@
 - [2026-08-17] [BUG-034] Fixed Barcode overflow on Inventory 360 Detail view by introducing universal responsive SVG constraint in BarcodeHelper
 - [2026-08-17] [BUG-035] Fixed UI Role Authorization Mismatch where Superadmin incorrectly saw 'Edit Barang' button
 - [2026-08-17] [UI] Implemented a unified, professional Asset Label design across Inventory 360 Detail, Print Label, and Mass Print Label views. Created shared component label_card.php.
+
+## [Unreleased]
+### Fixed
+- Fixed dashboard scroll trapping on Windows and mobile touch swipe by removing redundant \overflow-x-clip\ on the main layout container.
