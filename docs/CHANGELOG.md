@@ -890,3 +890,4 @@
 ## [Unreleased]
 ### Fixed
 - Fixed dashboard scroll trapping on Windows and mobile touch swipe by removing redundant \overflow-x-clip\ on the main layout container.
+- Fixed internal sidebar scroll trapping on dashboard by removing continuous javascript scroll reset in \saveSidebarScroll\ function.

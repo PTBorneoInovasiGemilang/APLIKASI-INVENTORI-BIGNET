@@ -461,9 +461,6 @@ function renderHeader($label, $sidebarGroupText) {
 
     function saveSidebarScroll(element) {
         if (isDashboardPage) {
-            if (element.scrollTop !== 0) {
-                element.scrollTop = 0;
-            }
             try {
                 localStorage.removeItem("sidebar_scroll_top");
             } catch (e) {}
