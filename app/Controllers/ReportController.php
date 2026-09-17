@@ -169,14 +169,14 @@ class ReportController {
 
         $this->handleReport([
             'title' => 'Laporan Transfer',
-            'base_query' => "SELECT t.*, sw.name as source_warehouse, dw.name as destination_warehouse, us.name as sender_name, ur.name as receiver_name 
+            'base_query' => "SELECT t.*, sw.name as source_warehouse, dw.name as destination_warehouse, us.name as sender_name, COALESCE(NULLIF(t.receiver_name, ''), ur.name) as actual_receiver_name 
                              FROM transfers t 
                              JOIN warehouses sw ON t.source_warehouse_id = sw.id 
                              JOIN warehouses dw ON t.destination_warehouse_id = dw.id 
                              JOIN users us ON t.sent_by = us.id 
                              LEFT JOIN users ur ON t.received_by = ur.id",
             'headers' => ['Tanggal Kirim', 'Tanggal Terima', 'Kode Transaksi', 'Gudang Asal', 'Gudang Tujuan', 'Status', 'Pengirim', 'Penerima'],
-            'columns' => ['sent_at', 'received_at', 'transaction_code', 'source_warehouse', 'destination_warehouse', 'status', 'sender_name', 'receiver_name'],
+            'columns' => ['sent_at', 'received_at', 'transaction_code', 'source_warehouse', 'destination_warehouse', 'status', 'sender_name', 'actual_receiver_name'],
             'date_column' => 't.sent_at',
             'warehouse_column' => 't.source_warehouse_id',
             'guide_content' => $guide_content

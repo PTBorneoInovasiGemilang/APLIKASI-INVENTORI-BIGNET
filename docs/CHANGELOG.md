@@ -891,3 +891,4 @@
 ### Fixed
 - Fixed dashboard scroll trapping on Windows and mobile touch swipe by removing redundant \overflow-x-clip\ on the main layout container.
 - Fixed internal sidebar scroll trapping on dashboard by removing continuous javascript scroll reset in \saveSidebarScroll\ function.
+- [BUG-049] Fixed Laporan Transfer HTTP 500 error caused by duplicate receiver_name column alias
