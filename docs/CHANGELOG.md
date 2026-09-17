@@ -892,3 +892,6 @@
 - Fixed dashboard scroll trapping on Windows and mobile touch swipe by removing redundant \overflow-x-clip\ on the main layout container.
 - Fixed internal sidebar scroll trapping on dashboard by removing continuous javascript scroll reset in \saveSidebarScroll\ function.
 - [2026-09-18] [BUG-049] Fixed Laporan Transfer HTTP 500 caused by duplicate receiver_name column alias
+
+### Verified
+- [2026-09-18] Browser E2E on `localhost:8001`: Stock Opname → Superadmin approval → automatic Stock Adjustment PASS; RBAC technician warehouse-route denial PASS. Borrowing request persisted without an active item (BUG-050); Return consequently blocked. Transfer, Installation, and Damage/Lost were blocked by deliberately unmet data/evidence preconditions. No source changes and no SQL/API mutation.

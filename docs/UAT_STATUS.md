@@ -146,6 +146,20 @@ Environment: Localhost
 | UI Polish — Transfer table konsistensi (BUG-026) | PASS | header/badge Indonesian via `UIHelper::badge`, tanggal "d M Y H:i", status center (2026-08-17) |
 
 Automated regression historical: **93/93 PASS**. FINAL BROWSER UAT (Antigravity): **PASS** (2026-08-17). UI Polish 2026-08-17: verifikasi statik (lint 83 file, template inspection); browser re-verification DELEGATED.
+
+## Browser E2E follow-up — 2026-09-18 (localhost:8001 only)
+
+| Flow | Status | Role / route | Expected | Actual / evidence |
+|---|---|---|---|---|
+| Borrowing + Return | **FAIL / BLOCKED** | Teknisi: `/loans/create` → `/loans`; Admin: `/loans` | Item yang dipilih tersimpan pada loan, dapat direview/keluar, lalu tersedia untuk Return. | UI menampilkan toast **"Peminjaman berhasil diajukan."**, tetapi daftar loan menunjukkan **"Tidak ada barang aktif."** dan status `Menunggu Persetujuan`. Karena tidak ada item aktif/loan diserahkan, Return tidak dapat diuji (BLOCKED). Screenshot browser diambil; console error kosong. |
+| Installation | **BLOCKED** | Teknisi: `/installations/create` | Hanya asset dalam custody teknisi dapat dipasang dengan bukti. | Dashboard Teknisi menunjukkan `Barang dipegang: 0`; form tersedia tetapi submit tetap disabled sebelum item dipilih. Tidak dibuat instalasi tanpa custody/evidence yang valid. Screenshot/form dan console error kosong. |
+| Damage + Lost | **BLOCKED** | Teknisi: `/incidents/create` | Laporan mencatat Damage/Lost atas asset tanggung jawab dengan bukti foto wajib. | Form UI tampil dan mewajibkan foto; tidak ada asset custody maupun evidence test yang disediakan, sehingga tidak dibuat laporan palsu. Screenshot/form dan console error kosong. |
+| Transfer | **BLOCKED** | Admin: `/transfers/create` | Pindah stok antar dua gudang berbeda dengan bukti pengiriman. | Hanya `Gudang E2E TEST` tersedia sebagai asal dan tujuan; precondition dua gudang berbeda tidak terpenuhi. Screenshot/form dan console error kosong. |
+| Stock Opname | **PASS** | Admin `/opnames/create`; Superadmin `/opnames/show?id=1` | Admin kirim variance, Superadmin setujui, audit/timeline tercatat. | `SOP-20260918-0001`: sistem 390, fisik 389, variance -1; disetujui Superadmin melalui modal BIGNET. Audit `CREATE_OPNAME` dan `PROCESS_OPNAME` terlihat. Screenshot diambil; console error kosong. |
+| Adjustment | **PASS** | Superadmin `/adjustments` | Approval Opname membuat adjustment yang dapat diaudit. | `ADJ-20260918-0001` muncul di UI dengan alasan `Auto-adjustment from Stock Opname SOP-20260918-0001`. Screenshot diambil; console error kosong. |
+| RBAC | **PASS** | Teknisi: `/adjustments`, `/opnames`, `/transfers`; Admin: `/loans`, `/transfers`, `/opnames`; Superadmin: `/adjustments` | Teknisi dibatasi dari operasi gudang; Admin dapat mengakses operasi; Superadmin monitoring/read-only. | Ketiga route operasi untuk Teknisi menampilkan halaman 403 `Akses Ditolak`; Admin dapat membuka queue/form operasi; Superadmin melihat adjustment hasil approval. Console error kosong. |
+
+No SQL/API mutation was used; all state changes above were made through the browser UI.
 Result:
 0. **Sync UAT (2026-08-16):** Status Stock Opname disinkronkan menjadi **PASS** berdasarkan re-run E2E `tests/playwright/test_opnames_e2e.spec.js` (1 passed, 6.6s, tanpa redirect timeout). Batch C dinyatakan **FULL PASS**.
 5. **Batch D (Reports, Timeline, Audit Log, Users, Account Management):**
