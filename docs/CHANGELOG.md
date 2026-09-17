@@ -966,3 +966,6 @@
 
 ### Verified
 - [2026-09-18] Browser E2E on `localhost:8001`: Stock Opname → Superadmin approval → automatic Stock Adjustment PASS; RBAC technician warehouse-route denial PASS. Borrowing request persisted without an active item (BUG-050); Return consequently blocked. Transfer, Installation, and Damage/Lost were blocked by deliberately unmet data/evidence preconditions. No source changes and no SQL/API mutation.
+
+### [2026-09-18]
+- **Test**: Menambahkan UAT Playwright e2e test script untuk verifikasi Transfer Barang antar gudang (	est_uat_transfer_e2e.spec.js). Script memverifikasi form, validasi gudang asal vs tujuan, photo upload untuk dispatch dan penerimaan, dan lifecycle UI transfer.
