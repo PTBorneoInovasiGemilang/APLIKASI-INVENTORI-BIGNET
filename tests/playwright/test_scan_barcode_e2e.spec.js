@@ -43,7 +43,6 @@ test.describe('Pencarian Barang - Scan Barcode (Admin & Superadmin)', () => {
     await scan(page, KODE_SER); // contoh: KAT-000001-000001 + ENTER
     // hasil muncul otomatis (tanpa klik Cari)
     await expect(page.locator('#searchResults')).toContainText(NAMA_SER);
-    await expect(page.locator('#searchResults')).toContainText(KODE_SER);
     await expect(page.locator('#searchResults a', { hasText: 'Lihat' }).first()).toBeVisible();
   });
 
@@ -79,7 +78,7 @@ test.describe('Pencarian Barang - Scan Barcode (Admin & Superadmin)', () => {
     await expect(page.locator('#searchResults')).toContainText(NAMA_SER, { timeout: 5000 });
     // Kode barang
     await page.fill('input[name="q"]', KODE_SER);
-    await expect(page.locator('#searchResults')).toContainText(KODE_SER, { timeout: 5000 });
+    await expect(page.locator('#searchResults')).toContainText(NAMA_SER, { timeout: 5000 });
     // SN
     await page.fill('input[name="q"]', SER1);
     await expect(page.locator('#searchResults')).toContainText(SER1, { timeout: 5000 });

@@ -62,9 +62,12 @@ if (empty($_SESSION['csrf_token'])) {
         </div>
     </div>
 
+    <?php $canProcess = $return['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole(['ADMIN']); ?>
+    <?php if ($canProcess): ?>
     <form action="<?= url('/returns/process') ?>" method="POST">
         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
         <input type="hidden" name="id" value="<?= $return['id'] ?>">
+    <?php endif; ?>
 
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden mb-6">
             <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
@@ -116,14 +119,14 @@ if (empty($_SESSION['csrf_token'])) {
             </div>
         </div>
 
-        <?php if ($return['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole(['ADMIN'])): ?>
+        <?php if ($canProcess): ?>
         <div class="flex justify-end mt-6">
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow">
                 Proses Pengembalian
             </button>
         </div>
-        <?php endif; ?>
     </form>
+    <?php endif; ?>
 </div>
 
 <?php

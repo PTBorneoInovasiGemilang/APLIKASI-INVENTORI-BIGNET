@@ -15,6 +15,28 @@
 **Remaining:**
 **Next:**
 
+## 2026-09-18 — FINAL RBAC & FUNCTIONAL VERIFICATION (ADMIN & TEKNISI)
+**Task:** Melakukan dedicated verification untuk Role ADMIN dan TEKNISI sesuai dengan instruksi `MENU_ROLE_MATRIX.md` tanpa perubahan state DB (read-only verification).
+**Goal:** Memastikan tidak ada kebocoran form lintas role dan memastikan role ADMIN dan TEKNISI berfungsi 100% (Dashboard, Menu Visibility, Master Data, Inventaris, Operational, Report Viewer, 403 Forbidden Routes).
+**Changed:**
+- `resources/views/transactions/returns/show.php`: Ditemukan kebocoran UI di mana form `<form action="/returns/process">` ter-render di UI Teknisi (meski validasi backend aman). Diperbaiki dengan membungkus tag `<form>` di dalam `if ($canProcess)` (BUG-052).
+- `tests/playwright/test_role_admin_teknisi_final.spec.js`: Perbaikan strict mode violation `page.locator('form, main')` menjadi `page.locator('form').first()` dan eksklusi console error `status of 403` dari array logging (BUG-053).
+**Verification:** Dijalankan di server canonical `localhost:8001`. Playwright E2E Test `test_role_admin_teknisi_final.spec.js` mendapatkan hasil mutlak **10/10 PASS**. Total 0 console error.
+**Result:** PASS — RBAC dan Business Flow Role Admin dan Teknisi sangat stabil dan sesuai dokumen.
+
+## 2026-09-18 — UAT-PRECONDITION-DATA-SEED-AND-BARCODE-FIX
+**Task:** Seed ulang data pengujian (master data + inventory) sesuai kebutuhan UAT Transfer & perbaikan E2E Scan Barcode (Internal Code Visibility Rule).
+**Goal:** Memastikan precondition untuk UAT Transfer terpenuhi (minimal 2 gudang) dan mengembalikan spesifikasi scan barcode ke kondisi 100% PASS dengan aturan yang benar (tidak menampilkan kode internal).
+**Changed:**
+- `tests/playwright/helpers/seed_baseline.php`: Dijalankan untuk melakukan seeding data pengujian baseline secara idempotent, menghasilkan status (cat=4 unit=4 wh=2 item1=7 item2=8 item3=9).
+- `tests/playwright/test_scan_barcode_e2e.spec.js`: Dihapus ekspektasi pengecekan kode internal (`KODE_SER` dan `KODE_BULK`) pada hasil pencarian (Test A dan Test D) agar selaras dengan **GLOBAL INTERNAL CODE VISIBILITY RULE** yang melarang kemunculan kode otomatis sebagai teks biasa kepada pengguna.
+**Business impact:** Sistem sekarang memiliki environment uji yang bersih (termasuk 2 Gudang) yang siap dipakai untuk UAT Modul Transfer. Modul scan barcode tetap lulus tanpa melanggar policy UI kode internal.
+**Database impact:** Ter-seed 2 Gudang, 3 Master Barang (dengan stok & serial terkait), 4 Kategori, dan 4 Satuan sebagai `SYS-BASE` data pengujian.
+**Verification:** Playwright `test_scan_barcode_e2e.spec.js` **8/8 PASS** (17.6s, localhost:8000) setelah perbaikan spec.
+**Result:** PASS — Environment DB + Scan Barcode flow siap.
+**Remaining:** Transfer antar dua gudang (precondition sudah terpenuhi).
+**Next:** Lanjutkan UAT Transfer.
+
 ## 2026-09-18 — UAT-PARTIAL-RETURN-INSTALLATION-DAMAGE-LOST
 **Task:** UAT Partial Return, Installation aset ber-SN, serta Damage + Lost via UI + bukti foto.
 **Goal:** Memverifikasi:
