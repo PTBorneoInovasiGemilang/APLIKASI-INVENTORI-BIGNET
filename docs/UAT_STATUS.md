@@ -58,7 +58,7 @@ HTTP 200 bukan UAT PASS.
 - [x] Logout
 
 > **Catatan UAT (2026-09-18):**
-> Perubahan UI Teknisi (mobile-first) dan pembaruan struktur Submission Warehouse Fulfillment telah terverifikasi melalui serangkaian Playwright E2E UAT terbaru (localhost:8001). Status di bawah ini telah terkonfirmasi secara end-to-end.
+> Perubahan UI Teknisi (mobile-first) dan peran Superadmin/Admin/Teknisi telah terverifikasi melalui serangkaian Playwright E2E UAT terbaru (localhost:8001). Namun, untuk **Submission Warehouse Fulfillment**, E2E belum mencakup 4 hal: (1) Teknisi memilih Gudang per item, (2) approval scoped per gudang, (3) Outgoing preselect Gudang, dan (4) penolakan warehouse mismatch. Bagian ini masih berstatus HTTP+DB verification (2026-08-18) dan menanti dedicated browser re-UAT.
 
 ## BROWSER CHECKLIST
 
@@ -95,8 +95,8 @@ Date: 2026-09-18 (**FINAL BROWSER UAT PASS — Agent Antigravity**)
 Tester: Playwright (automated E2E regression)
 Environment: Localhost:8001
 
-> **Historical Note (2026-08-17):** 93/93 PASS pada UAT awal sebelum refactor Teknisi/Submission.
-> **Pembaruan 2026-09-18:** Isu "belum diverifikasi di browser" untuk Submission Warehouse Fulfillment dan peran Teknisi telah resmi teratasi via eksekusi suite testing Playwright `test_role_superadmin_final.spec.js`, `test_transfer_integrity.spec.js`, dan role admin/teknisi lainnya.
+> **Historical Note (2026-08-17 & 2026-08-18):** 93/93 PASS pada UAT awal sebelum refactor Teknisi/Submission. Perubahan Submission Warehouse Fulfillment diverifikasi via HTTP+DB (26/26 PASS), namun belum memiliki dedicated Playwright/browser UAT.
+> **Pembaruan 2026-09-18:** Isu "belum diverifikasi di browser" untuk UI/UX peran Teknisi, Transfer antar Gudang, dan pembatasan peran Superadmin/Admin telah resmi teratasi via eksekusi suite testing Playwright (`test_role_superadmin_final.spec.js`, `test_transfer_integrity.spec.js`, dll). Namun **Submission Warehouse Fulfillment masih membutuhkan dedicated browser re-UAT**.
 
 
 ## STATUS PER MODUL (TERKINI)

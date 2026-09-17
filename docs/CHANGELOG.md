@@ -974,3 +974,5 @@
 
 ### [2026-09-18] Documentation Hygiene & Final Baseline
 - **Docs**: Synchronized documentation final baseline (Phase 4). Updated PROJECT_STATE and UAT_STATUS to reflect the latest E2E verifications (2026-09-18). Consolidated legacy and obsolete documentation to docs/archive/. Verified active status of 5 Open Decisions (OD-003, OD-004, OD-005, OD-006, OD-008).
+
+- **Docs**: Corrected UAT status claim for Submission Warehouse Fulfillment. Re-established the fact that its 4 core requirements (Teknisi warehouse picking, scoped approval, outgoing preselect, and mismatch rejection) were verified via HTTP+DB (2026-08-18) but still require dedicated Playwright/browser E2E re-verification.
