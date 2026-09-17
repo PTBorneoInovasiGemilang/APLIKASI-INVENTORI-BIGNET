@@ -969,3 +969,5 @@
 
 ### [2026-09-18]
 - **Test**: Menambahkan UAT Playwright e2e test script untuk verifikasi Transfer Barang antar gudang (	est_uat_transfer_e2e.spec.js). Script memverifikasi form, validasi gudang asal vs tujuan, photo upload untuk dispatch dan penerimaan, dan lifecycle UI transfer.
+
+- **Test**: Menambahkan UAT Playwright e2e test script untuk verifikasi Role Superadmin (	est_role_superadmin_final.spec.js). Script memverifikasi read-only access, ketiadaan tombol/form mutasi di modul operasional, hak exception D-014 untuk Stock Opname, dan pengecekan proteksi backend terhadap direct mutasi.

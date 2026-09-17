@@ -213,3 +213,5 @@ Evidence reference: `screenshots/batch_a/*`, `screenshots/outgoing_e2e/*`, `scre
 - **2026-09-17**: Sidebar scroll verified on SUPERADMIN, ADMIN, TEKNISI roles across Desktop (1366x768) and Mobile (375x812, 390x844). Independent scrolling functions correctly (BUG-041).
 
 - **2026-09-18** (TRANSFER ANTAR GUDANG): Status: **PASS (Playwright UI E2E)**. Verifikasi Transfer: 1. Login Admin; 2. Validasi error jika gudang asal dan tujuan sama; 3. Pengisian form transfer (driver, file bukti dispatch JPG/PNG valid); 4. Redirect ke /transfers; 5. Proses Receive dari detail transfer (input penerima, file bukti penerimaan JPG/PNG valid); 6. Redirect selesai dan hilangnya tombol Simpan Penerimaan. Form validation PHP berfungsi dengan file image sungguhan (menolak text file dummy).
+
+- **2026-09-18** (SUPERADMIN RBAC): Status: **PASS**. (Playwright test_role_superadmin_final.spec.js 4/4 - Akses penuh read-only, tidak ada form mutasi, exception D-014 berlaku, negative backend 403 test lolos).

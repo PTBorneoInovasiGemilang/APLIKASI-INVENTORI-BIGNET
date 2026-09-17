@@ -7,16 +7,16 @@
 - Updated by: Buffy (Codebuff) — sesi BUG-050 FIX (Loan tersimpan tanpa item aktif)
 
 ## CURRENT PHASE
-- P0: **UAT TRANSFER ANTAR GUDANG COMPLETED & PASS** —
-  1. Melakukan UAT end-to-end untuk module Transfer Antar Gudang melalui Playwright (`test_uat_transfer_e2e.spec.js`).
-  2. Memverifikasi validasi form jika gudang asal dan tujuan sama.
-  3. Memverifikasi dispatch transfer dengan bukti foto valid.
-  4. Memverifikasi proses penerimaan (receive) dari sisi UI hingga status selesai.
+- P0: **UAT SUPERADMIN ROLE COMPLETED & PASS** —
+  1. Melakukan UAT end-to-end untuk privilege Superadmin.
+  2. Read-only pada semua modul operasional (tombol Tambah/Edit/Hapus tidak muncul).
+  3. Exception D-014: Bisa proses/approve Stock Opname.
+  4. Negative check (mutasi form) ditolak backend (403 Akses Ditolak).
 
 ## CURRENT TASK
-- Task: FINAL UAT TRANSFER ANTAR GUDANG
-- Objective: Menjalankan dan memverifikasi secara penuh flow Transfer Barang antar gudang via UI.
-- Status: COMPLETED. Playwright E2E PASS (localhost:8001, semua state change via UI, tanpa SQL/API mutation). Dokumentasi di-update.
+- Task: FINALIZE ROLE SUPERADMIN
+- Objective: Menjalankan dan memverifikasi batas akses Superadmin.
+- Status: COMPLETED. Playwright E2E PASS (localhost:8001). Tidak ada kebocoran tombol mutasi, Exception D-014 bekerja, Negative Check sukses. Dokumentasi di-update.
 
 
 
