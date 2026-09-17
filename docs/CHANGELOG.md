@@ -15,6 +15,19 @@
 **Remaining:**
 **Next:**
 
+## 2026-09-18 — UAT-SERIALIZED-LOAN (BUG-050 follow-up)
+**Task:** UAT serialized loan — full SN custody chain via UI.
+**Goal:** Membuktikan flow Teknisi loan serialized → Admin approve + pilih SN → Handover (custody SN) → Return SN → Admin process berjalan benar: SN tampil saat approval, custody/lokasi/status SN benar, timeline/audit lengkap, 0 console error.
+**Changed:**
+- `tests/playwright/test_bug050_serialized_loan_e2e.spec.js`: spec E2E baru (6 test serial). Data seed dibuat lewat UI bisnis sah (Master Barang serialized via modal `/items`, Barang Masuk 2 SN via `/incoming/create`) — tanpa SQL/API mutation.
+- TIDAK ADA perubahan source/business rule (follow-up verification only).
+**Business impact:** Konfirmasi workflow peminjaman barang serialized (asset ber-SN) aman end-to-end: SN tidak pernah hilang dari traceability — masuk (AVAILABLE) → dipinjam (LOANED, custody teknisi) → kembali (AVAILABLE, gudang asal).
+**Database impact:** NO SCHEMA CHANGES. Data dibuat via UI; verifikasi state dalam (holder/warehouse/movements/ledger/audit) via SELECT read-only di terminal.
+**Verification:** Playwright `test_bug050_serialized_loan_e2e.spec.js` **6/6 PASS** (2026-09-18, localhost:8001). DB read-only: movement SN `AVAILABLE→LOANED` (warehouse 1→NULL, holder NULL→3781) saat handover dan `LOANED→AVAILABLE` (warehouse NULL→1, holder 3781→NULL, kondisi BAIK) saat return; `loan_item_serials` PENDING→BORROWED→RETURNED; ledger hanya `INCOMING +2`; audit `CREATE→APPROVE→HANDOVER→CREATE returns→RETURN_PROCESSED`; 6 serial movements; 0 console error.
+**Result:** PASS — serialized loan flow terverifikasi penuh.
+**Remaining:** `-`.
+**Next:** Lanjutkan UAT modul lain (Installation/Damage-Lost kini punya jalur custody via loan handover).
+
 ## 2026-09-18 — FIX-BUG-050-LOAN-ITEM-AKTIF
 **Task:** Bug FIX BUG-050 — Loan/Peminjaman sukses submit via UI tetapi tampil "Tidak ada barang aktif." di `/loans`.
 **Goal:** Loan hasil submit UI menampilkan barang yang diajukan (index + detail) sehingga flow Borrowing → Admin approval → Custody (Barang Keluar) → Return berjalan penuh; tanpa workaround, tanpa mengubah business rule, tanpa SQL/API mutation.
