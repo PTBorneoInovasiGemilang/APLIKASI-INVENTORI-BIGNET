@@ -4,23 +4,22 @@
 
 ## LAST UPDATED
 - Date: 2026-09-18
-- Updated by: Buffy (Codebuff) — sesi BUG-050 FIX (Loan tersimpan tanpa item aktif)
+- Updated by: Agent Antigravity — sesi DOCUMENTATION SYNCHRONIZATION — FINAL BASELINE
 
 ## CURRENT PHASE
-- P0: **UAT SUPERADMIN ROLE COMPLETED & PASS** —
-  1. Melakukan UAT end-to-end untuk privilege Superadmin.
-  2. Read-only pada semua modul operasional (tombol Tambah/Edit/Hapus tidak muncul).
-  3. Exception D-014: Bisa proses/approve Stock Opname.
-  4. Negative check (mutasi form) ditolak backend (403 Akses Ditolak).
+- P0: **DOCUMENTATION HYGIENE & FINAL BASELINE COMPLETED** —
+  1. Melakukan pembersihan dokumentasi historis ke `docs/archive/`.
+  2. Menghapus file laporan usang/temporary (Phase 2 & Phase 3).
+  3. Sinkronisasi dokumen akhir untuk memastikan tidak ada broken references (Phase 4).
+  4. Konsolidasi laporan UAT berdasarkan target/CORE E2E terbaru.
 
 ## CURRENT TASK
-- Task: FINALIZE ROLE SUPERADMIN
-- Objective: Menjalankan dan memverifikasi batas akses Superadmin.
-- Status: COMPLETED. Playwright E2E PASS (localhost:8001). Tidak ada kebocoran tombol mutasi, Exception D-014 bekerja, Negative Check sukses. Dokumentasi di-update.
-
-
+- Task: DOCUMENTATION SYNCHRONIZATION — FINAL BASELINE
+- Objective: Sinkronisasi dokumentasi aktif berdasarkan evidence E2E UAT 2026-09-18 terbaru.
+- Status: COMPLETED.
 
 ## COMPLETED
+- [x] UAT SUPERADMIN ROLE (Read-only check, D-014 exception, negative mutation check)
 - [x] Initial DB Schema Creation
 - [x] Basic UI Layout and Sidebar rendering
 - [x] Documentation scaffolding (PRD V2, Decisions, Open Decisions, State, Changelog)
@@ -163,8 +162,8 @@
 - 2026-08-16 — Table UI Standardization Batch C (Damage/Lost & Stock Opname) Completed, including core logic implementations & Playwright tests.
 
 ## NEXT ACTION
-- Exact next action: Lakukan dedicated verification untuk role SUPERADMIN jika diperlukan, atau langsung verifikasi fitur spesifik (Transfer antar gudang) jika role SUPERADMIN dianggap sudah selesai pada UAT sebelumnya.
-- Expected result: Seluruh RBAC aplikasi 100% tervalidasi via E2E Test yang konsisten di dedicated environment tanpa bug kebocoran form lintas role.
+- Exact next action: Sinkronisasi pemahaman dengan Product Owner terkait nasib fitur-fitur tertunda dan peleburan hak akses (OD-003, OD-004, OD-005, OD-006, OD-008).
+- Expected result: Adanya arahan solid untuk menyelesaikan atau membatalkan inisiatif yang bersifat "PROPOSED".
 
 ## IMPORTANT CONTEXT
 - Locked business rules: Traceability (Timeline), Accountability (Audit Logs), Evidence.
@@ -174,9 +173,9 @@
 - Other critical context: Do not guess logic.
 
 ## CHECKPOINT
-Task terakhir: MASTER DATA CODE AUTO
-Result: SELESAI — kode Satuan/Gudang/Lokasi auto-generated (`UNT-`/`GDG-`/`LOK-` + 6 digit, transaksional + retry collision); UI Tambah `[Auto Generated]` + helper text; Ubah readonly; `locations.code` unique global; Kategori/Master Barang dipertahankan; kode existing tidak diregenerate; baseline SYS-BASE di-seed sehingga spec stock/scan kembali 10/10 & 8/8; regresi penuh 44/44 PASS.
-Remaining: UAT lanjutan; OPEN DECISIONS — OD-003/004/005/006/008 menunggu keputusan Product Owner.
+Task terakhir: DOCUMENTATION SYNCHRONIZATION — FINAL BASELINE
+Result: SELESAI — seluruh artefak usang (scratchpad, history laporan) telah dipindahkan ke `docs/archive/` atau dihapus. UAT evidence dikonsolidasikan pada 2026-09-18. Project state clean.
+Remaining: OPEN DECISIONS — OD-003/004/005/006/008 menunggu keputusan Product Owner.
 - **[2026-08-17] PDF Export Enhancement & Pagination Fix (BUG-029)**: Final Polish to ensure no clipping on long company names, perfect adaptive font layout, translation mapping for raw enums (INCOMING, AVAILABLE), native JPEG favicon support via DCTDecode, multi-page scaling with repeatable table headers, and stable footer boundaries.
 - **[2026-08-17] CSV Export Professional Formatting (BUG-030)**: Standardized CSV output for Excel Windows compatibility. Added UTF-8 BOM, strict semicolon delimiter, translation of raw enums (status/type), safe date formatting, and Excel formula injection prevention.
 - **[2026-08-17] Universal Report Row Numbering (BUG-031)**: Added sequential numbering (No. 1, 2, 3...) universally to all PDF and CSV exports via array injection in ReportController. Also modified PdfHelper to enforce fixed 30pt column width specifically for the 'No' column to ensure efficient layout distribution.

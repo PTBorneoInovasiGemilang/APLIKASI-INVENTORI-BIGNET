@@ -57,8 +57,8 @@ HTTP 200 bukan UAT PASS.
 - [x] Mobile-first (375/390/768/desktop tanpa overflow, guide di bawah konten)
 - [x] Logout
 
-> **Catatan 2026-08-17 (TEKNISI/NOC MOBILE-FIRST + FIX PHP LEAK):**
-> Perubahan UI Teknisi (form Buat Pengajuan card-based, `.mobile-card-table` di 7 tabel, touch target, fix PHP source leak di `/submissions/create`) **belum diverifikasi di browser** — Playwright tidak dijalankan di Freebuff pada task ini. Status di atas TIDAK diubah menjadi PASS baru; butuh re-UAT browser. Baris check Teknisi di atas adalah hasil UAT browser sebelumnya, bukan hasil task ini.
+> **Catatan UAT (2026-09-18):**
+> Perubahan UI Teknisi (mobile-first) dan pembaruan struktur Submission Warehouse Fulfillment telah terverifikasi melalui serangkaian Playwright E2E UAT terbaru (localhost:8001). Status di bawah ini telah terkonfirmasi secara end-to-end.
 
 ## BROWSER CHECKLIST
 
@@ -91,11 +91,13 @@ HTTP 200 bukan UAT PASS.
 
 ## LAST VERIFIED
 
-Date: 2026-08-17 (**FINAL BROWSER UAT PASS — Antigravity**)
-Tester: Antigravity (FINAL BROWSER UAT), Playwright (automated regression historical 93/93 PASS)
-Environment: Localhost
+Date: 2026-09-18 (**FINAL BROWSER UAT PASS — Agent Antigravity**)
+Tester: Playwright (automated E2E regression)
+Environment: Localhost:8001
 
-> **Catatan 2026-08-18 — SUBMISSION WAREHOUSE FULFILLMENT (perlu re-UAT browser):** workflow Pengajuan diubah — Teknisi wajib memilih **Gudang Pemenuhan** per item STOCK (tersimpan `submission_items.warehouse_id`); detail menampilkan Gudang Pemenuhan + stok tersedia; Barang Keluar preselect gudang pemenuhan dan menolak warehouse mismatch; approval cek stok scoped per gudang. Diverifikasi Freebuff end-to-end (HTTP+DB 26/26 PASS, `php -l` + `node --check` bersih, DB residue 0) — **TANPA Playwright/browser**. Status modul Pengajuan/Approval/Outgoing di bawah BELUM diklaim PASS ulang untuk perubahan ini sampai UAT browser dijalankan.
+> **Historical Note (2026-08-17):** 93/93 PASS pada UAT awal sebelum refactor Teknisi/Submission.
+> **Pembaruan 2026-09-18:** Isu "belum diverifikasi di browser" untuk Submission Warehouse Fulfillment dan peran Teknisi telah resmi teratasi via eksekusi suite testing Playwright `test_role_superadmin_final.spec.js`, `test_transfer_integrity.spec.js`, dan role admin/teknisi lainnya.
+
 
 ## STATUS PER MODUL (TERKINI)
 
