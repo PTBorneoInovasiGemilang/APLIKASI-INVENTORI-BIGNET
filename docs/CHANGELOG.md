@@ -15,6 +15,27 @@
 **Remaining:**
 **Next:**
 
+## 2026-09-18 — UAT-PARTIAL-RETURN-INSTALLATION-DAMAGE-LOST
+**Task:** UAT Partial Return, Installation aset ber-SN, serta Damage + Lost via UI + bukti foto.
+**Goal:** Memverifikasi:
+1. Partial Return: Teknisi mengembalikan 1 dari 2 SN pinjaman → status loan `PARTIAL_RETURNED` ("Kembali Sebagian"), SN yang dikembalikan kembali `AVAILABLE` ke gudang, SN kedua tetap `LOANED` pada Teknisi.
+2. Installation: Teknisi memasang SN berstatus `LOANED` ke customer site lengkap dengan bukti foto → SN menjadi `INSTALLED`, tercatat di daftar instalasi, dapat dibuka Admin.
+3. Damage + Lost: Memperbaiki missing route `POST /incidents/store` pada `routes/web.php` (menghilangkan 404), Teknisi melapor DAMAGE & LOST dengan bukti foto wajib, Admin melihat insiden di list & detail beserta timeline audit. 0 console error di seluruh alur.
+**Changed:**
+- `routes/web.php`: Menambahkan `$router->post('/incidents/store', 'IncidentController@store');` yang sebelumnya hilang pada baris route incident.
+- `tests/playwright/test_uat_partial_return_installation_damage_lost.spec.js`: Spec E2E lengkap Playwright yang menguji state-aware flow Partial Return, Installation, Damage, Lost, Admin verification, dan 0 console errors.
+**Business impact:**
+- Teknisi dapat mengembalikan pinjaman secara bertahap (partial return) tanpa memutus siklus peminjaman bagi barang yang masih dipegang.
+- Lifecycle instalasi barang ke pelanggan terdokumentasi dengan nomor seri fisik, lokasi site, dan foto bukti.
+- Insiden kerusakan (DAMAGE) dan kehilangan (LOST) dapat dilaporkan langsung oleh Teknisi dengan bukti foto wajib dan ditinjau oleh Admin tanpa error 404.
+**Database impact:**
+- Perubahan state melalui transaksi browser UI: `serial_numbers` (AVAILABLE / INSTALLED), `installations`, `incidents`, `incident_items`, `audit_logs`.
+- Tidak ada schema migration.
+**Verification:** Playwright `tests/playwright/test_uat_partial_return_installation_damage_lost.spec.js` **7/7 PASS** (2026-09-18, localhost:8001, 1 worker, 25.7s). 0 console error.
+**Result:** PASS — Partial Return, Installation, Damage, dan Lost resmi lulus UAT.
+**Remaining:** Transfer antar dua gudang (precondition 2 gudang belum dibuat di UI).
+**Next:** Lanjutkan UAT Transfer atau modul berikutnya sesuai arahan Product Owner.
+
 ## 2026-09-18 — UAT-SERIALIZED-LOAN (BUG-050 follow-up)
 **Task:** UAT serialized loan — full SN custody chain via UI.
 **Goal:** Membuktikan flow Teknisi loan serialized → Admin approve + pilih SN → Handover (custody SN) → Return SN → Admin process berjalan benar: SN tampil saat approval, custody/lokasi/status SN benar, timeline/audit lengkap, 0 console error.

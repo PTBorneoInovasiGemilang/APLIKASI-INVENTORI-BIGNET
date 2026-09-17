@@ -7,12 +7,16 @@
 - Updated by: Buffy (Codebuff) — sesi BUG-050 FIX (Loan tersimpan tanpa item aktif)
 
 ## CURRENT PHASE
-- P0: **BUG-050 LOAN ITEM DISPLAY FIX COMPLETED & CLOSED** — Root cause: kolom "Barang Dipinjam" di `/loans` memuat chip via `LoanController@apiItems` yang hanya mengembalikan barang aktif (`quantity > returned_quantity`), sehingga loan `PENDING_APPROVAL` (by design `quantity=0` sampai Admin approve) selalu tampil "Tidak ada barang aktif." — persistence `loan_items` sebenarnya BENAR. Fix display-only: API mengembalikan semua baris item + ekspos `requested_quantity`/`approved_quantity`; chip index kontekstual per status; ringkasan "Barang Diajukan" di detail saat pending. Verified Playwright `test_bug050_loans_e2e.spec.js` 5/5 PASS (Borrowing → Admin approval → Custody/Barang Keluar → Return, stok fisik tidak dimutasi, timeline/audit tercatat, 0 console error).
+- P0: **UAT PARTIAL RETURN, INSTALLATION, DAMAGE & LOST COMPLETED & PASS** —
+  1. Partial Return: LOAN-6 (2 SN) di-return 1 SN via UI → Loan = PARTIAL_RETURNED ("Kembali Sebagian"), SN-A = AVAILABLE di gudang, SN-B = LOANED (tetap dipegang Teknisi).
+  2. Installation: Teknisi pasang SN-B via `/installations/create` dengan nama customer, lokasi, dan bukti foto → Installation INS-20260918-0001 dibuat, SN-B status menjadi INSTALLED, detail instalasi terverifikasi oleh Admin, 0 console error.
+  3. Damage + Lost: Ditemukan dan diperbaiki bug route missing `POST /incidents/store` di `routes/web.php`. Teknisi melapor DAMAGE (DMG-20260918-0002) dan LOST (LST-20260918-0001) via UI lengkap dengan bukti foto wajib. Admin memverifikasi daftar insiden dan detail insiden beserta timeline audit. 0 console error.
+  Verified Playwright `test_uat_partial_return_installation_damage_lost.spec.js` **7/7 PASS**.
 
 ## CURRENT TASK
-- Task: FIX-BUG-050-LOAN-ITEM-AKTIF
-- Objective: Loan hasil submit UI menampilkan barang yang diajukan di daftar & detail; flow Borrowing → Admin approval → Custody → Return berjalan penuh tanpa mengubah business rule/persistence.
-- Status: COMPLETED. 5/5 Playwright E2E PASS (localhost:8001, semua state change via UI, tanpa SQL/API mutation). BUG-050 CLOSED di `docs/BUG_TRACKER.md`; UAT Borrowing+Return menjadi PASS di `docs/UAT_STATUS.md`.
+- Task: UAT-PARTIAL-RETURN-INSTALLATION-DAMAGE-LOST
+- Objective: Menjalankan dan memverifikasi secara penuh flow Partial Return, Installation aset ber-SN, serta pelaporan Damage & Lost via UI + bukti foto.
+- Status: COMPLETED. 7/7 Playwright E2E PASS (localhost:8001, semua state change via UI, tanpa SQL/API mutation). Route missing `POST /incidents/store` diperbaiki. Documentation checkpoint lengkap.
 
 
 
