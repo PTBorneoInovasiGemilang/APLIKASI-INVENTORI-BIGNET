@@ -6,8 +6,8 @@
 File ini adalah satu-satunya MASTER ACTIVE.
 
 ## REFERENCE / ARCHIVE ONLY
-- `MASTER_PROGRAM_PRD_INDUK_BIGNET.md`
-- `BIGNET_ANTIGRAVITY_PROJECT_MEMORY.md`
+- `docs/archive/MASTER_PROGRAM_PRD_INDUK_BIGNET.md`
+- `docs/archive/BIGNET_ANTIGRAVITY_PROJECT_MEMORY.md`
 
 Kedua file tersebut hanya referensi historis/background.
 Jangan memperlakukan keduanya sebagai requirement aktif jika bertentangan dengan `MASTER_BIGNET_PROJECT_V2.md`.
