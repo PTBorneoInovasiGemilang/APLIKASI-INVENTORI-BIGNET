@@ -15,6 +15,21 @@
 **Remaining:**
 **Next:**
 
+## 2026-09-18 — FIX-BUG-050-LOAN-ITEM-AKTIF
+**Task:** Bug FIX BUG-050 — Loan/Peminjaman sukses submit via UI tetapi tampil "Tidak ada barang aktif." di `/loans`.
+**Goal:** Loan hasil submit UI menampilkan barang yang diajukan (index + detail) sehingga flow Borrowing → Admin approval → Custody (Barang Keluar) → Return berjalan penuh; tanpa workaround, tanpa mengubah business rule, tanpa SQL/API mutation.
+**Changed:**
+- `app/Controllers/LoanController.php` (`apiItems`, dipakai route `/loans/api/items`): ROOT CAUSE — query lama hanya mengembalikan baris `quantity > returned_quantity` (API legacy "barang aktif"), padahal loan baru berstatus `PENDING_APPROVAL` dengan `quantity=0` sampai Admin approve (by design). Kini mengembalikan SEMUA baris item loan (stock + manual) dan mengekspos `requested_quantity`/`approved_quantity`. Consumer return (`/returns/create`) aman karena hanya memakai baris dengan sisa `quantity - returned_quantity > 0` (baris approved), sehingga barang belum disetujui tetap tidak bisa direturn.
+- `resources/views/workflow/loans/index.php`: kolom "Barang Dipinjam" kini kontekstual per status (atribut `data-loan-status`): `× N diminta` saat PENDING_APPROVAL, `× N sisa dipinjam` saat BORROWED/PARTIAL_RETURNED, `× N disetujui` saat sudah kembali; teks kosong diganti "Belum ada barang pada peminjaman ini."
+- `resources/views/workflow/loans/show.php`: ringkasan "Barang Diajukan" (barang + jumlah diminta) tampil saat status `PENDING_APPROVAL` — sebelumnya bagian barang kosong total sampai approve.
+- `tests/playwright/test_bug050_loans_e2e.spec.js`: spec E2E baru (5 test serial, semua state change via UI).
+**Business impact:** Teknisi & Admin melihat barang yang diajukan sejak submit; Admin punya konteks lengkap saat review; daftar loan tidak lagi menyesatkan. Alur custody & return tidak berubah.
+**Database impact:** NO SQL CHANGES (tidak ada migrasi, tidak ada data mutation).
+**Verification:** Playwright `tests/playwright/test_bug050_loans_e2e.spec.js` **5/5 PASS** (2026-09-18, server localhost:8001): A) submit Teknisi → chip `E2E Barang Bulk × 3 diminta` + status `Menunggu Persetujuan` + ringkasan `Barang Diajukan` di detail; B) Admin approve → `Siap Diproses` + `Diberikan 3`; C) handover → Barang Keluar dibuat, stok fisik tetap 389 (custody model — tidak dimutasi), dokumen outgoing memuat barang; D) return Teknisi → PENDING; E) proses return Admin → loan `Dikembalikan`, timeline audit CREATE/APPROVE/HANDOVER terlihat, 0 console error di seluruh step.
+**Result:** PASS — BUG-050 CLOSED.
+**Remaining:** `-` (flow Borrowing+Return selesai; serialized loan belum di-cover spesifik oleh spec ini).
+**Next:** Lanjutkan UAT modul lain sesuai arahan Product Owner.
+
 ## 2026-09-14 — DEFINITIVE-FIX-FOR-DASHBOARD-REAL-USER-SCROLL
 **Task:** Definitive Fix for Dashboard Real User Scroll (Mouse Wheel & Touch Swipe).
 **Goal:** Restore real user mouse wheel and touch swipe scrolling on `/dashboard` across desktop, tablet, and mobile viewports while keeping `sidebar.scrollTop === 0` top-aligned on `/dashboard`.

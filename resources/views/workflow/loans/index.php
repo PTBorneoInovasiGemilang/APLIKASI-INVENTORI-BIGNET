@@ -75,7 +75,7 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
             <td class="p-4 text-sm whitespace-nowrap"><?=date('d M Y',strtotime($ln['loan_date']))?></td>
             <td class="p-4 text-sm font-semibold leading-5 max-w-[180px]"><?=htmlspecialchars($ln['borrower_name'])?></td>
             <td class="p-4 text-sm leading-5 max-w-[180px]"><?=htmlspecialchars($ln['warehouse_name'])?></td>
-            <td class="p-4 text-sm loan-items-cell" data-loan-id="<?=$loanId?>">
+            <td class="p-4 text-sm loan-items-cell" data-loan-id="<?=$loanId?>" data-loan-status="<?=htmlspecialchars($ln['status'])?>">
               <div class="loan-items-muted">Memuat barang...</div>
             </td>
             <td class="p-4 text-sm"><?php if($due!=='-'): ?><span class="<?=$overdue?'text-red-600 font-semibold':''?>"><?=htmlspecialchars($due)?></span><?php if($overdue): ?><div class="text-xs text-red-500 mt-1">Terlambat</div><?php endif; ?><?php else: ?><span class="text-gray-400">-</span><?php endif; ?></td>
@@ -117,12 +117,25 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
     fetch('<?=url('/loans/api/items?id=')?>'+encodeURIComponent(loanId))
       .then(r=>{if(!r.ok)throw new Error('request');return r.json();})
       .then(items=>{
-        if(!Array.isArray(items)||items.length===0){cell.innerHTML='<span class="loan-items-muted">Tidak ada barang aktif.</span>';return;}
+        if(!Array.isArray(items)||items.length===0){cell.innerHTML='<span class="loan-items-muted">Belum ada barang pada peminjaman ini.</span>';return;}
+        const rowStatus=cell.dataset.loanStatus||'';
         const visible=items.slice(0,4);
         cell.innerHTML=visible.map(it=>{
           const name=escapeHtml(it.nama||it.name||'-');
-          const qty=Math.max(0,(Number(it.quantity)||0)-(Number(it.returned_quantity)||0));
-          return '<span class="loan-item-chip"><strong>'+name+'</strong><span>× '+qty+'</span></span>';
+          const requested=Math.max(0,Number(it.requested_quantity)||0);
+          const approved=Math.max(0,Number(it.approved_quantity)||0);
+          const remaining=Math.max(0,(Number(it.quantity)||0)-(Number(it.returned_quantity)||0));
+          let label;
+          if(rowStatus==='PENDING_APPROVAL'){
+            label=requested>0?('× '+requested+' diminta'):'menunggu persetujuan';
+          }else if(remaining>0){
+            label='× '+remaining+' sisa dipinjam';
+          }else if(approved>0){
+            label='× '+approved+' disetujui';
+          }else{
+            label=requested>0?('× '+requested+' diminta'):'menunggu persetujuan';
+          }
+          return '<span class="loan-item-chip"><strong>'+name+'</strong><span>'+label+'</span></span>';
         }).join('')+(items.length>4?'<div class="loan-items-muted mt-1">+ '+(items.length-4)+' barang lainnya</div>':'');
       })
       .catch(()=>{cell.innerHTML='<span class="loan-items-muted">Barang tidak dapat dimuat.</span>';});

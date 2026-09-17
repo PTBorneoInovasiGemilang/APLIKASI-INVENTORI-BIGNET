@@ -3,16 +3,16 @@
 > File ini adalah "save game" project. Harus selalu menggambarkan kondisi TERKINI.
 
 ## LAST UPDATED
-- Date: 2026-09-14
-- Updated by: Antigravity — sesi DEFINITIVE FIX FOR DASHBOARD REAL USER SCROLL
+- Date: 2026-09-18
+- Updated by: Buffy (Codebuff) — sesi BUG-050 FIX (Loan tersimpan tanpa item aktif)
 
 ## CURRENT PHASE
-- P0: **DASHBOARD REAL USER SCROLL FIX COMPLETED** — Definitive fix for mouse wheel and touch swipe scrolling on `/dashboard`. Replaced `overflow-x-hidden` with `overflow-x-clip` on `<main>` in `resources/views/layouts/app.php`, preventing CSS computed `overflow-y: auto` from turning `<main>` into a trapped scroll container. Verified via Playwright real user mouse wheel (`page.mouse.wheel()`) and touch gestures across 6 viewports, 3 roles, mobile drawer, modal state, 16 long pages, and 0 console errors.
+- P0: **BUG-050 LOAN ITEM DISPLAY FIX COMPLETED & CLOSED** — Root cause: kolom "Barang Dipinjam" di `/loans` memuat chip via `LoanController@apiItems` yang hanya mengembalikan barang aktif (`quantity > returned_quantity`), sehingga loan `PENDING_APPROVAL` (by design `quantity=0` sampai Admin approve) selalu tampil "Tidak ada barang aktif." — persistence `loan_items` sebenarnya BENAR. Fix display-only: API mengembalikan semua baris item + ekspos `requested_quantity`/`approved_quantity`; chip index kontekstual per status; ringkasan "Barang Diajukan" di detail saat pending. Verified Playwright `test_bug050_loans_e2e.spec.js` 5/5 PASS (Borrowing → Admin approval → Custody/Barang Keluar → Return, stok fisik tidak dimutasi, timeline/audit tercatat, 0 console error).
 
 ## CURRENT TASK
-- Task: DEFINITIVE-FIX-FOR-DASHBOARD-REAL-USER-SCROLL
-- Objective: Fix real user mouse wheel and touch swipe scrolling on `/dashboard` while maintaining top-aligned sidebar (`sidebar.scrollTop === 0`).
-- Status: COMPLETED. 11/11 Playwright automated real input tests pass (100%). Screenshots generated in `scratch/`. Documentation updated in `docs/FINAL_RELEASE_REGRESSION_2026-09-14.md`. Working tree clean.
+- Task: FIX-BUG-050-LOAN-ITEM-AKTIF
+- Objective: Loan hasil submit UI menampilkan barang yang diajukan di daftar & detail; flow Borrowing → Admin approval → Custody → Return berjalan penuh tanpa mengubah business rule/persistence.
+- Status: COMPLETED. 5/5 Playwright E2E PASS (localhost:8001, semua state change via UI, tanpa SQL/API mutation). BUG-050 CLOSED di `docs/BUG_TRACKER.md`; UAT Borrowing+Return menjadi PASS di `docs/UAT_STATUS.md`.
 
 
 
@@ -134,6 +134,7 @@
 - OD-007 — **CLOSED (D-015)**: superadmin-created user langsung APPROVED + ACTIVE.
 
 ## RECENT CHANGES
+- 2026-09-18 — BUG-050 LOAN ITEM DISPLAY FIX: Root cause = `LoanController::apiItems` (route `/loans/api/items`) hanya mengembalikan baris `quantity > returned_quantity` (API legacy "barang aktif"), padahal lifecycle baru menyimpan loan `PENDING_APPROVAL` dengan `quantity=0` sampai Admin approve — persistence `loan_items` selalu benar, tampilannya yang kosong. Fix: (1) `apiItems` mengembalikan SEMUA baris item loan (stock + manual) + ekspos `requested_quantity`/`approved_quantity`; (2) `workflow/loans/index.php` — chip "Barang Dipinjam" kontekstual per status via `data-loan-status` (`× N diminta` saat pending, `× N sisa dipinjam` saat borrowed, `× N disetujui`); (3) `workflow/loans/show.php` — ringkasan "Barang Diajukan" saat `PENDING_APPROVAL`. Persistence, business rule, dan kontrak consumer return (`/returns/create` tetap hanya memakai baris sisa > 0) tidak diubah. Verified: Playwright `tests/playwright/test_bug050_loans_e2e.spec.js` 5/5 PASS (2026-09-18, localhost:8001) — Borrowing → Admin approval → Custody (Barang Keluar, stok fisik tetap) → Return → loan `Dikembalikan`, timeline CREATE/APPROVE/HANDOVER tercatat, 0 console error.
 - 2026-08-17 — SCAN-BARCODE-SEARCH: Pencarian Barang mendukung scan barcode langsung untuk Admin dan Superadmin. Scanner mengisi input barcode dan ENTER memicu pencarian otomatis tanpa klik tombol Cari. `SearchController@index` menerima `?barcode=` (exact match parameterized pada `serial_numbers.serial_number` / `master_items.kode_barang`, bukan LIKE; filter manual diabaikan di mode scan); view `search/index.php` mendapat panel "Scan Barcode" (input `#scanInput`, auto-focus, Enter/submit → fetch JSON, fokus kembali, pesan "Barcode tidak ditemukan.", URL sync). Manual search tetap utuh; permission tidak berubah (SUPERADMIN/ADMIN; TEKNISI 403). Diverifikasi Playwright `test_scan_barcode_e2e.spec.js` 8/8 (A-H) + curl TEKNISI 403.
 - 2026-08-17 — SUPERADMIN-USER-WORKFLOW (BUG-037): `UserController::update()` tidak lagi memaksa `is_active=0` (root cause: form edit tak punya field `is_active` → setiap simpan password/role/nama membuat user Nonaktif). Kini status `is_active`/`account_status` **dipertahankan dari nilai existing** dan hanya berubah bila Superadmin mengubah field "Status Akun" (Aktif/Nonaktif) secara eksplisit (Aktif→APPROVED+active, Nonaktif→SUSPENDED+inactive); guard menolak Superadmin menonaktifkan akun sendiri. Form `users/edit.php` mendapat select "Status Akun" (tanpa redesign). `store()` sudah langsung APPROVED+active (D-015) — tanpa approval; public registration tetap PENDING_APPROVAL. Diverifikasi Playwright `test_user_workflow_e2e.spec.js` 9/9 (A-I) + curl (self-deactivate guard).
 - 2026-08-17 — LOGIN-HEADLINE-FROM-APP_NAME: Headline "Welcome to" pada halaman Login sekarang mengikuti setting **Nama Aplikasi** dari Pengaturan Sistem → Umum (`app_name`, fallback `GUDANG PT.BIG`, di-escape). `resources/views/auth/login.php`: h1 headline diganti dari "Selamat Datang di [company_name]" → "Welcome to [app_name]"; `company_name` tetap dipakai untuk branding span/title/mobile; tidak ada hardcode nama aplikasi. Diverifikasi via alur Superadmin asli (settings/update): ubah ke `TEST WMS BIGNET` → headline berubah, restore → kembali. Playwright `test_login_branding_e2e.spec.js` diperbarui → 3/3 PASS.

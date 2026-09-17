@@ -68,6 +68,18 @@ $isApproved=$loan['status']==='APPROVED';
   </form>
   <?php endif; ?>
 
+  <?php if($isPending): ?>
+  <?php /* BUG-050: loan yang masih Menunggu Persetujuan tetap menampilkan barang yang diajukan Teknisi */ ?>
+  <div class="bg-white rounded-xl border shadow-sm p-6 mb-6">
+    <div class="flex items-start justify-between gap-4 mb-4"><div><h2 class="text-lg font-semibold">Barang Diajukan</h2><p class="text-xs text-gray-500 mt-1">Barang yang diminta Peminjam. Admin menentukan barang, jumlah, dan serial saat review.</p></div><span class="text-xs px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700">Menunggu Persetujuan</span></div>
+    <div class="space-y-3">
+      <?php foreach($items as $it): ?>
+      <div class="border rounded-lg p-4"><div class="flex flex-col md:flex-row md:justify-between gap-3"><div><div class="font-semibold"><?=htmlspecialchars($it['nama'])?></div><div class="text-xs text-gray-500 mt-1"><?=($it['source_type']??'STOCK')==='MANUAL'?'Manual / Custom':'Dari Stok'?></div><?php if(!empty($it['specification'])):?><div class="text-xs text-gray-500 mt-1"><?=htmlspecialchars($it['specification'])?></div><?php endif;?></div><div class="text-sm text-right"><div>Diminta <strong><?=$it['requested_quantity']?></strong></div></div></div></div>
+      <?php endforeach;if(empty($items)):?><div class="p-8 text-center text-gray-500">Belum ada barang.</div><?php endif; ?>
+    </div>
+  </div>
+  <?php endif; ?>
+
   <?php if(!$isPending): ?>
   <div class="bg-white rounded-xl border shadow-sm p-6 mb-6">
     <div class="flex items-start justify-between gap-4 mb-4"><div><h2 class="text-lg font-semibold">Barang Peminjaman</h2><p class="text-xs text-gray-500 mt-1">Rincian barang yang sudah diputuskan Admin.</p></div><span class="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700">Ringkasan</span></div>

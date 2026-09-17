@@ -318,7 +318,11 @@ class LoanController
             $pdo = Database::getInstance()->getConnection();
             $items = [];
 
-            $stmt = $pdo->prepare("SELECT li.id AS loan_item_id, li.master_item_id, m.nama, m.is_serialized, li.quantity, li.returned_quantity, 'STOCK' AS source_type FROM loan_items li JOIN master_items m ON li.master_item_id = m.id WHERE li.loan_id = ? AND li.quantity > li.returned_quantity ORDER BY li.id");
+            // BUG-050: kembalikan SEMUA baris item loan (termasuk yang masih
+            // PENDING_APPROVAL dengan quantity=0) supaya loan yang baru diajukan
+            // tetap menampilkan barang yang diminta. Konsumen return tetap aman
+            // karena hanya memakai baris dengan sisa (quantity - returned) > 0.
+            $stmt = $pdo->prepare("SELECT li.id AS loan_item_id, li.master_item_id, m.nama, m.is_serialized, li.requested_quantity, li.approved_quantity, li.quantity, li.returned_quantity, 'STOCK' AS source_type FROM loan_items li JOIN master_items m ON li.master_item_id = m.id WHERE li.loan_id = ? ORDER BY li.id");
             $stmt->execute([$id]);
             $stockItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -332,7 +336,7 @@ class LoanController
             }
             unset($item);
 
-            $manualStmt = $pdo->prepare("SELECT lmi.id AS loan_item_id, lmi.master_item_id, lmi.name AS nama, COALESCE(m.is_serialized,0) AS is_serialized, lmi.quantity, lmi.returned_quantity, 'MANUAL' AS source_type, lmi.specification, lmi.unit FROM loan_manual_items lmi LEFT JOIN master_items m ON m.id = lmi.master_item_id WHERE lmi.loan_id = ? AND lmi.quantity > lmi.returned_quantity ORDER BY lmi.id");
+            $manualStmt = $pdo->prepare("SELECT lmi.id AS loan_item_id, lmi.master_item_id, lmi.name AS nama, COALESCE(m.is_serialized,0) AS is_serialized, lmi.requested_quantity, lmi.approved_quantity, lmi.quantity, lmi.returned_quantity, 'MANUAL' AS source_type, lmi.specification, lmi.unit FROM loan_manual_items lmi LEFT JOIN master_items m ON m.id = lmi.master_item_id WHERE lmi.loan_id = ? ORDER BY lmi.id");
             $manualStmt->execute([$id]);
             $manualItems = $manualStmt->fetchAll(PDO::FETCH_ASSOC);
 
