@@ -433,13 +433,13 @@ function renderHeader($label, $sidebarGroupText) {
             <?php if (isset($_SESSION['error'])): ?><div class="toast bg-red-50 border border-red-200 text-red-800 dark:bg-red-900/80 dark:border-red-700 dark:text-red-200 px-4 py-3 rounded-lg shadow-lg flex items-center max-w-sm"><i class="fas fa-exclamation-circle mr-3 text-red-500"></i><span class="text-sm"><?= htmlspecialchars($_SESSION['error']) ?></span></div><?php unset($_SESSION['error']); endif; ?>
         </div>
 
-        <main class="flex-1 bg-gray-50 dark:bg-gray-950 p-4 lg:p-6 lg:flex lg:gap-6">
+        <main class="flex-1 bg-gray-50 dark:bg-gray-950 p-4 2xl:p-6 2xl:flex 2xl:gap-6">
             <div class="flex-1 min-w-0"><div class="fade-in"><?= $content ?></div></div>
             <?php
             if (!isset($guide) && !isset($guide_content)) $guide = \App\Helpers\PageGuideHelper::forPath($currentPath);
             if (isset($guide) || (isset($guide_content) && !empty($guide_content))):
             ?>
-            <div class="w-full lg:w-80 shrink-0 mt-6 lg:mt-0"><div class="sticky top-6"><?php require __DIR__ . '/../components/page_guide.php'; ?></div></div>
+            <div class="w-full 2xl:w-80 shrink-0 mt-6 2xl:mt-0"><div class="sticky top-6"><?php require __DIR__ . '/../components/page_guide.php'; ?></div></div>
             <?php endif; ?>
         </main>
 
