@@ -4,7 +4,7 @@
 
 ## LAST UPDATED
 - Date: 2026-09-18
-- Updated by: Agent Antigravity — sesi DOCUMENTATION SYNCHRONIZATION — FINAL BASELINE
+- Updated by: Agent Antigravity — sesi DEDICATED BROWSER UAT — SUBMISSION WAREHOUSE FULFILLMENT
 
 ## CURRENT PHASE
 - P0: **DOCUMENTATION HYGIENE & FINAL BASELINE COMPLETED** —
@@ -14,11 +14,12 @@
   4. Konsolidasi laporan UAT berdasarkan target/CORE E2E terbaru.
 
 ## CURRENT TASK
-- Task: DOCUMENTATION SYNCHRONIZATION — FINAL BASELINE
-- Objective: Sinkronisasi dokumentasi aktif berdasarkan evidence E2E UAT 2026-09-18 terbaru.
+- Task: DEDICATED BROWSER UAT — SUBMISSION WAREHOUSE FULFILLMENT
+- Objective: Verifikasi Playwright E2E E2E untuk alur Warehouse Fulfillment pada Submission (4 target requirements).
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] DEDICATED BROWSER UAT — SUBMISSION WAREHOUSE FULFILLMENT: Playwright spec `test_uat_warehouse_fulfillment_e2e.spec.js` PASS untuk end-to-end flow.
 - [x] UAT SUPERADMIN ROLE (Read-only check, D-014 exception, negative mutation check)
 - [x] Initial DB Schema Creation
 - [x] Basic UI Layout and Sidebar rendering

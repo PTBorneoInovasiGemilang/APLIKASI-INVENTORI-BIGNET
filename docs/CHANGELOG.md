@@ -15,6 +15,18 @@
 **Remaining:**
 **Next:**
 
+## 2026-09-18 — DEDICATED BROWSER UAT — SUBMISSION WAREHOUSE FULFILLMENT
+**Task:** Verifikasi Playwright E2E khusus untuk Warehouse Fulfillment pada modul Submission.
+**Goal:** Memastikan alur pemilihan gudang oleh Teknisi, limitasi approval per gudang, auto-preselect saat Outgoing, dan penolakan warehouse mismatch berfungsi sempurna di UI.
+**Changed:**
+- Ditambahkan test script `tests/playwright/test_uat_warehouse_fulfillment_e2e.spec.js`
+**Business impact:** Requirement E2E lengkap untuk Warehouse Fulfillment telah diverifikasi.
+**Database impact:** Tidak ada perubahan struktur DB.
+**Verification:** Dijalankan via Playwright (100% PASS, 3/3 target requirements, 0 console errors).
+**Result:** PASS — Submission Warehouse Fulfillment resmi berstatus E2E terverifikasi.
+**Remaining:** -
+**Next:** -
+
 ## 2026-09-18 — FINAL RBAC & FUNCTIONAL VERIFICATION (ADMIN & TEKNISI)
 **Task:** Melakukan dedicated verification untuk Role ADMIN dan TEKNISI sesuai dengan instruksi `MENU_ROLE_MATRIX.md` tanpa perubahan state DB (read-only verification).
 **Goal:** Memastikan tidak ada kebocoran form lintas role dan memastikan role ADMIN dan TEKNISI berfungsi 100% (Dashboard, Menu Visibility, Master Data, Inventaris, Operational, Report Viewer, 403 Forbidden Routes).
