@@ -61,7 +61,7 @@ $currentUser = \App\Helpers\AuthHelper::user();
         <ul class="divide-y divide-gray-200 dark:divide-gray-700">
             <?php foreach ($evidenceItems as $ev): ?>
                 <?php $isImage = strpos($ev['mime_type'], 'image/') === 0; ?>
-                <li class="px-4 py-3 flex items-start gap-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <li class="px-4 py-3 flex items-start gap-4 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                     <div class="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                         <?php if ($isImage): ?>
                             <img src="<?= url('/evidence/' . $ev['id']) ?>" alt="<?= htmlspecialchars($ev['original_name']) ?>" class="w-full h-full object-cover">

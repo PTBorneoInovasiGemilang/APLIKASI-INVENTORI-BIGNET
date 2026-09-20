@@ -283,7 +283,7 @@ class LocationController {
             $_SESSION['error'] = $e->getMessage();
         }
 
-        header("Location: " . url('/locations' . ($warehouse_id ? "?warehouse_id=$warehouse_id" : "")));
+        header("Location: " . url('/locations'));
         exit;
     }
 

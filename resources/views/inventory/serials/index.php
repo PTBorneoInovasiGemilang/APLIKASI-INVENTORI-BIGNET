@@ -40,13 +40,13 @@ require __DIR__ . '/../../components/table/toolbar.php';
         <table class="w-full min-w-[800px] lg:min-w-full table-sticky mobile-card-table divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
-                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">No</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">No. Seri</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Barang</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Gudang</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pemegang</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">No. Seri</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Barang</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Gudang</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pemegang</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -54,16 +54,16 @@ require __DIR__ . '/../../components/table/toolbar.php';
                 $no = ($offset ?? 0) + 1;
                 foreach ($serials as $sn):
                 ?>
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                     <td data-label="No" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center"><?= $no++ ?></td>
                     <td data-label="No. Seri" class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($sn['serial_number']); ?></td>
                     <td data-label="Barang" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         <?php echo htmlspecialchars($sn['item_name']); ?>
                         <div class="text-xs text-gray-400"><?php echo htmlspecialchars($sn['kode_barang']); ?></div>
                     </td>
-                    <td data-label="Gudang" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500"><?php echo htmlspecialchars($sn['warehouse_name'] ?? '-'); ?></td>
-                    <td data-label="Pemegang" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500"><?php echo htmlspecialchars($sn['holder_name'] ?? '-'); ?></td>
-                    <td data-label="Status" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    <td data-label="Gudang" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($sn['warehouse_name'] ?? '-'); ?></td>
+                    <td data-label="Pemegang" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($sn['holder_name'] ?? '-'); ?></td>
+                    <td data-label="Status" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         <?php
                         $st = $sn['status'];
                         $badgeType = 'NEUTRAL';

@@ -69,7 +69,7 @@ if (empty($_SESSION['csrf_token'])) {
                         $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
                         $formattedDate = date('d ', $timestamp) . $months[date('n', $timestamp) - 1] . date(' Y, H:i', $timestamp);
                     ?>
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                         <td data-label="No" class="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
                         <td data-label="Tanggal" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?= $formattedDate ?></td>
                         <td data-label="Kode" class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($inst['transaction_code']); ?></td>

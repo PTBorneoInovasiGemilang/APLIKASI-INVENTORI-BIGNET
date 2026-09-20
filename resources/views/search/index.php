@@ -210,7 +210,7 @@ ob_start();
                     $no = ($offset ?? 0) + 1;
                     foreach ($results as $item): 
                     ?>
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center"><?= $no++ ?></td>
                         <td class="px-4 py-3 whitespace-nowrap">
                             <?php if ($item['type'] === 'SERIALIZED'): ?>
@@ -357,7 +357,7 @@ ob_start();
     }
     const rows = data.results.map((r, i) => {
       const serialized = r.type === 'SERIALIZED';
-      return '<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">' +
+      return '<tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">' +
         '<td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">' + (i + 1) + '</td>' +
         '<td class="px-4 py-3 whitespace-nowrap">' + (serialized
           ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-200 dark:border-purple-800">SERIALIZED</span>'

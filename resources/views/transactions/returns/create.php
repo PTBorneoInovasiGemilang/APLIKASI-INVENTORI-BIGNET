@@ -167,8 +167,8 @@ function addSubItemRow(item) {
             <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">Pilih Nomor Seri yang Dikembalikan</label>
             <div class="space-y-2 max-h-40 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-900/40">
                 ${serials.length ? serials.map(sn => `
-                    <label class="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white dark:hover:bg-gray-800 cursor-pointer">
-                        <input type="checkbox" class="sn-option-${rowIndex} h-4 w-4 text-blue-600 border-gray-300 rounded" value="${escapeHtml(sn)}" onchange="syncReturnRow(${rowIndex})">
+                    <label class="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-800 cursor-pointer">
+                        <input type="checkbox" class="sn-option-${rowIndex} h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-700 rounded" value="${escapeHtml(sn)}" onchange="syncReturnRow(${rowIndex})">
                         <span class="text-sm font-medium text-gray-800 dark:text-gray-200">${escapeHtml(sn)}</span>
                     </label>
                 `).join('') : '<div class="text-sm text-red-500">Nomor seri barang ini tidak ditemukan.</div>'}
@@ -179,7 +179,7 @@ function addSubItemRow(item) {
 
     tr.innerHTML = `
         <td class="px-4 py-4 align-top text-center">
-            <input type="checkbox" class="return-check mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded" onchange="toggleReturnRow(${rowIndex})">
+            <input type="checkbox" class="return-check mt-1 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-700 rounded" onchange="toggleReturnRow(${rowIndex})">
             <input type="hidden" name="item_ids[]" value="${Number(item.loan_item_id || 0)}" disabled id="item-id-${rowIndex}">
             <input type="hidden" name="item_types[]" value="${sourceType}" disabled id="item-type-${rowIndex}">
             <input type="hidden" name="quantities[]" value="${maxQty}" disabled id="qty-hidden-${rowIndex}">

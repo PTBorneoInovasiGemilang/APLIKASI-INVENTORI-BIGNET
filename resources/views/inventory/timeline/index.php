@@ -70,7 +70,7 @@ ob_start();
                     $no = ($offset ?? 0) + 1;
                     foreach ($results as $row): 
                     ?>
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                             <td data-label="No" class="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
                             <td data-label="Tipe" class="px-4 py-3 whitespace-nowrap text-sm">
                                 <?php if ($row['type'] === 'SN'): ?>

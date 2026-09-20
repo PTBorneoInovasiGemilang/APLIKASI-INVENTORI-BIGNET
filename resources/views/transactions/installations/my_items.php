@@ -35,7 +35,7 @@ use App\Helpers\AuthHelper;
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         <?php foreach ($items as $item): ?>
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                                 <td data-label="Tanggal" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     <?= date('d M Y, H:i', strtotime($item['installed_at'])) ?>
                                 </td>

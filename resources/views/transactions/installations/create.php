@@ -126,7 +126,7 @@ foreach (($items ?? []) as $item) {
 
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kuantitas</label>
-                    <input type="number" name="quantities[]" value="1" min="1" max="1" readonly class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 text-gray-800 shadow-sm text-sm text-center cursor-not-allowed">
+                    <input type="number" name="quantities[]" value="1" min="1" max="1" readonly class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 shadow-sm text-sm text-center cursor-not-allowed">
                 </div>
 
                 <div class="md:col-span-5">

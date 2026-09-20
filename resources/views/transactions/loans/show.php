@@ -76,7 +76,7 @@ ob_start();
                         <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
                             <?= htmlspecialchars($item['nama']) ?>
                             <?php if (($item['source_type'] ?? 'STOCK') === 'MANUAL' && !empty($item['specification'])): ?>
-                                <div class="text-xs text-gray-500 mt-1"><?= htmlspecialchars($item['specification']) ?></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1"><?= htmlspecialchars($item['specification']) ?></div>
                             <?php endif; ?>
                         </td>
                         <td class="px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($item['quantity']) ?><?= !empty($item['unit']) ? ' ' . htmlspecialchars($item['unit']) : '' ?></td>

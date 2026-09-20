@@ -30,13 +30,13 @@ if (empty($_SESSION['csrf_token'])) {
     <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700">
         <div class="border-b border-gray-200 dark:border-gray-700">
             <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
-                <a href="<?= url('/settings?tab=general') ?>" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm <?= $tab === 'general' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400' ?>">
+                <a href="<?= url('/settings?tab=general') ?>" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm <?= $tab === 'general' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400' ?>">
                     <i class="fas fa-cog mr-1"></i> Umum
                 </a>
-                <a href="<?= url('/settings?tab=branding') ?>" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm <?= $tab === 'branding' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400' ?>">
+                <a href="<?= url('/settings?tab=branding') ?>" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm <?= $tab === 'branding' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400' ?>">
                     <i class="fas fa-paint-brush mr-1"></i> Branding & Tampilan
                 </a>
-                <a href="<?= url('/settings?tab=security') ?>" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm <?= $tab === 'security' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400' ?>">
+                <a href="<?= url('/settings?tab=security') ?>" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm <?= $tab === 'security' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400' ?>">
                     <i class="fas fa-lock mr-1"></i> Keamanan
                 </a>
             </nav>
@@ -114,11 +114,11 @@ if (empty($_SESSION['csrf_token'])) {
                                         <img src="<?= url('/file?path=' . urlencode($logo)) ?>" alt="Logo" class="h-12 object-contain">
                                     </div>
                                 <?php endif; ?>
-                                <input type="file" name="logo" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300">
+                                <input type="file" name="logo" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Favicon</label>
-                                <input type="file" name="favicon" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300">
+                                <input type="file" name="favicon" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300">
                             </div>
                         </div>
                     </div>

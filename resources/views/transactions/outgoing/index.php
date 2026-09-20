@@ -60,7 +60,7 @@ $purposeLabels = ['ISSUE' => 'Pengeluaran', 'LOAN' => 'Peminjaman'];
                     foreach ($outgoings as $out):
                         $purpose = $out['purpose'] ?? 'ISSUE';
                     ?>
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                         <td class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
                         <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap"><?= date('d M Y H:i', strtotime($out['created_at'])) ?></td>
                         <td class="px-4 py-3 text-sm whitespace-nowrap">

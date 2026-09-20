@@ -97,7 +97,7 @@ if (empty($_SESSION['csrf_token'])) {
                 $no = ($offset ?? 0) + 1;
                 foreach ($units as $unit): 
                 ?>
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                     <?php if (!\App\Helpers\AuthHelper::hasRole('SUPERADMIN')): ?>
                     <td class="px-4 py-3 whitespace-nowrap text-center">
                         <input type="checkbox" class="bulk-checkbox bulkUnit rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500" value="<?= (int)$unit['id'] ?>" aria-label="Pilih baris">
@@ -168,7 +168,7 @@ if (empty($_SESSION['csrf_token'])) {
         <div class="mt-3">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">Tambah Satuan Baru</h3>
-                <button onclick="document.getElementById('addModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-500">
+                <button onclick="document.getElementById('addModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-500 dark:text-gray-400">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -194,7 +194,7 @@ if (empty($_SESSION['csrf_token'])) {
                 
                 <div class="mb-4">
                     <label class="flex items-center">
-                        <input type="checkbox" name="is_active" checked class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded">
+                        <input type="checkbox" name="is_active" checked class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-700 rounded">
                         <span class="ml-2 text-gray-700 dark:text-gray-300">Aktif</span>
                     </label>
                 </div>

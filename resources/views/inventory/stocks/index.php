@@ -92,7 +92,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
             $unit = $stock['unit_name'] ?: 'unit';
             $availablePercent = $physical > 0 ? min(100, round(($available / $physical) * 100)) : 0;
         ?>
-            <tr class="group transition hover:bg-gray-50 dark:hover:bg-gray-700/40">
+            <tr class="group transition hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/40">
                 <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
 
                 <td class="px-4 py-4 align-top">

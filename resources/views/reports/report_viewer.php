@@ -113,20 +113,20 @@ ob_start();
         <form method="GET" action="" id="reportFilterForm">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pencarian</label>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Pencarian</label>
                     <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Cari kode, nama, serial..." class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tanggal Mulai</label>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Tanggal Mulai</label>
                     <input type="date" name="start_date" value="<?= htmlspecialchars($_GET['start_date'] ?? '') ?>" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tanggal Akhir</label>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Tanggal Akhir</label>
                     <input type="date" name="end_date" value="<?= htmlspecialchars($_GET['end_date'] ?? '') ?>" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300">
                 </div>
                 <?php if (isset($config['warehouse_column'])): ?>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Gudang</label>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Gudang</label>
                     <select name="warehouse_id" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300">
                         <option value="">Semua Gudang</option>
                         <?php foreach ($warehouses as $wh): ?>
@@ -137,7 +137,7 @@ ob_start();
                 <?php endif; ?>
                 <?php if (isset($config['category_column'])): ?>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Kategori</label>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Kategori</label>
                     <select name="category_id" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300">
                         <option value="">Semua Kategori</option>
                         <?php foreach ($categories as $cat): ?>
@@ -148,7 +148,7 @@ ob_start();
                 <?php endif; ?>
                 <?php if (isset($config['user_column'])): ?>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Oleh (User)</label>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Oleh (User)</label>
                     <select name="user_id" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300">
                         <option value="">Semua User</option>
                         <?php foreach ($users as $u): ?>
@@ -159,7 +159,7 @@ ob_start();
                 <?php endif; ?>
                 <?php if (isset($config['action_column']) && !empty($actions)): ?>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Aksi</label>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Aksi</label>
                     <select name="action_type" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300">
                         <option value="">Semua Aksi</option>
                         <?php foreach ($actions as $act): ?>
@@ -257,7 +257,7 @@ ob_start();
                         $no = ($offset ?? 0) + 1;
                         foreach ($data as $row): 
                         ?>
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                                 <td class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400 no-print">
                                     <input type="checkbox" name="selected_ids[]" form="selectionForm" value="<?= (int)($row['id'] ?? 0) ?>" class="row-check rounded border-gray-300 dark:border-gray-600">
                                 </td>

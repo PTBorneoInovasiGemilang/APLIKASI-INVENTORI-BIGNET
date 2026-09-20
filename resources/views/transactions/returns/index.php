@@ -76,7 +76,7 @@ if (empty($_SESSION['csrf_token'])) {
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 <?php $no = $offset + 1; foreach ($returns as $ret): ?>
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                         <td class="px-4 py-4 text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
                         <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap"><?= date('d M Y', strtotime($ret['created_at'])) ?></td>
                         <td class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100">

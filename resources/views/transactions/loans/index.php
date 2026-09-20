@@ -56,13 +56,13 @@ $labels = [
             <table class="w-full min-w-[800px] lg:min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">No</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Tanggal</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Peminjam</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Gudang</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Jatuh Tempo</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Aksi</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">No</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Peminjam</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Gudang</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Jatuh Tempo</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -70,8 +70,8 @@ $labels = [
                     $statusMeta = $labels[$ln['status']] ?? [$ln['status'], 'gray'];
                     $isOverdue = !empty($ln['due_date']) && time() > strtotime($ln['due_date']) && !in_array($ln['status'], ['RETURNED','REJECTED'], true);
                 ?>
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
-                        <td class="px-4 py-4 text-center text-sm text-gray-500"><?= $no++ ?></td>
+                    <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/40">
+                        <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
                         <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300"><?= date('d M Y', strtotime($ln['loan_date'])) ?></td>
                         <td class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($ln['borrower_name']) ?></td>
                         <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300"><?= htmlspecialchars($ln['warehouse_name']) ?></td>
@@ -121,7 +121,7 @@ $labels = [
                 </tbody>
             </table>
         </div>
-        <div class="px-4 py-3 text-sm text-gray-500 border-t">Menampilkan total <?= (int)$totalItems ?> data</div>
+        <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 border-t">Menampilkan total <?= (int)$totalItems ?> data</div>
     </div>
 </div>
 
@@ -129,7 +129,7 @@ $labels = [
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Tolak Peminjaman</h3>
-            <button type="button" onclick="closeReject()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="fas fa-times"></i></button>
+            <button type="button" onclick="closeReject()" class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200"><i class="fas fa-times"></i></button>
         </div>
         <form method="POST" action="<?= url('/loans/reject') ?>">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">

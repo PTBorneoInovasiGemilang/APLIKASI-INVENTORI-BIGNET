@@ -84,14 +84,14 @@ if ($viewItem && preg_match('#/users/show/([0-9]+)$#', (string)(parse_url($viewI
     <?php if (!empty($menuItems)): ?>
     <div class="relative inline-block text-left" data-actions>
         <button type="button" data-actions-toggle title="Aksi lainnya" aria-label="Aksi lainnya" aria-haspopup="menu" aria-expanded="false"
-                class="inline-flex items-center justify-center w-9 h-9 shrink-0 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                class="inline-flex items-center justify-center w-9 h-9 shrink-0 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
             <i class="fas fa-ellipsis-v text-sm"></i>
         </button>
         <div data-actions-menu role="menu" aria-label="Aksi lainnya" class="hidden w-44 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 text-left">
             <?php foreach ($menuItems as $act): ?>
                 <?php if (($act['type'] ?? '') === 'button'): ?>
                     <button type="button" onclick="<?= htmlspecialchars($act['onclick'] ?? '') ?>"
-                            class="w-full text-left px-4 py-2.5 text-sm flex items-center min-h-[40px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            class="w-full text-left px-4 py-2.5 text-sm flex items-center min-h-[40px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-700">
                         <?php if (!empty($act['icon'])): ?><i class="fas <?= htmlspecialchars($act['icon']) ?> mr-2 w-4 text-center"></i><?php endif; ?>
                         <?= htmlspecialchars($act['label']) ?>
                     </button>
@@ -110,14 +110,14 @@ if ($viewItem && preg_match('#/users/show/([0-9]+)$#', (string)(parse_url($viewI
                             <input type="hidden" name="<?= htmlspecialchars($k) ?>" value="<?= htmlspecialchars($v) ?>">
                         <?php endforeach; ?>
                         <button type="submit"
-                                class="w-full text-left px-4 py-2.5 text-sm flex items-center min-h-[40px] <?= ($act['danger'] ?? false) ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' ?>">
+                                class="w-full text-left px-4 py-2.5 text-sm flex items-center min-h-[40px] <?= ($act['danger'] ?? false) ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-700' ?>">
                             <?php if (!empty($act['icon'])): ?><i class="fas <?= htmlspecialchars($act['icon']) ?> mr-2 w-4 text-center"></i><?php endif; ?>
                             <?= htmlspecialchars($act['label']) ?>
                         </button>
                     </form>
                 <?php else: ?>
                     <a href="<?= htmlspecialchars($act['url']) ?>"
-                       class="block px-4 py-2.5 text-sm flex items-center min-h-[40px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                       class="block px-4 py-2.5 text-sm flex items-center min-h-[40px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-700">
                         <?php if (!empty($act['icon'])): ?><i class="fas <?= htmlspecialchars($act['icon']) ?> mr-2 w-4 text-center"></i><?php endif; ?>
                         <?= htmlspecialchars($act['label']) ?>
                     </a>

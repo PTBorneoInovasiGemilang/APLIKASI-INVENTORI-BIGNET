@@ -312,7 +312,7 @@ if (!function_exists('dashboardBadge')) {
         <?php if (!empty($recentLedger)): ?>
         <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
             <?php foreach ($recentLedger as $lg): ?>
-                <div class="px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
+                <div class="px-6 py-3.5 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
                     <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <?= $lg['quantity_delta'] >= 0 ? 'bg-green-50 text-green-600 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-50 text-red-600 dark:bg-red-900/50 dark:text-red-300' ?> flex-shrink-0">
                         <i class="fas <?= $lg['quantity_delta'] >= 0 ? 'fa-arrow-down' : 'fa-arrow-up' ?> text-xs"></i>
                     </span>
@@ -351,7 +351,7 @@ if (!function_exists('dashboardBadge')) {
             <?php if (!empty($activeSubmissions)): ?>
             <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
                 <?php foreach ($activeSubmissions as $sub): ?>
-                    <a href="<?= url('/submissions/show?id=' . $sub['id']) ?>" class="px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
+                    <a href="<?= url('/submissions/show?id=' . $sub['id']) ?>" class="px-6 py-3.5 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-800 dark:text-gray-200"><?= htmlspecialchars($sub['submission_code']) ?></p>
                             <p class="text-xs text-gray-400 dark:text-gray-500"><?= htmlspecialchars($sub['submitter_name']) ?> · <?= date('d M', strtotime($sub['created_at'])) ?></p>
@@ -468,7 +468,7 @@ if (!function_exists('dashboardBadge')) {
         <?php if (!empty($recentIncidents)): ?>
         <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
             <?php foreach ($recentIncidents as $inc): ?>
-                <a href="<?= url('/incidents/show?id=' . $inc['id']) ?>" class="px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
+                <a href="<?= url('/incidents/show?id=' . $inc['id']) ?>" class="px-6 py-3.5 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
                     <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <?= $inc['incident_type'] === 'LOST' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300' : 'bg-red-50 text-red-600 dark:bg-red-900/50 dark:text-red-300' ?> flex-shrink-0">
                         <i class="fas <?= $inc['incident_type'] === 'LOST' ? 'fa-question-circle' : 'fa-exclamation' ?> text-xs"></i>
                     </span>
@@ -498,7 +498,7 @@ if (!function_exists('dashboardBadge')) {
         <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
             <?php if (!empty($recentActivities)): ?>
                 <?php foreach ($recentActivities as $activity): ?>
-                    <div class="px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center space-x-3">
+                    <div class="px-6 py-3.5 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors flex items-center space-x-3">
                         <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300 flex-shrink-0">
                             <i class="fas fa-history text-xs"></i>
                         </span>
@@ -529,7 +529,7 @@ if (!function_exists('dashboardBadge')) {
             <?php if (!empty($mySubmissions)): ?>
             <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
                 <?php foreach ($mySubmissions as $sub): ?>
-                    <a href="<?= url('/submissions/show?id=' . $sub['id']) ?>" class="px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
+                    <a href="<?= url('/submissions/show?id=' . $sub['id']) ?>" class="px-6 py-3.5 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-800 dark:text-gray-200"><?= htmlspecialchars($sub['submission_code']) ?></p>
                             <p class="text-xs text-gray-400 dark:text-gray-500"><?= date('d M', strtotime($sub['created_at'])) ?></p>

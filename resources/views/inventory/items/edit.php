@@ -62,7 +62,7 @@ if (empty($_SESSION['csrf_token'])) {
             
             <div class="mb-6 flex gap-6">
                 <label class="flex items-center">
-                    <input type="checkbox" name="is_serialized" <?= $item['is_serialized'] ? 'checked' : '' ?> class="form-checkbox h-4 w-4 text-purple-600 border-gray-300 rounded">
+                    <input type="checkbox" name="is_serialized" <?= $item['is_serialized'] ? 'checked' : '' ?> class="form-checkbox h-4 w-4 text-purple-600 border-gray-300 dark:border-gray-700 rounded">
                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Apakah Barang Seri?</span>
                 </label>
             </div>
@@ -71,11 +71,11 @@ if (empty($_SESSION['csrf_token'])) {
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status Barang</label>
                 <div class="flex gap-6">
                     <label class="flex items-center">
-                        <input type="radio" name="is_active" value="1" <?= $item['is_active'] ? 'checked' : '' ?> class="form-radio h-4 w-4 text-blue-600 border-gray-300">
+                        <input type="radio" name="is_active" value="1" <?= $item['is_active'] ? 'checked' : '' ?> class="form-radio h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-700">
                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktif</span>
                     </label>
                     <label class="flex items-center">
-                        <input type="radio" name="is_active" value="0" <?= !$item['is_active'] ? 'checked' : '' ?> class="form-radio h-4 w-4 text-red-500 border-gray-300">
+                        <input type="radio" name="is_active" value="0" <?= !$item['is_active'] ? 'checked' : '' ?> class="form-radio h-4 w-4 text-red-500 border-gray-300 dark:border-gray-700">
                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Nonaktif</span>
                     </label>
                 </div>

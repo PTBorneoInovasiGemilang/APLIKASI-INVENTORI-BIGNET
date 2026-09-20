@@ -71,7 +71,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
                     $no = ($offset ?? 0) + 1;
                     foreach ($submissions as $sub): 
                     ?>
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                         <td data-label="No" class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center"><?= $no++ ?></td>
                         <td data-label="Kode" class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                             <?php echo htmlspecialchars($sub['submission_code']); ?>

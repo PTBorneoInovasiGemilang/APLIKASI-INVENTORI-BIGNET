@@ -58,7 +58,7 @@ if (empty($_SESSION['csrf_token'])) {
                     $no = $offset + 1;
                     foreach ($adjustments as $adj): 
                     ?>
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo date('d M Y, H:i', strtotime($adj['created_at'])); ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($adj['transaction_code']); ?></td>

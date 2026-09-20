@@ -39,10 +39,10 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
 
   <form method="GET" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-5">
     <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_220px_auto_auto] gap-3 items-end">
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Pencarian</label><input name="search" value="<?=htmlspecialchars($_GET['search']??'')?>" placeholder="Cari peminjam / gudang..." class="w-full border rounded-lg px-3 py-2.5"></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Status</label><select name="status" class="w-full border rounded-lg px-3 py-2.5"><option value="">Semua Status</option><?php foreach($labels as $v=>$x):?><option value="<?=$v?>" <?=$status===$v?'selected':''?>><?=$x[0]?></option><?php endforeach;?></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Pencarian</label><input name="search" value="<?=htmlspecialchars($_GET['search']??'')?>" placeholder="Cari peminjam / gudang..." class="w-full border rounded-lg px-3 py-2.5"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Status</label><select name="status" class="w-full border rounded-lg px-3 py-2.5"><option value="">Semua Status</option><?php foreach($labels as $v=>$x):?><option value="<?=$v?>" <?=$status===$v?'selected':''?>><?=$x[0]?></option><?php endforeach;?></select></div>
       <button class="bg-slate-800 text-white px-5 py-2.5 rounded-lg font-semibold">Cari</button>
-      <a href="<?=url('/loans')?>" class="bg-gray-100 px-5 py-2.5 rounded-lg font-semibold text-center">Reset</a>
+      <a href="<?=url('/loans')?>" class="bg-gray-100 dark:bg-gray-700 px-5 py-2.5 rounded-lg font-semibold text-center">Reset</a>
     </div>
   </form>
 
@@ -51,14 +51,14 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
       <table class="w-full min-w-[800px] lg:min-w-full">
         <thead class="bg-gray-50 dark:bg-gray-900/40">
           <tr>
-            <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase w-14">No</th>
-            <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Tanggal</th>
-            <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Peminjam</th>
-            <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Gudang</th>
-            <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase min-w-[280px]">Barang Dipinjam</th>
-            <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Jatuh Tempo</th>
-            <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-            <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase w-44">Aksi</th>
+            <th class="p-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-14">No</th>
+            <th class="p-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
+            <th class="p-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Peminjam</th>
+            <th class="p-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Gudang</th>
+            <th class="p-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase min-w-[280px]">Barang Dipinjam</th>
+            <th class="p-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Jatuh Tempo</th>
+            <th class="p-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Status</th>
+            <th class="p-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-44">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -70,7 +70,7 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
           $loanId=(int)$ln['id'];
           $returnUrl=url('/returns/create?loan_id='.$loanId);
         ?>
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40 align-top">
+          <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/40 align-top">
             <td class="p-4 text-center text-sm"><?=$no++?></td>
             <td class="p-4 text-sm whitespace-nowrap"><?=date('d M Y',strtotime($ln['loan_date']))?></td>
             <td class="p-4 text-sm font-semibold leading-5 max-w-[180px]"><?=htmlspecialchars($ln['borrower_name'])?></td>
@@ -102,7 +102,7 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
         </tbody>
       </table>
     </div>
-    <div class="p-4 text-sm text-gray-500">Menampilkan total <?=$totalItems?> data</div>
+    <div class="p-4 text-sm text-gray-500 dark:text-gray-400">Menampilkan total <?=$totalItems?> data</div>
     <?php $paginationBaseUrl=url('/loans'); require __DIR__.'/../../components/table/pagination.php'; ?>
   </div>
 </div>

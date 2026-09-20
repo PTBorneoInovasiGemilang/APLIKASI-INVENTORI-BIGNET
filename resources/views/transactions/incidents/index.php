@@ -73,7 +73,7 @@ ob_start();
                         <td class="px-4 py-3">
                             <?= date('d M Y H:i', strtotime($incident['reported_date'])) ?>
                             <br>
-                            <span class="text-xs text-gray-500"><?= $incident['warehouse_name'] ? htmlspecialchars($incident['warehouse_name']) : 'N/A' ?></span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400"><?= $incident['warehouse_name'] ? htmlspecialchars($incident['warehouse_name']) : 'N/A' ?></span>
                         </td>
                         <td class="px-4 py-3">
                             <?= htmlspecialchars($incident['reporter_name']) ?>

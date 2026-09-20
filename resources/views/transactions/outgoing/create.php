@@ -135,7 +135,7 @@ if (empty($_SESSION['csrf_token'])) {
             <div class="space-y-2">
                 <div class="flex items-center gap-2">
                     <input id="sn-search-${rowIndex}" type="search" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-sm text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Cari Serial Number..." autocomplete="off">
-                    <span id="sn-load-${rowIndex}" class="hidden text-xs text-gray-500 whitespace-nowrap">Memuat...</span>
+                    <span id="sn-load-${rowIndex}" class="hidden text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Memuat...</span>
                 </div>
                 <div id="sn-options-${rowIndex}" class="border border-gray-200 dark:border-gray-700 rounded-lg max-h-44 overflow-y-auto bg-white dark:bg-gray-800"></div>
                 <div class="flex items-center justify-between text-xs">
@@ -186,8 +186,8 @@ if (empty($_SESSION['csrf_token'])) {
                 return;
             }
             options.innerHTML = filtered.map(sn => `
-                <label class="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b last:border-b-0 border-gray-100 dark:border-gray-700">
-                    <input type="checkbox" value="${esc(sn)}" class="sn-check rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${selected.includes(sn) ? 'checked' : ''}>
+                <label class="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700 cursor-pointer border-b last:border-b-0 border-gray-100 dark:border-gray-700">
+                    <input type="checkbox" value="${esc(sn)}" class="sn-check rounded border-gray-300 dark:border-gray-700 text-blue-600 focus:ring-blue-500" ${selected.includes(sn) ? 'checked' : ''}>
                     <span class="text-sm text-gray-800 dark:text-gray-100">${esc(sn)}</span>
                 </label>`).join('');
 
@@ -277,7 +277,7 @@ if (empty($_SESSION['csrf_token'])) {
             <td class="px-4 py-3 align-top">
                 <div id="serial-picker-${rowIndex}"></div>
                 <input type="hidden" name="sn_list[]" id="sn-input-${rowIndex}" value="" disabled>
-                <div id="sn-counter-${rowIndex}" class="text-xs font-bold text-gray-500 mt-1"></div>
+                <div id="sn-counter-${rowIndex}" class="text-xs font-bold text-gray-500 dark:text-gray-400 mt-1"></div>
             </td>
             <td class="px-4 py-3 text-center align-top">
                 <button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700 mt-1"><i class="fas fa-trash"></i></button>
@@ -361,7 +361,7 @@ if (empty($_SESSION['csrf_token'])) {
             <td class="px-4 py-3 align-top">
                 <div id="serial-picker-${rowIndex}"></div>
                 <input type="hidden" name="sn_list[]" id="sn-input-${rowIndex}" value="" ${item.is_serialized == 1 ? '' : 'disabled'}>
-                <div id="sn-counter-${rowIndex}" class="text-xs font-bold text-gray-500 mt-1"></div>
+                <div id="sn-counter-${rowIndex}" class="text-xs font-bold text-gray-500 dark:text-gray-400 mt-1"></div>
             </td>
             <td class="px-4 py-3 text-center align-top">
                 <button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700 mt-1"><i class="fas fa-trash"></i></button>

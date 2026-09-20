@@ -144,13 +144,7 @@ unset($_SESSION['import_result']);
                 
                 <form action="<?php echo url('/import-export/import-items'); ?>" method="POST" enctype="multipart/form-data" class="flex items-center gap-2">
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                    <input type="file" name="csv_file" accept=".csv" required class="flex-1 block w-full text-sm text-gray-500 dark:text-gray-400
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-md file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-green-50 file:text-green-700
-                        hover:file:bg-green-100 dark:file:bg-gray-700 dark:file:text-gray-200
-                        cursor-pointer border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800">
+                    <input type="file" name="csv_file" accept=".csv" required class="flex-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 dark:file:bg-gray-700 dark:file:text-gray-200 cursor-pointer border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800">
                     <button type="submit"
                             data-confirm="Proses import data? Seluruh baris akan divalidasi sebelum disimpan."
                             data-confirm-title="Proses Import"

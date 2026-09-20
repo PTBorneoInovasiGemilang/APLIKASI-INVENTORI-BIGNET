@@ -51,7 +51,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
             $no = ($offset ?? 0) + 1;
             foreach ($incomings as $inc): 
             ?>
-            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+            <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center"><?= $no++ ?></td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($inc['transaction_code']); ?></td>
                 <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 min-w-[220px]">

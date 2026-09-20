@@ -43,7 +43,7 @@ $extraFilters = ob_get_clean();
 require __DIR__ . '/../../components/table/toolbar.php';
 ?>
 
-<div class="bg-white shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+<div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
     <div class="overflow-x-auto">
         <table class="w-full min-w-[800px] lg:min-w-full table-sticky divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-900/50">
@@ -54,6 +54,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kategori</th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Satuan</th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tipe</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Digunakan</th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                     <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
                 </tr>
@@ -63,7 +64,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
                 $no = ($offset ?? 0) + 1;
                 foreach ($items as $item): 
                 ?>
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors">
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center"><?= $no++ ?></td>
                     <td class="px-4 py-3 whitespace-nowrap">
                         <?php if ($item['photo_path']): ?>
@@ -83,6 +84,11 @@ require __DIR__ . '/../../components/table/toolbar.php';
                         <?php else: ?>
                             <?= \App\Helpers\UIHelper::badge('Curah (Bulk)', 'NEUTRAL') ?>
                         <?php endif; ?>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
+                        <span class="bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 py-1 px-2 rounded-full text-xs font-medium">
+                            <?php echo !empty($item['is_used']) ? 'Ya' : 'Tidak'; ?>
+                        </span>
                     </td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         <?php if ($item['is_active']): ?>

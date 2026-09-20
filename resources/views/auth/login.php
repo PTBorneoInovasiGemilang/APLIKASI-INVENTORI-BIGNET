@@ -72,7 +72,7 @@ if ($faviconFile && is_file(__DIR__ . '/../../../storage/private_uploads/' . bas
 
             <div class="relative z-10 flex items-center gap-3">
                 <?php if ($loginLogo): ?>
-                    <img src="<?= $loginLogo ?>" alt="Logo" class="h-10 object-contain bg-white/10 p-1.5 rounded-lg border border-white/20">
+                    <img src="<?= $loginLogo ?>" alt="Logo" class="h-10 object-contain bg-white dark:bg-gray-800/10 p-1.5 rounded-lg border border-white/20">
                 <?php else: ?>
                     <div class="h-10 w-10 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-xl shadow-md"><i class="fas fa-boxes-stacked"></i></div>
                 <?php endif; ?>
@@ -87,7 +87,7 @@ if ($faviconFile && is_file(__DIR__ . '/../../../storage/private_uploads/' . bas
                 <p class="text-base text-blue-100/90 leading-relaxed mb-8">
                     <?= htmlspecialchars($loginSubtitle) ?>
                 </p>
-                <div class="flex items-center gap-3 text-xs font-semibold text-blue-200 bg-white/10 backdrop-blur-md inline-flex px-4 py-2 rounded-full border border-white/10">
+                <div class="flex items-center gap-3 text-xs font-semibold text-blue-200 bg-white dark:bg-gray-800/10 backdrop-blur-md inline-flex px-4 py-2 rounded-full border border-white/10">
                     <span class="relative flex h-2.5 w-2.5">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -194,7 +194,7 @@ if ($faviconFile && is_file(__DIR__ . '/../../../storage/private_uploads/' . bas
                             <input class="w-full h-11 pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-800/80 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
                                 id="password" type="password" name="password" placeholder="••••••••" required>
                             
-                            <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none" aria-label="Tampilkan Kata Sandi">
+                            <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-300 focus:outline-none" aria-label="Tampilkan Kata Sandi">
                                 <i class="fas fa-eye text-sm" id="eyeIcon"></i>
                             </button>
                         </div>
@@ -209,7 +209,7 @@ if ($faviconFile && is_file(__DIR__ . '/../../../storage/private_uploads/' . bas
 
                     <div class="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800/80 text-center">
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Belum punya akun?</p>
-                        <a href="<?= url('/register') ?>" class="w-full h-11 inline-flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-700 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <a href="<?= url('/register') ?>" class="w-full h-11 inline-flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-700 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 transition-colors">
                             <i class="fas fa-user-plus text-xs text-gray-500 dark:text-gray-400"></i>
                             <span>Buat Akun Baru</span>
                         </a>

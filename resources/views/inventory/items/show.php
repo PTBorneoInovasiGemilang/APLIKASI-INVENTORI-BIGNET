@@ -173,7 +173,7 @@ ob_start();
                         $stPhysical = $item['is_serialized'] ? (int)($st['serials_in_wh'] ?? 0) : (int)$st['physical'];
                         $stAvailable = $item['is_serialized'] ? (int)($st['avail_serials'] ?? 0) : $stPhysical;
                     ?>
-                    <li class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <li class="p-4 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50">
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-semibold text-sm text-gray-900 dark:text-gray-100">
                                 <i class="fas fa-map-marker-alt text-gray-400 mr-1"></i> <?= htmlspecialchars($st['warehouse_name']) ?>
@@ -228,7 +228,7 @@ ob_start();
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                             <?php foreach ($installations as $inst): ?>
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50">
                                 <td class="p-4 text-gray-900 dark:text-gray-200"><?= date('d/m/Y H:i', strtotime($inst['installed_at'])) ?></td>
                                 <td class="p-4">
                                     <div class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($inst['customer_name']) ?></div>
@@ -283,7 +283,7 @@ ob_start();
                             <?php foreach ($history as $log): ?>
                                 <?php if ($snDetail): ?>
                                     <!-- Log untuk SN (serial_movements) -->
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                    <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50">
                                         <td class="p-3 text-xs text-gray-500 dark:text-gray-400"><?= date('d/m/Y H:i', strtotime($log['created_at'])) ?></td>
                                         <td class="p-3">
                                             <span class="px-2 py-0.5 inline-flex items-center gap-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
@@ -307,7 +307,7 @@ ob_start();
                                     $refCode = $log['ref_code'] ?? null;
                                     $refRoute = $log['ref_route'] ?? null;
                                     ?>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                    <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50">
                                         <td class="p-3 text-xs text-gray-500 dark:text-gray-400"><?= date('d/m/Y H:i', strtotime($log['created_at'])) ?></td>
                                         <td class="p-3">
                                             <div class="font-semibold text-gray-800 dark:text-gray-200"><?= htmlspecialchars(\App\Helpers\UIHelper::mutationTypeLabel($log['transaction_type'])) ?></div>
@@ -374,7 +374,7 @@ ob_start();
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                             <?php foreach ($serials as $sn): ?>
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50">
                                 <td class="p-3 font-mono font-bold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($sn['serial_number']) ?></td>
                                 <td class="p-3 text-xs">
                                     <div class="font-bold text-gray-800 dark:text-gray-200"><?= htmlspecialchars(\App\Helpers\UIHelper::statusLabel($sn['status'])) ?></div>
@@ -407,7 +407,7 @@ ob_start();
 <!-- QR Modal -->
 <div id="qrModal" class="fixed z-50 inset-0 overflow-y-auto hidden" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+        <div class="fixed inset-0 bg-gray-50 dark:bg-gray-9000 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:align-middle sm:max-w-sm sm:w-full">
             <div class="px-6 py-5 text-center">

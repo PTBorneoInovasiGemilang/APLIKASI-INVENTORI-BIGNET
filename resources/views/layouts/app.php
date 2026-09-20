@@ -155,7 +155,7 @@ function renderHeader($label, $sidebarGroupText) {
         .table-sticky tbody td:last-child { position: sticky; right: 0; z-index: 10; background-color: #ffffff; }
         .table-sticky thead th:last-child { background-color: #f9fafb; }
         .dark .table-sticky thead th:first-child,
-        .dark .table-sticky thead th:last-child { background-color: rgba(17, 24, 39, 0.5); }
+        .dark .table-sticky thead th:last-child { background-color: #374151; }
         .dark .table-sticky tbody td:first-child,
         .dark .table-sticky tbody td:last-child { background-color: #1f2937; }
         .table-sticky tbody tr td:only-child { position: static; left: auto; right: auto; }
@@ -294,7 +294,7 @@ function renderHeader($label, $sidebarGroupText) {
                 </div>
             <?php endif; ?>
             <div>
-                <h1 class="text-base font-bold tracking-tight <?= $sidebarTheme === 'dark' ? 'text-white' : 'text-gray-900' ?>"><?= htmlspecialchars($appShortName) ?></h1>
+                <h1 class="text-base font-bold tracking-tight <?= $sidebarTheme === 'dark' ? 'text-white' : 'text-gray-900 dark:text-gray-100' ?>"><?= htmlspecialchars($appShortName) ?></h1>
                 <p class="text-xs <?= $sidebarGroupText ?> -mt-0.5">Sistem Gudang</p>
             </div>
         </a>
@@ -408,11 +408,11 @@ function renderHeader($label, $sidebarGroupText) {
                 <div class="min-w-0"><h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h2></div>
             </div>
             <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
-                <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-sm"></i></button>
+                <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-sm"></i></button>
                 <span class="text-xs text-gray-400 dark:text-gray-500 hidden sm:block font-medium"><?= date('l, d M Y') ?></span>
                 <?php if (isset($_SESSION['user_id'])): ?>
                 <?php $unreadCount = \App\Helpers\NotificationHelper::unreadCount((int)$_SESSION['user_id']); ?>
-                <a href="<?= url('/notifications') ?>" class="relative text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Notifikasi"><i class="fas fa-bell text-sm"></i><?php if ($unreadCount > 0): ?><span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span><?php endif; ?></a>
+                <a href="<?= url('/notifications') ?>" class="relative text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-800 transition-colors" aria-label="Notifikasi"><i class="fas fa-bell text-sm"></i><?php if ($unreadCount > 0): ?><span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span><?php endif; ?></a>
                 <?php endif; ?>
                 <div class="relative ml-3">
                     <button id="userDropdownBtn" class="flex items-center space-x-2 focus:outline-none">
@@ -420,8 +420,8 @@ function renderHeader($label, $sidebarGroupText) {
                     </button>
                     <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
                         <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700"><p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><?= htmlspecialchars($userName) ?></p><p class="text-xs text-gray-500 dark:text-gray-400 truncate"><?= $roleLabel ?></p></div>
-                        <a href="<?= url('/profile') ?>" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fas fa-user-circle mr-2 w-4 text-center"></i> Profil Saya</a>
-                        <a href="<?= url('/profile?tab=password') ?>" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fas fa-key mr-2 w-4 text-center"></i> Ubah Password</a>
+                        <a href="<?= url('/profile') ?>" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-700"><i class="fas fa-user-circle mr-2 w-4 text-center"></i> Profil Saya</a>
+                        <a href="<?= url('/profile?tab=password') ?>" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-700"><i class="fas fa-key mr-2 w-4 text-center"></i> Ubah Password</a>
                         <a href="<?= url('/logout') ?>" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 border-t border-gray-100 dark:border-gray-700 mt-1"><i class="fas fa-sign-out-alt mr-2 w-4 text-center"></i> Keluar</a>
                     </div>
                 </div>

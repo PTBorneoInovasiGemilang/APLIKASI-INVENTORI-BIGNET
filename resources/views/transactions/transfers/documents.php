@@ -95,28 +95,28 @@ $documentNoFor = static function (array $row, string $baseCode): string {
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
  <div class="no-print mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
   <div class="flex items-center gap-3">
-   <a href="<?=url('/transfers/show?id='.(int)$transfer['id'])?>" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50"><i class="fas fa-arrow-left"></i></a>
-   <div><h1 class="text-2xl font-bold text-gray-900">Riwayat Surat Jalan</h1><p class="text-sm text-gray-500">Setiap pengiriman dan penerimaan menghasilkan lembar Surat Jalan baru. Lembar sebelumnya tetap menjadi arsip dan tidak diperbarui.</p></div>
+   <a href="<?=url('/transfers/show?id='.(int)$transfer['id'])?>" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50"><i class="fas fa-arrow-left"></i></a>
+   <div><h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Riwayat Surat Jalan</h1><p class="text-sm text-gray-500 dark:text-gray-400">Setiap pengiriman dan penerimaan menghasilkan lembar Surat Jalan baru. Lembar sebelumnya tetap menjadi arsip dan tidak diperbarui.</p></div>
   </div>
   <?php if($version): ?><button type="button" onclick="window.print()" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white"><i class="fas fa-print"></i> Cetak Lembar Ini</button><?php endif; ?>
  </div>
 
  <div class="no-print mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
  <?php foreach($versions as $v): $active=$version && (int)$version['id']===(int)$v['id']; $cardDocNo=$documentNoFor($v,$baseCode); ?>
-  <a href="<?=url('/transfers/documents?id='.(int)$transfer['id'].'&version='.(int)$v['version_no'])?>" class="rounded-2xl border p-4 transition <?=$active?'border-blue-500 bg-blue-50 shadow-sm':'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/40'?>">
+  <a href="<?=url('/transfers/documents?id='.(int)$transfer['id'].'&version='.(int)$v['version_no'])?>" class="rounded-2xl border p-4 transition <?=$active?'border-blue-500 bg-blue-50 shadow-sm':'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 hover:bg-blue-50/40'?>">
    <div class="flex items-center justify-between gap-3"><span class="rounded-full bg-gray-900 px-2.5 py-1 text-[10px] font-bold text-white">LEMBAR <?= (int)$v['version_no'] ?></span><i class="fas fa-file-lines text-blue-600"></i></div>
-   <div class="mt-3 text-sm font-bold text-gray-900"><?=htmlspecialchars($v['event_label'])?></div>
-   <div class="mt-1 text-xs text-gray-500"><?=date('d M Y, H:i',strtotime($v['created_at']))?></div>
+   <div class="mt-3 text-sm font-bold text-gray-900 dark:text-gray-100"><?=htmlspecialchars($v['event_label'])?></div>
+   <div class="mt-1 text-xs text-gray-500 dark:text-gray-400"><?=date('d M Y, H:i',strtotime($v['created_at']))?></div>
    <div class="mt-2 text-xs font-semibold text-blue-700"><?=htmlspecialchars($cardDocNo)?></div>
   </a>
  <?php endforeach; ?>
  </div>
 
  <?php if(!$version): ?>
-  <div class="no-print rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-gray-500">Belum ada Surat Jalan tersimpan untuk transfer ini.</div>
+  <div class="no-print rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-10 text-center text-gray-500 dark:text-gray-400">Belum ada Surat Jalan tersimpan untuk transfer ini.</div>
  <?php else: ?>
   <?php $displayDocumentNo=$documentNoFor($version,$baseCode); ?>
-  <section id="surat-jalan-version" class="sj-document-card rounded-2xl border border-gray-200 bg-white shadow-sm">
+  <section id="surat-jalan-version" class="sj-document-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
    <div class="sj-doc-header border-b-2 border-gray-900 pb-4">
     <div class="sj-company"><img class="logo" src="<?=url('/logo')?>" alt="Logo"><div><div class="sj-company-name">PT. BORNEO INOVASI GEMILANG</div><div class="sj-company-sub">Sistem Inventori & Distribusi Internal</div></div></div>
     <div class="sj-title"><div class="sj-title-main">SURAT JALAN</div><div class="sj-title-no">NO. <?=htmlspecialchars($displayDocumentNo)?></div><div class="sj-title-meta">Lembar <?= (int)$version['version_no'] ?> · <?=htmlspecialchars($version['event_label'])?></div></div>
@@ -127,8 +127,8 @@ $documentNoFor = static function (array $row, string $baseCode): string {
     <div><div class="sj-meta-label">Ke Gudang</div><div class="sj-meta-value"><?=htmlspecialchars($version['destination_warehouse'] ?? $transfer['dest_warehouse'] ?? '-')?></div></div>
     <div><div class="sj-meta-label">Tanggal Pengiriman</div><div class="sj-meta-value"><?=!empty($version['sent_at'])?date('d F Y, H:i',strtotime($version['sent_at'])):'-'?></div></div>
     <div><div class="sj-meta-label">Pengirim</div><div class="sj-meta-value"><?=htmlspecialchars($version['sender_name'] ?? '-')?></div></div>
-    <div><div class="sj-meta-label">Supir / Pembawa</div><div class="sj-meta-value"><?=htmlspecialchars($version['driver_name'] ?? '-')?></div><div class="text-[10px] text-gray-500"><?=htmlspecialchars($version['vehicle_number'] ?? '')?><?=($version['driver_phone']??'')?' · '.htmlspecialchars($version['driver_phone']):''?></div></div>
-    <div><div class="sj-meta-label">Penerima</div><div class="sj-meta-value"><?=htmlspecialchars($version['receiver_name'] ?? 'Belum menerima')?></div><div class="text-[10px] text-gray-500"><?=htmlspecialchars($version['receiver_role'] ?? '')?><?=($version['receiver_phone']??'')?' · '.htmlspecialchars($version['receiver_phone']):''?></div></div>
+    <div><div class="sj-meta-label">Supir / Pembawa</div><div class="sj-meta-value"><?=htmlspecialchars($version['driver_name'] ?? '-')?></div><div class="text-[10px] text-gray-500 dark:text-gray-400"><?=htmlspecialchars($version['vehicle_number'] ?? '')?><?=($version['driver_phone']??'')?' · '.htmlspecialchars($version['driver_phone']):''?></div></div>
+    <div><div class="sj-meta-label">Penerima</div><div class="sj-meta-value"><?=htmlspecialchars($version['receiver_name'] ?? 'Belum menerima')?></div><div class="text-[10px] text-gray-500 dark:text-gray-400"><?=htmlspecialchars($version['receiver_role'] ?? '')?><?=($version['receiver_phone']??'')?' · '.htmlspecialchars($version['receiver_phone']):''?></div></div>
    </div>
 
    <?php if($isReceiptVersion): ?><div class="sj-receipt-banner"><strong>PENERIMAAN LEMBAR <?= (int)$version['version_no'] - 1 ?>:</strong> <?=htmlspecialchars($version['receiver_name'] ?? 'Belum menerima')?><?php if(!empty($version['received_at'])): ?> · <?=date('d F Y, H:i',strtotime($version['received_at']))?><?php endif; ?>. Dokumen ini merekam kondisi Surat Jalan pada saat penerimaan.</div><?php endif; ?>
@@ -148,14 +148,14 @@ $documentNoFor = static function (array $row, string $baseCode): string {
    </div>
 
    <div class="sj-bottom-grid">
-    <div><div class="sj-meta-label">Catatan</div><div class="mt-1 min-h-14 rounded-xl border border-gray-300 p-2.5 text-[11px] whitespace-pre-line"><?=htmlspecialchars($version['notes']??'')?></div></div>
-    <div class="rounded-xl border border-gray-300 p-3"><div class="sj-meta-label">Keterangan Dokumen</div><div class="mt-1 text-[11px] leading-4">Lembar ini adalah salinan Surat Jalan yang dibekukan pada saat <?=htmlspecialchars(strtolower($version['event_label']))?>. Lembar sebelumnya tetap menjadi arsip dan tidak diperbarui.</div></div>
+    <div><div class="sj-meta-label">Catatan</div><div class="mt-1 min-h-14 rounded-xl border border-gray-300 dark:border-gray-700 p-2.5 text-[11px] whitespace-pre-line"><?=htmlspecialchars($version['notes']??'')?></div></div>
+    <div class="rounded-xl border border-gray-300 dark:border-gray-700 p-3"><div class="sj-meta-label">Keterangan Dokumen</div><div class="mt-1 text-[11px] leading-4">Lembar ini adalah salinan Surat Jalan yang dibekukan pada saat <?=htmlspecialchars(strtolower($version['event_label']))?>. Lembar sebelumnya tetap menjadi arsip dan tidak diperbarui.</div></div>
    </div>
 
    <div class="sj-signatures">
-    <div class="sj-signature-box"><div class="text-[11px] font-semibold">Pengirim</div><div class="sj-signature-line"><div class="font-bold text-[11px]"><?=htmlspecialchars($version['sender_name'] ?? '________________')?></div><div class="text-[9px] text-gray-500">Tanda tangan & nama jelas</div></div></div>
-    <div class="sj-signature-box"><div class="text-[11px] font-semibold">Supir / Pembawa</div><div class="sj-signature-line"><div class="font-bold text-[11px]"><?=htmlspecialchars($version['driver_name'] ?? '________________')?></div><div class="text-[9px] text-gray-500">Tanda tangan & nama jelas</div></div></div>
-    <div class="sj-signature-box"><div class="text-[11px] font-semibold">Penerima</div><div class="sj-signature-line"><div class="font-bold text-[11px]"><?=htmlspecialchars($version['receiver_name'] ?? '________________')?></div><div class="text-[9px] text-gray-500"><?=htmlspecialchars($version['receiver_role'] ?? 'Tanda tangan & nama jelas')?></div></div></div>
+    <div class="sj-signature-box"><div class="text-[11px] font-semibold">Pengirim</div><div class="sj-signature-line"><div class="font-bold text-[11px]"><?=htmlspecialchars($version['sender_name'] ?? '________________')?></div><div class="text-[9px] text-gray-500 dark:text-gray-400">Tanda tangan & nama jelas</div></div></div>
+    <div class="sj-signature-box"><div class="text-[11px] font-semibold">Supir / Pembawa</div><div class="sj-signature-line"><div class="font-bold text-[11px]"><?=htmlspecialchars($version['driver_name'] ?? '________________')?></div><div class="text-[9px] text-gray-500 dark:text-gray-400">Tanda tangan & nama jelas</div></div></div>
+    <div class="sj-signature-box"><div class="text-[11px] font-semibold">Penerima</div><div class="sj-signature-line"><div class="font-bold text-[11px]"><?=htmlspecialchars($version['receiver_name'] ?? '________________')?></div><div class="text-[9px] text-gray-500 dark:text-gray-400"><?=htmlspecialchars($version['receiver_role'] ?? 'Tanda tangan & nama jelas')?></div></div></div>
    </div>
 
    <div class="sj-footer"><span><?=htmlspecialchars($displayDocumentNo)?></span><span>Halaman 1 · Lembar <?= (int)$version['version_no'] ?></span></div>

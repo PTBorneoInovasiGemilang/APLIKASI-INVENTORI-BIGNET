@@ -55,7 +55,7 @@ ob_start();
                         <td class="px-4 py-3">
                             <?= date('d M Y H:i', strtotime($opname['opname_date'])) ?>
                             <br>
-                            <span class="text-xs text-gray-500">Oleh: <?= htmlspecialchars($opname['conducted_by_name']) ?></span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">Oleh: <?= htmlspecialchars($opname['conducted_by_name']) ?></span>
                         </td>
                         <td class="px-4 py-3">
                             <?php 

@@ -171,7 +171,7 @@ $badge = $statusBadge[$user['account_status']] ?? ['Tidak Diketahui', 'NEUTRAL']
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <?php foreach ($auditHistory as $log): ?>
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <tr class="hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50">
                                     <td class="px-4 py-3 whitespace-nowrap text-gray-600 dark:text-gray-300"><?= date('d M Y H:i', strtotime($log['created_at'])) ?></td>
                                     <td class="px-4 py-3">
                                         <?= \App\Helpers\UIHelper::badge(htmlspecialchars($log['action']), 'NEUTRAL') ?>
