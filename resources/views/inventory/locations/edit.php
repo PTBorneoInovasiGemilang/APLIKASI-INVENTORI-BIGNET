@@ -30,11 +30,6 @@ if (empty($_SESSION['csrf_token'])) {
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kode</label>
-                    <input type="text" value="<?= htmlspecialchars($location['code']) ?>" disabled class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 shadow-sm cursor-not-allowed">
-                </div>
-
-                <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama</label>
                     <!-- Name Field -->
                     <input type="text" name="name" value="<?= htmlspecialchars($location['name']) ?>" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
