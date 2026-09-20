@@ -52,7 +52,8 @@ class LocationController {
         $totalItems = $stmtCount->fetchColumn();
         $totalPages = ceil($totalItems / $limit);
 
-        $sql = "SELECT l.*, w.name as warehouse_name 
+        $sql = "SELECT l.*, w.name as warehouse_name,
+                       (EXISTS (SELECT 1 FROM serial_numbers WHERE current_location_id = l.id)) as is_used
                 FROM locations l 
                 JOIN warehouses w ON l.warehouse_id = w.id 
                 $whereSql
@@ -283,6 +284,51 @@ class LocationController {
         }
 
         header("Location: " . url('/locations' . ($warehouse_id ? "?warehouse_id=$warehouse_id" : "")));
+        exit;
+    }
+
+    public function delete($id) {
+        \App\Helpers\AuthHelper::requireRole('ADMIN');
+        if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
+            $_SESSION['error'] = "CSRF token validation failed.";
+            header("Location: " . url('/locations'));
+            exit;
+        }
+
+        $id = (int)$id;
+        if (!$id) {
+            $_SESSION['error'] = "Invalid location ID.";
+            header("Location: " . url('/locations'));
+            exit;
+        }
+
+        $pdo = Database::getInstance()->getConnection();
+        
+        // Lokasi yang masih dipakai nomor seri TIDAK boleh dihapus.
+        $stmtUsed = $pdo->prepare("SELECT COUNT(*) FROM serial_numbers WHERE current_location_id = ?");
+        $stmtUsed->execute([$id]);
+        if ($stmtUsed->fetchColumn() > 0) {
+            $_SESSION['error'] = "Lokasi tidak dapat dihapus karena masih digunakan oleh nomor seri.";
+            header("Location: " . url('/locations'));
+            exit;
+        }
+
+        try {
+            $pdo->beginTransaction();
+            $del = $pdo->prepare("DELETE FROM locations WHERE id = ?");
+            $del->execute([$id]);
+            
+            $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'DELETE', 'locations', ?)");
+            $auditStmt->execute([AuthHelper::user()['id'], $id]);
+            
+            $pdo->commit();
+            $_SESSION['success'] = "Lokasi berhasil dihapus.";
+        } catch (\PDOException $e) {
+            $pdo->rollBack();
+            $_SESSION['error'] = "Gagal menghapus data. Silakan coba lagi.";
+        }
+
+        header("Location: " . url('/locations'));
         exit;
     }
 }

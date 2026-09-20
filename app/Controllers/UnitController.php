@@ -256,4 +256,49 @@ class UnitController {
         header("Location: " . url('/units'));
         exit;
     }
+
+    public function delete($id) {
+        \App\Helpers\AuthHelper::requireRole('ADMIN');
+        if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
+            $_SESSION['error'] = "CSRF token validation failed.";
+            header("Location: " . url('/units'));
+            exit;
+        }
+
+        $id = (int)$id;
+        if (!$id) {
+            $_SESSION['error'] = "Invalid unit ID.";
+            header("Location: " . url('/units'));
+            exit;
+        }
+
+        $pdo = Database::getInstance()->getConnection();
+        
+        // Satuan yang masih dipakai item TIDAK boleh dihapus
+        $stmtUsed = $pdo->prepare("SELECT COUNT(*) FROM master_items WHERE unit_id = ?");
+        $stmtUsed->execute([$id]);
+        if ($stmtUsed->fetchColumn() > 0) {
+            $_SESSION['error'] = "Satuan tidak dapat dihapus karena masih digunakan oleh master barang.";
+            header("Location: " . url('/units'));
+            exit;
+        }
+
+        try {
+            $pdo->beginTransaction();
+            $del = $pdo->prepare("DELETE FROM units WHERE id = ?");
+            $del->execute([$id]);
+            
+            $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'DELETE', 'units', ?)");
+            $auditStmt->execute([AuthHelper::user()['id'], $id]);
+            
+            $pdo->commit();
+            $_SESSION['success'] = "Satuan berhasil dihapus.";
+        } catch (\PDOException $e) {
+            $pdo->rollBack();
+            $_SESSION['error'] = "Gagal menghapus data. Silakan coba lagi.";
+        }
+
+        header("Location: " . url('/units'));
+        exit;
+    }
 }

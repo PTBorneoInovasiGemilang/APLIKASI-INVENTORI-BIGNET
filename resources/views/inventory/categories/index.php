@@ -123,6 +123,25 @@ if (empty($_SESSION['csrf_token'])) {
                     <?php if (\App\Helpers\AuthHelper::hasRole('ADMIN')): ?>
                     <?php
                     $rowActions = [['type' => 'view', 'url' => url('/categories/edit/' . (int)$cat['id']), 'label' => 'Ubah', 'icon' => 'fa-edit']];
+                    if (($cat['used_count'] ?? 0) == 0) {
+                        $rowActions[] = [
+                            'type' => 'form',
+                            'action' => url('/categories/delete/' . (int)$cat['id']),
+                            'fields' => [
+                                'csrf_token' => $_SESSION['csrf_token']
+                            ],
+                            'label' => 'Hapus',
+                            'icon' => 'fa-trash',
+                            'danger' => true,
+                            'confirm' => [
+                                'title' => 'Hapus Kategori?',
+                                'message' => 'Apakah Anda yakin ingin menghapus kategori ini?',
+                                'type' => 'danger',
+                                'confirm' => 'Hapus',
+                                'loading' => 'Menghapus...'
+                            ]
+                        ];
+                    }
                     require __DIR__ . '/../../components/table/row_actions.php';
                     ?>
                     <?php endif; ?>

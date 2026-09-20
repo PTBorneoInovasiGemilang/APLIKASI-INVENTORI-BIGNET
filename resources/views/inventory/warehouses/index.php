@@ -69,8 +69,11 @@ if (empty($_SESSION['csrf_token'])) {
                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Alamat</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Digunakan</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                        <?php if (!\App\Helpers\AuthHelper::hasRole('SUPERADMIN')): ?>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -87,6 +90,11 @@ if (empty($_SESSION['csrf_token'])) {
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center"><?= $no++ ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($wh['name']); ?></td>
                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs"><?php echo htmlspecialchars($wh['address']); ?></td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
+                            <span class="bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 py-1 px-2 rounded-full text-xs font-medium">
+                                <?php echo !empty($wh['is_used']) ? 'Ya' : 'Tidak'; ?>
+                            </span>
+                        </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             <?php if ($wh['is_active']): ?>
                                 <?= \App\Helpers\UIHelper::badge('Aktif', 'SUCCESS') ?>
@@ -94,14 +102,35 @@ if (empty($_SESSION['csrf_token'])) {
                                 <?= \App\Helpers\UIHelper::badge('Nonaktif', 'DANGER') ?>
                             <?php endif; ?>
                         </td>
+                        <?php if (!\App\Helpers\AuthHelper::hasRole('SUPERADMIN')): ?>
                         <?php
                         $rowActions = [];
                         $rowActions[] = ['type' => 'view', 'url' => url('/locations?warehouse_id=' . (int)$wh['id']), 'label' => 'Lihat Lokasi', 'icon' => 'fa-map-marker-alt'];
                         if (\App\Helpers\AuthHelper::hasRole('ADMIN')) {
                             $rowActions[] = ['type' => 'link', 'url' => url('/warehouses/edit/' . (int)$wh['id']), 'label' => 'Ubah', 'icon' => 'fa-edit'];
+                            if (empty($wh['is_used'])) {
+                                $rowActions[] = [
+                                    'type' => 'form',
+                                    'action' => url('/warehouses/delete/' . (int)$wh['id']),
+                                    'fields' => [
+                                        'csrf_token' => $_SESSION['csrf_token']
+                                    ],
+                                    'label' => 'Hapus',
+                                    'icon' => 'fa-trash',
+                                    'danger' => true,
+                                    'confirm' => [
+                                        'title' => 'Hapus Gudang?',
+                                        'message' => 'Apakah Anda yakin ingin menghapus gudang ini?',
+                                        'type' => 'danger',
+                                        'confirm' => 'Hapus',
+                                        'loading' => 'Menghapus...'
+                                    ]
+                                ];
+                            }
                         }
                         require __DIR__ . '/../../components/table/row_actions.php';
                         ?>
+                        <?php endif; ?>
                     </tr>
                     <?php endforeach; ?>
                     <?php if (empty($warehouses)): ?>

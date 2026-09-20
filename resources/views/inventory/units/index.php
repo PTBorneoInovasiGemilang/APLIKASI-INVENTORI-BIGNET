@@ -121,6 +121,25 @@ if (empty($_SESSION['csrf_token'])) {
                     <?php if (\App\Helpers\AuthHelper::hasRole('ADMIN')): ?>
                     <?php
                     $rowActions = [['type' => 'view', 'url' => url('/units/edit/' . (int)$unit['id']), 'label' => 'Ubah', 'icon' => 'fa-edit']];
+                    if (($unit['used_count'] ?? 0) == 0) {
+                        $rowActions[] = [
+                            'type' => 'form',
+                            'action' => url('/units/delete/' . (int)$unit['id']),
+                            'fields' => [
+                                'csrf_token' => $_SESSION['csrf_token']
+                            ],
+                            'label' => 'Hapus',
+                            'icon' => 'fa-trash',
+                            'danger' => true,
+                            'confirm' => [
+                                'title' => 'Hapus Satuan?',
+                                'message' => 'Apakah Anda yakin ingin menghapus satuan ini?',
+                                'type' => 'danger',
+                                'confirm' => 'Hapus',
+                                'loading' => 'Menghapus...'
+                            ]
+                        ];
+                    }
                     require __DIR__ . '/../../components/table/row_actions.php';
                     ?>
                     <?php endif; ?>

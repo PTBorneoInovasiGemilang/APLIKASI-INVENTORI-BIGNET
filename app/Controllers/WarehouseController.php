@@ -47,7 +47,20 @@ class WarehouseController {
         $totalItems = $stmtCount->fetchColumn();
         $totalPages = ceil($totalItems / $limit);
 
-        $sql = "SELECT * FROM warehouses $whereSql ORDER BY id DESC LIMIT $limit OFFSET $offset";
+        $sql = "SELECT w.*, 
+                    (
+                        EXISTS (SELECT 1 FROM locations WHERE warehouse_id = w.id)
+                        OR EXISTS (SELECT 1 FROM stocks WHERE warehouse_id = w.id)
+                        OR EXISTS (SELECT 1 FROM serial_numbers WHERE current_warehouse_id = w.id)
+                        OR EXISTS (SELECT 1 FROM incoming WHERE warehouse_id = w.id)
+                        OR EXISTS (SELECT 1 FROM outgoing WHERE warehouse_id = w.id)
+                        OR EXISTS (SELECT 1 FROM transfers WHERE source_warehouse_id = w.id OR destination_warehouse_id = w.id)
+                        OR EXISTS (SELECT 1 FROM stock_ledgers WHERE warehouse_id = w.id)
+                        OR EXISTS (SELECT 1 FROM stock_adjustments WHERE warehouse_id = w.id)
+                        OR EXISTS (SELECT 1 FROM stock_opnames WHERE warehouse_id = w.id)
+                        OR EXISTS (SELECT 1 FROM incidents WHERE warehouse_id = w.id)
+                    ) as is_used
+                FROM warehouses w $whereSql ORDER BY w.id DESC LIMIT $limit OFFSET $offset";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $warehouses = $stmt->fetchAll();
@@ -274,6 +287,64 @@ class WarehouseController {
         } catch (\Exception $e) {
             $pdo->rollBack();
             $_SESSION['error'] = $e->getMessage();
+        }
+
+        header("Location: " . url('/warehouses'));
+        exit;
+    }
+
+    public function delete($id) {
+        \App\Helpers\AuthHelper::requireRole('ADMIN');
+        if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
+            $_SESSION['error'] = "CSRF token validation failed.";
+            header("Location: " . url('/warehouses'));
+            exit;
+        }
+
+        $id = (int)$id;
+        if (!$id) {
+            $_SESSION['error'] = "Invalid warehouse ID.";
+            header("Location: " . url('/warehouses'));
+            exit;
+        }
+
+        $pdo = Database::getInstance()->getConnection();
+        
+        // Gudang yang masih direferensikan TIDAK boleh dihapus.
+        $stmtUsed = $pdo->prepare("
+            SELECT 1 FROM warehouses WHERE id = ? AND (
+                EXISTS (SELECT 1 FROM locations WHERE warehouse_id = id)
+                OR EXISTS (SELECT 1 FROM stocks WHERE warehouse_id = id)
+                OR EXISTS (SELECT 1 FROM serial_numbers WHERE current_warehouse_id = id)
+                OR EXISTS (SELECT 1 FROM incoming WHERE warehouse_id = id)
+                OR EXISTS (SELECT 1 FROM outgoing WHERE warehouse_id = id)
+                OR EXISTS (SELECT 1 FROM transfers WHERE source_warehouse_id = id OR destination_warehouse_id = id)
+                OR EXISTS (SELECT 1 FROM stock_ledgers WHERE warehouse_id = id)
+                OR EXISTS (SELECT 1 FROM stock_adjustments WHERE warehouse_id = id)
+                OR EXISTS (SELECT 1 FROM stock_opnames WHERE warehouse_id = id)
+                OR EXISTS (SELECT 1 FROM incidents WHERE warehouse_id = id)
+            )
+        ");
+        $stmtUsed->execute([$id]);
+        if ($stmtUsed->fetchColumn()) {
+            $_SESSION['error'] = "Gudang tidak dapat dihapus karena masih memiliki stok/transaksi/lokasi terkait.";
+            header("Location: " . url('/warehouses'));
+            exit;
+        }
+
+        try {
+            $pdo->beginTransaction();
+            $del = $pdo->prepare("DELETE FROM warehouses WHERE id = ?");
+            $del->execute([$id]);
+            
+            $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'DELETE', 'warehouses', ?)");
+            $auditStmt->execute([AuthHelper::user()['id'], $id]);
+            
+            $pdo->commit();
+            $_SESSION['success'] = "Gudang berhasil dihapus.";
+        } catch (\PDOException $e) {
+            $pdo->rollBack();
+            $_SESSION['error'] = "Gagal menghapus data. Silakan coba lagi.";
         }
 
         header("Location: " . url('/warehouses'));

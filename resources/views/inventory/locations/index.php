@@ -83,6 +83,7 @@ if (empty($_SESSION['csrf_token'])) {
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Gudang</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kode</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama Lokasi</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Digunakan</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                         <?php if (!\App\Helpers\AuthHelper::hasRole('SUPERADMIN')): ?>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
@@ -104,6 +105,11 @@ if (empty($_SESSION['csrf_token'])) {
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($loc['warehouse_name']); ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($loc['code']); ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($loc['name']); ?></td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
+                            <span class="bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 py-1 px-2 rounded-full text-xs font-medium">
+                                <?php echo !empty($loc['is_used']) ? 'Ya' : 'Tidak'; ?>
+                            </span>
+                        </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             <?php if ($loc['is_active']): ?>
                                 <?= \App\Helpers\UIHelper::badge('Aktif', 'SUCCESS') ?>
@@ -114,6 +120,25 @@ if (empty($_SESSION['csrf_token'])) {
                         <?php if (\App\Helpers\AuthHelper::hasRole('ADMIN')): ?>
                         <?php
                         $rowActions = [['type' => 'view', 'url' => url('/locations/edit/' . (int)$loc['id']), 'label' => 'Ubah', 'icon' => 'fa-edit']];
+                        if (empty($loc['is_used'])) {
+                            $rowActions[] = [
+                                'type' => 'form',
+                                'action' => url('/locations/delete/' . (int)$loc['id']),
+                                'fields' => [
+                                    'csrf_token' => $_SESSION['csrf_token']
+                                ],
+                                'label' => 'Hapus',
+                                'icon' => 'fa-trash',
+                                'danger' => true,
+                                'confirm' => [
+                                    'title' => 'Hapus Lokasi?',
+                                    'message' => 'Apakah Anda yakin ingin menghapus lokasi ini?',
+                                    'type' => 'danger',
+                                    'confirm' => 'Hapus',
+                                    'loading' => 'Menghapus...'
+                                ]
+                            ];
+                        }
                         require __DIR__ . '/../../components/table/row_actions.php';
                         ?>
                         <?php endif; ?>
