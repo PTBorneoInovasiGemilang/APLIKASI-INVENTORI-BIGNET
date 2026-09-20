@@ -41,33 +41,33 @@ foreach($q->fetchAll(PDO::FETCH_ASSOC) as $sn)$availableSerials[(int)$sn['curren
 .dark body:has(#transferForm) #serialModal input{background:#0f172a!important;color:#f8fafc!important;border-color:#4b5563!important}
 </style>
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-6 flex items-center gap-3">
-        <a href="<?=url('/transfers')?>" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"><i class="fas fa-arrow-left"></i></a>
-        <div><h1 class="text-2xl font-bold">Transfer Gudang Baru</h1><p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tentukan tujuan, pembawa barang, lalu pilih barang yang benar-benar dikirim.</p></div>
-    </div>
-    <div id="transferClientError" class="mb-5 hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><i class="fas fa-circle-exclamation mr-2"></i><span></span></div>
-    <?php if(isset($_SESSION['error'])):?><div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><?=htmlspecialchars($_SESSION['error']);unset($_SESSION['error']);?></div><?php endif;?>
-    <form id="transferForm" action="<?=url('/transfers')?>" method="POST" enctype="multipart/form-data" class="space-y-6">
-        <input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token'])?>">
-        <section class="rounded-2xl border bg-white dark:bg-gray-800 shadow-sm">
-            <div class="border-b px-6 py-5"><h2 class="text-lg font-semibold">Detail Pengiriman</h2><p class="text-xs text-gray-500 dark:text-gray-400">Data pembawa akan tersimpan di Surat Jalan.</p></div>
-            <div class="grid grid-cols-1 gap-5 px-6 py-6 md:grid-cols-2">
-                <div><label class="text-sm font-semibold">Gudang Asal *</label><select id="source_warehouse_id" name="source_warehouse_id" required class="mt-2 w-full rounded-xl border px-3 py-2.5"><option value="">Pilih gudang asal...</option><?php foreach($warehouses as $w):?><option value="<?=$w['id']?>"><?=htmlspecialchars($w['name'])?></option><?php endforeach;?></select></div>
-                <div><label class="text-sm font-semibold">Gudang Tujuan *</label><select id="destination_warehouse_id" name="destination_warehouse_id" required class="mt-2 w-full rounded-xl border px-3 py-2.5"><option value="">Pilih gudang tujuan...</option><?php foreach($warehouses as $w):?><option value="<?=$w['id']?>" data-warehouse-name="<?=htmlspecialchars($w['name'],ENT_QUOTES)?>"><?=htmlspecialchars($w['name'])?></option><?php endforeach;?></select></div>
-                <div><label class="text-sm font-semibold">Supir / Pembawa Barang *</label><input name="driver_name" required class="mt-2 w-full rounded-xl border px-3 py-2.5" placeholder="Nama orang yang membawa barang"></div>
-                <div><label class="text-sm font-semibold">Nomor HP Supir</label><input name="driver_phone" class="mt-2 w-full rounded-xl border px-3 py-2.5" placeholder="Opsional"></div>
-                <div><label class="text-sm font-semibold">Nomor Kendaraan</label><input name="vehicle_number" class="mt-2 w-full rounded-xl border px-3 py-2.5" placeholder="Contoh: KB 1234 XX"></div>
-                <div class="md:col-span-2"><label class="text-sm font-semibold">Catatan Pengiriman</label><textarea name="notes" rows="3" class="mt-2 w-full rounded-xl border px-3 py-2.5" placeholder="Catatan tambahan bila diperlukan"></textarea></div>
-                <div class="md:col-span-2"><div class="rounded-xl border border-blue-100 bg-blue-50 p-4"><label class="text-sm font-semibold">Foto Bukti Pengiriman *</label><input name="dispatch_photo" type="file" accept="image/jpeg,image/png,image/webp" required class="mt-3 w-full"><p class="mt-1 text-xs text-gray-500 dark:text-gray-400">JPG, PNG, atau WEBP · maksimal 5 MB.</p></div></div>
-            </div>
-        </section>
-        <section class="rounded-2xl border bg-white dark:bg-gray-800 shadow-sm">
-            <div class="flex items-center justify-between border-b px-6 py-5"><div><h2 class="text-lg font-semibold">Barang yang Dikirim</h2><p class="text-xs text-gray-500 dark:text-gray-400">Nomor seri dipilih dari stok. Tidak perlu mengetik satu per satu.</p></div><button type="button" onclick="addRow()" class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white">Tambah Barang</button></div>
-            <div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-50 dark:bg-gray-900"><tr><th class="px-6 py-3 text-left text-xs uppercase text-gray-500 dark:text-gray-400">Barang</th><th class="px-4 py-3 text-center text-xs uppercase text-gray-500 dark:text-gray-400">Jumlah</th><th class="px-4 py-3 text-left text-xs uppercase text-gray-500 dark:text-gray-400">Nomor Seri</th><th class="w-20"></th></tr></thead><tbody id="itemsBody"></tbody></table></div>
-            <div class="border-t px-6 py-4 text-xs text-gray-500 dark:text-gray-400">Barang tanpa nomor seri cukup isi jumlah.</div>
-        </section>
-        <div class="flex justify-end gap-3"><a href="<?=url('/transfers')?>" class="rounded-xl border px-5 py-2.5 font-semibold">Batal</a><button class="rounded-xl bg-blue-600 px-6 py-2.5 font-semibold text-white" type="submit">Simpan Transfer</button></div>
-    </form>
+  <div class="mb-6 flex items-center gap-3">
+    <a href="<?=url('/transfers')?>" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"><i class="fas fa-arrow-left"></i></a>
+    <div><h1 class="text-2xl font-bold">Transfer Gudang Baru</h1><p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tentukan tujuan, pembawa barang, lalu pilih barang yang benar-benar dikirim.</p></div>
+  </div>
+  <div id="transferClientError" class="mb-5 hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><i class="fas fa-circle-exclamation mr-2"></i><span></span></div>
+  <?php if(isset($_SESSION['error'])):?><div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><?=htmlspecialchars($_SESSION['error']);unset($_SESSION['error']);?></div><?php endif;?>
+  <form id="transferForm" action="<?=url('/transfers')?>" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token'])?>">
+    <section class="rounded-2xl border bg-white dark:bg-gray-800 shadow-sm">
+      <div class="border-b px-6 py-5"><h2 class="text-lg font-semibold">Detail Pengiriman</h2><p class="text-xs text-gray-500 dark:text-gray-400">Data pembawa akan tersimpan di Surat Jalan.</p></div>
+      <div class="grid grid-cols-1 gap-5 px-6 py-6 md:grid-cols-2">
+        <div><label class="text-sm font-semibold">Gudang Asal *</label><select id="source_warehouse_id" name="source_warehouse_id" required class="mt-2 w-full rounded-xl border px-3 py-2.5"><option value="">Pilih gudang asal...</option><?php foreach($warehouses as $w):?><option value="<?=$w['id']?>"><?=htmlspecialchars($w['name'])?></option><?php endforeach;?></select></div>
+        <div><label class="text-sm font-semibold">Gudang Tujuan *</label><select id="destination_warehouse_id" name="destination_warehouse_id" required class="mt-2 w-full rounded-xl border px-3 py-2.5"><option value="">Pilih gudang tujuan...</option><?php foreach($warehouses as $w):?><option value="<?=$w['id']?>" data-warehouse-name="<?=htmlspecialchars($w['name'],ENT_QUOTES)?>"><?=htmlspecialchars($w['name'])?></option><?php endforeach;?></select></div>
+        <div><label class="text-sm font-semibold">Supir / Pembawa Barang *</label><input name="driver_name" required class="mt-2 w-full rounded-xl border px-3 py-2.5" placeholder="Nama orang yang membawa barang"></div>
+        <div><label class="text-sm font-semibold">Nomor HP Supir</label><input name="driver_phone" class="mt-2 w-full rounded-xl border px-3 py-2.5" placeholder="Opsional"></div>
+        <div><label class="text-sm font-semibold">Nomor Kendaraan</label><input name="vehicle_number" class="mt-2 w-full rounded-xl border px-3 py-2.5" placeholder="Contoh: KB 1234 XX"></div>
+        <div class="md:col-span-2"><label class="text-sm font-semibold">Catatan Pengiriman</label><textarea name="notes" rows="3" class="mt-2 w-full rounded-xl border px-3 py-2.5" placeholder="Catatan tambahan bila diperlukan"></textarea></div>
+        <div class="md:col-span-2"><div class="rounded-xl border border-blue-100 bg-blue-50 p-4"><label class="text-sm font-semibold">Foto Bukti Pengiriman *</label><input name="dispatch_photo" type="file" accept="image/jpeg,image/png,image/webp" required class="mt-3 w-full"><p class="mt-1 text-xs text-gray-500 dark:text-gray-400">JPG, PNG, atau WEBP · maksimal 5 MB.</p></div></div>
+      </div>
+    </section>
+    <section class="rounded-2xl border bg-white dark:bg-gray-800 shadow-sm">
+      <div class="flex items-center justify-between border-b px-6 py-5"><div><h2 class="text-lg font-semibold">Barang yang Dikirim</h2><p class="text-xs text-gray-500 dark:text-gray-400">Nomor seri dipilih dari stok. Tidak perlu mengetik satu per satu.</p></div><button type="button" onclick="addRow()" class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white">Tambah Barang</button></div>
+      <div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-50 dark:bg-gray-700"><tr><th class="px-6 py-3 text-left text-xs uppercase text-gray-500 dark:text-gray-400">Barang</th><th class="px-4 py-3 text-center text-xs uppercase text-gray-500 dark:text-gray-400">Jumlah</th><th class="px-4 py-3 text-left text-xs uppercase text-gray-500 dark:text-gray-400">Nomor Seri</th><th class="w-20"></th></tr></thead><tbody id="itemsBody"></tbody></table></div>
+      <div class="border-t px-6 py-4 text-xs text-gray-500 dark:text-gray-400">Barang tanpa nomor seri cukup isi jumlah.</div>
+    </section>
+    <div class="flex justify-end gap-3"><a href="<?=url('/transfers')?>" class="rounded-xl border px-5 py-2.5 font-semibold">Batal</a><button class="rounded-xl bg-blue-600 px-6 py-2.5 font-semibold text-white" type="submit">Simpan Transfer</button></div>
+  </form>
 </div>
 <div id="serialModal" class="fixed inset-0 z-[140] hidden items-center justify-center bg-black/50 p-4"><div class="w-full max-w-3xl rounded-2xl bg-white dark:bg-gray-800 shadow-2xl"><div class="flex items-center justify-between border-b px-6 py-5"><div><h3 class="text-lg font-bold">Pilih Nomor Seri</h3><p id="serialHint" class="text-xs text-gray-500 dark:text-gray-400"></p></div><button type="button" onclick="closeModal()"><i class="fas fa-times"></i></button></div><div class="p-6"><div class="flex gap-3"><input id="serialSearch" class="flex-1 rounded-xl border px-3 py-2.5" placeholder="Cari nomor seri..."><button type="button" onclick="autoSelect()" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-white">Pilih Otomatis</button></div><div id="serialList" class="mt-4 max-h-[55vh] overflow-auto"></div></div><div class="flex justify-end gap-3 border-t bg-gray-50 dark:bg-gray-900 px-6 py-4"><button type="button" onclick="closeModal()" class="rounded-xl border px-5 py-2.5">Batal</button><button type="button" onclick="applySerials()" class="rounded-xl bg-blue-600 px-5 py-2.5 text-white">Gunakan Nomor Seri</button></div></div></div>
 <script>
