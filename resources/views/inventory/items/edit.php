@@ -82,24 +82,49 @@ if (empty($_SESSION['csrf_token'])) {
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Status hanya berubah jika Anda mengubahnya. Perubahan nama/kategori/satuan/deskripsi tidak mengubah status.</p>
       </div>
 
-      <?php if (!empty($attachments)): ?>
-      <div class="mb-6 border-t border-gray-200 dark:border-gray-700 pt-6">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Foto-foto</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <?php foreach ($attachments as $att): ?>
-            <div class="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-              <img src="<?= url('/file?path='.urlencode($att['file_path'])) ?>" class="w-full h-32 object-cover">
-            </div>
-          <?php endforeach; ?>
-        </div>
-      </div>
-      <?php endif; ?>
-      
       <div class="flex justify-end gap-4 mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
         <a href="<?= url('/items') ?>" class="bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 py-2 px-4 rounded-md shadow-sm text-sm font-medium transition-colors">Batal</a>
         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md shadow-sm text-sm font-medium transition-colors">Simpan Perubahan</button>
       </div>
     </form>
+
+    <?php if (!empty($attachments)): ?>
+    <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-b-lg">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Kelola Foto Existing</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <?php foreach ($attachments as $att): ?>
+          <div class="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col shadow-sm">
+            <img src="<?= url('/file?path='.urlencode($att['file_path'])) ?>" class="w-full h-40 object-cover">
+            
+            <div class="p-3 flex-1 flex flex-col justify-between border-t border-gray-200 dark:border-gray-700">
+              <div class="text-xs text-gray-500 dark:text-gray-400 mb-3 truncate" title="<?= htmlspecialchars($att['original_name']) ?>">
+                <?= htmlspecialchars($att['original_name']) ?>
+              </div>
+              
+              <div class="flex gap-2 justify-between">
+                <!-- Form Ganti -->
+                <form action="<?= url('/items/photo/replace/' . $att['id']) ?>" method="POST" enctype="multipart/form-data" class="flex-1 flex" onsubmit="return confirm('Apakah Anda yakin ingin mengganti foto ini?');">
+                  <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                  <label class="cursor-pointer bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 text-xs py-1.5 px-2 rounded font-medium text-center flex-1 transition-colors border border-blue-200 dark:border-blue-800">
+                    <i class="fas fa-sync-alt mr-1"></i> Ganti
+                    <input type="file" name="photo" accept="image/*" class="hidden" onchange="this.form.submit()">
+                  </label>
+                </form>
+                
+                <!-- Form Hapus -->
+                <form action="<?= url('/items/photo/delete/' . $att['id']) ?>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto ini? File akan dihapus permanen.');">
+                  <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                  <button type="submit" class="bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 text-xs py-1.5 px-3 rounded font-medium transition-colors border border-red-200 dark:border-red-800" title="Hapus Foto">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <?php endif; ?>
   </div>
 </div>
 

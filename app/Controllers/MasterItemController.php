@@ -520,6 +520,127 @@ class MasterItemController {
         exit;
     }
 
+    public function deletePhoto($id) {
+        \App\Helpers\AuthHelper::requireRole('ADMIN');
+        if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
+            $_SESSION['error'] = "CSRF token validation failed.";
+            header("Location: " . url('/items'));
+            exit;
+        }
+
+        $id = (int)$id;
+        $pdo = \App\Core\Database::getInstance()->getConnection();
+        
+        $stmt = $pdo->prepare("SELECT * FROM master_item_attachments WHERE id = ?");
+        $stmt->execute([$id]);
+        $photo = $stmt->fetch();
+        
+        if (!$photo) {
+            $_SESSION['error'] = "Foto tidak ditemukan.";
+            header("Location: " . url('/items'));
+            exit;
+        }
+
+        try {
+            $file = __DIR__ . '/../../storage/private_uploads/' . $photo['file_path'];
+            if (is_file($file)) {
+                @unlink($file);
+            }
+            
+            $pdo->prepare("DELETE FROM master_item_attachments WHERE id = ?")->execute([$id]);
+            
+            $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'DELETE_PHOTO', 'master_items', ?)");
+            $auditStmt->execute([\App\Helpers\AuthHelper::user()['id'], $photo['master_item_id']]);
+            
+            $_SESSION['success'] = "Foto berhasil dihapus.";
+        } catch (\Exception $e) {
+            $_SESSION['error'] = "Gagal menghapus foto: " . $e->getMessage();
+        }
+
+        header("Location: " . url('/items/edit/' . $photo['master_item_id']));
+        exit;
+    }
+
+    public function replacePhoto($id) {
+        \App\Helpers\AuthHelper::requireRole('ADMIN');
+        if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
+            $_SESSION['error'] = "CSRF token validation failed.";
+            header("Location: " . url('/items'));
+            exit;
+        }
+
+        $id = (int)$id;
+        $pdo = \App\Core\Database::getInstance()->getConnection();
+        
+        $stmt = $pdo->prepare("SELECT * FROM master_item_attachments WHERE id = ?");
+        $stmt->execute([$id]);
+        $photo = $stmt->fetch();
+        
+        if (!$photo) {
+            $_SESSION['error'] = "Foto tidak ditemukan.";
+            header("Location: " . url('/items'));
+            exit;
+        }
+
+        if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
+            $_SESSION['error'] = "Silakan pilih foto baru yang valid.";
+            header("Location: " . url('/items/edit/' . $photo['master_item_id']));
+            exit;
+        }
+        
+        $file = $_FILES['photo'];
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!in_array($file['type'], $allowedMimes)) {
+            $_SESSION['error'] = "Tipe file tidak diizinkan. Hanya JPG, PNG, GIF, WEBP.";
+            header("Location: " . url('/items/edit/' . $photo['master_item_id']));
+            exit;
+        }
+        if ($file['size'] > 5 * 1024 * 1024) {
+            $_SESSION['error'] = "Ukuran file maksimal 5MB.";
+            header("Location: " . url('/items/edit/' . $photo['master_item_id']));
+            exit;
+        }
+
+        try {
+            // Delete old file
+            $oldFile = __DIR__ . '/../../storage/private_uploads/' . $photo['file_path'];
+            if (is_file($oldFile)) {
+                @unlink($oldFile);
+            }
+
+            // Upload new file
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = uniqid('item_') . '.' . $ext;
+            $uploadDir = __DIR__ . '/../../storage/private_uploads/items/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+            $destination = $uploadDir . $filename;
+            
+            if (move_uploaded_file($file['tmp_name'], $destination)) {
+                $updStmt = $pdo->prepare("UPDATE master_item_attachments SET file_path = ?, original_name = ?, mime_type = ?, file_size = ?, uploaded_by = ? WHERE id = ?");
+                $updStmt->execute([
+                    'items/' . $filename,
+                    $file['name'],
+                    $file['type'],
+                    $file['size'],
+                    \App\Helpers\AuthHelper::user()['id'],
+                    $id
+                ]);
+                
+                $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'REPLACE_PHOTO', 'master_items', ?)");
+                $auditStmt->execute([\App\Helpers\AuthHelper::user()['id'], $photo['master_item_id']]);
+                
+                $_SESSION['success'] = "Foto berhasil diganti.";
+            } else {
+                $_SESSION['error'] = "Gagal mengunggah foto baru.";
+            }
+        } catch (\Exception $e) {
+            $_SESSION['error'] = "Terjadi kesalahan: " . $e->getMessage();
+        }
+
+        header("Location: " . url('/items/edit/' . $photo['master_item_id']));
+        exit;
+    }
+
     /**
      * Hapus Permanen Master Barang — HANYA jika barang belum pernah digunakan
      * (tanpa stok, tanpa nomor seri, tanpa histori transaksi). Backend guard WAJIB;
