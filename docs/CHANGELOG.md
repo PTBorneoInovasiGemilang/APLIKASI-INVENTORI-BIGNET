@@ -15,6 +15,20 @@
 **Remaining:**
 **Next:**
 
+## 2026-09-21 — FIX MASTER ITEM PHOTO MANAGEMENT
+**Task:** Bug FIX BUG-054 — Foto master barang tidak dapat dihapus atau diganti di halaman edit.
+**Goal:** Admin dapat mengelola (hapus & ganti) foto-foto lama secara satuan di halaman Ubah Barang tanpa merusak alur form utama.
+**Changed:**
+- `routes/web.php`: Menambahkan route `POST /items/photo/delete/{id}` dan `POST /items/photo/replace/{id}`.
+- `app/Controllers/MasterItemController.php`: Menambahkan metode `deletePhoto()` dan `replacePhoto()` dengan validasi keamanan (Role ADMIN, CSRF, File Size/MIME), audit log (`DELETE_PHOTO`, `REPLACE_PHOTO`), dan konsistensi file fisik (unlink file lama).
+- `resources/views/inventory/items/edit.php`: Memisahkan section foto existing keluar dari form utama (tetap di dalam container kotak putih UI yang sama) sehingga setiap aksi Ganti/Hapus memiliki form + konfirmasi mandiri (UX lebih intuitif).
+**Business impact:** Admin dapat memperbaiki kesalahan upload foto Master Barang. Mencegah file usang/orphan menumpuk di server.
+**Database impact:** Menggunakan tabel `master_item_attachments` existing, menambah histori aksi pada `audit_logs`. Tidak ada perubahan schema.
+**Verification:** PHP Syntax check lulus (0 errors). Manual code inspection & logic check.
+**Result:** PASS — BUG-054 CLOSED.
+**Remaining:** -
+**Next:** -
+
 ## 2026-09-18 — DEDICATED BROWSER UAT — SUBMISSION WAREHOUSE FULFILLMENT
 **Task:** Verifikasi Playwright E2E khusus untuk Warehouse Fulfillment pada modul Submission.
 **Goal:** Memastikan alur pemilihan gudang oleh Teknisi, limitasi approval per gudang, auto-preselect saat Outgoing, dan penolakan warehouse mismatch berfungsi sempurna di UI.
