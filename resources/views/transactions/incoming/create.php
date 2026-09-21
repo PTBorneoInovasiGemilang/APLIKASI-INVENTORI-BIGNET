@@ -152,7 +152,7 @@ if (empty($_SESSION['csrf_token'])) {
     filtered.slice(0, 50).forEach(item => {
       const div = document.createElement('div');
       div.className = 'px-3 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0';
-      div.innerHTML = `<strong>${item.kode_barang}</strong> - ${item.nama}`;
+      div.innerHTML = item.nama;
       div.onclick = function() { selectItem(rowIndex, item); };
       dropdown.appendChild(div);
     });
@@ -187,7 +187,7 @@ if (empty($_SESSION['csrf_token'])) {
     const inputSearch = tr.querySelector('.item-search');
     const inputHidden = tr.querySelector('.item-id-hidden');
     
-    inputSearch.value = item.kode_barang + ' - ' + item.nama;
+    inputSearch.value = item.nama;
     inputHidden.value = item.id;
     document.getElementById(`dropdown-${rowIndex}`).classList.add('hidden');
     
