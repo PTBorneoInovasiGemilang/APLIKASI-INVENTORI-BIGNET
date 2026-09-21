@@ -87,7 +87,7 @@ if ($faviconFile && is_file(__DIR__ . '/../../../storage/private_uploads/' . bas
         <p class="text-base text-blue-100/90 leading-relaxed mb-8">
           <?= htmlspecialchars($loginSubtitle) ?>
         </p>
-        <div class="flex items-center gap-3 text-xs font-semibold text-blue-200 bg-white dark:bg-gray-800/10 backdrop-blur-md inline-flex px-4 py-2 rounded-full border border-white/10">
+        <div class="flex items-center gap-3 text-xs font-semibold text-blue-200 bg-white/10 backdrop-blur-md inline-flex px-4 py-2 rounded-full border border-white/10">
           <span class="relative flex h-2.5 w-2.5">
            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
