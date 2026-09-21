@@ -197,12 +197,12 @@ class AdjustmentController {
                             // Barang berkurang, mark as LOST or DAMAGED
                             $newStatus = ($reason_type === 'Barang Rusak') ? 'DAMAGED' : 'LOST';
                             foreach ($snArray as $sn) {
-                                $chk = $pdo->prepare("SELECT id, status, current_warehouse_id, current_holder_id FROM serial_numbers WHERE serial_number = ? AND current_warehouse_id = ? FOR UPDATE");
-                                $chk->execute([$sn, $warehouse_id]);
+                                $chk = $pdo->prepare("SELECT id, status, current_warehouse_id, current_holder_id FROM serial_numbers WHERE serial_number = ? AND current_warehouse_id = ? AND master_item_id = ? AND status = 'AVAILABLE' FOR UPDATE");
+                                $chk->execute([$sn, $warehouse_id, $item_id]);
                                 $snRow = $chk->fetch();
                                 
                                 if (!$snRow) {
-                                    throw new \Exception("Serial Number '$sn' tidak ditemukan di gudang ini.");
+                                    throw new \Exception("Serial Number '$sn' tidak valid (tidak ada, tidak AVAILABLE, atau bukan milik barang/gudang ini).");
                                 }
                                 
                                 $stockService->moveSerial(

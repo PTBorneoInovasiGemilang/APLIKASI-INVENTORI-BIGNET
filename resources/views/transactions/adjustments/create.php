@@ -88,9 +88,9 @@ if (empty($_SESSION['csrf_token'])) {
 <script>
   const itemsData = <?php echo json_encode($items); ?>;
   let rowCount = 0;
+  let rowSerials = {}; // Store serials per row from API
   
   function fetchStocks() {
-    // Mock fetch or reset
     document.querySelectorAll('.item-select').forEach((sel) => {
       handleItemChange(sel, sel.closest('tr').dataset.index);
     });
@@ -124,11 +124,25 @@ if (empty($_SESSION['csrf_token'])) {
         <span id="diff-${rowIndex}" class="font-bold text-gray-500 dark:text-gray-400">0</span>
       </td>
       <td class="px-4 py-3 align-top">
-        <div id="sn-container-${rowIndex}" class="hidden">
-          <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1 leading-tight" id="sn-instruction-${rowIndex}">Masukkan SN.</p>
-          <textarea name="sn_list[]" id="sn-input-${rowIndex}" rows="3" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="SN001\nSN002..." onkeyup="validateSnCount(${rowIndex})" onchange="validateSnCount(${rowIndex})"></textarea>
-          <div id="sn-counter-${rowIndex}" class="text-[10px] font-bold text-red-500 mt-1">SN Diisi: 0 / 0</div>
+        <div id="sn-container-pos-${rowIndex}" class="hidden">
+          <p class="text-[10px] text-green-600 mb-1 leading-tight" id="sn-instruction-pos-${rowIndex}"></p>
+          <textarea id="sn-input-${rowIndex}" rows="3" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="SN001\nSN002..." onkeyup="validateSnCount(${rowIndex})" onchange="validateSnCount(${rowIndex})"></textarea>
+          <div id="sn-counter-pos-${rowIndex}" class="text-[10px] font-bold text-red-500 mt-1">SN Diisi: 0 / 0</div>
         </div>
+        
+        <div id="sn-container-neg-${rowIndex}" class="hidden">
+          <p class="text-[10px] text-red-600 mb-1 leading-tight" id="sn-instruction-neg-${rowIndex}"></p>
+          <div class="mb-1">
+             <input type="text" id="sn-search-${rowIndex}" placeholder="Cari SN..." class="block w-full text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" onkeyup="filterSn(${rowIndex})">
+          </div>
+          <div class="max-h-32 overflow-y-auto border rounded-md p-2 bg-gray-50 dark:bg-gray-900 dark:border-gray-600 space-y-1 text-sm" id="sn-checkboxes-${rowIndex}">
+            <!-- populated by JS -->
+          </div>
+          <div id="sn-counter-neg-${rowIndex}" class="text-[10px] font-bold text-red-500 mt-1">Terpilih: 0 / 0</div>
+        </div>
+
+        <input type="hidden" name="sn_list[]" id="sn-hidden-${rowIndex}">
+
         <div id="sn-disabled-${rowIndex}" class="text-xs text-gray-500 dark:text-gray-400 italic py-1">
           Bukan barang serial atau tidak ada selisih.
         </div>
@@ -153,6 +167,7 @@ if (empty($_SESSION['csrf_token'])) {
       sysQtySpan.innerText = '0';
       sysQtyInput.value = '0';
       actualInput.value = '0';
+      rowSerials[rowIndex] = [];
       calcDiff(rowIndex);
       return;
     }
@@ -162,6 +177,7 @@ if (empty($_SESSION['csrf_token'])) {
       if(res.ok) {
         const data = await res.json();
         const qty = data.quantity || 0;
+        rowSerials[rowIndex] = data.serials || [];
         sysQtySpan.innerText = qty;
         sysQtyInput.value = qty;
         actualInput.value = qty; // default actual to system
@@ -180,6 +196,7 @@ if (empty($_SESSION['csrf_token'])) {
     const actQty = parseInt(document.getElementById(`actual-qty-${rowIndex}`).value) || 0;
     const diffSpan = document.getElementById(`diff-${rowIndex}`);
     const diff = actQty - sysQty;
+    const absDiff = Math.abs(diff);
     
     diffSpan.innerText = (diff > 0 ? '+' : '') + diff;
     if (diff > 0) diffSpan.className ="font-bold text-green-500";
@@ -190,53 +207,138 @@ if (empty($_SESSION['csrf_token'])) {
     const option = selectElem.options[selectElem.selectedIndex];
     const isSerialized = option ? (option.getAttribute('data-serialized') == '1') : false;
     
-    const snContainer = document.getElementById(`sn-container-${rowIndex}`);
-    const snDisabled = document.getElementById(`sn-disabled-${rowIndex}`);
+    const posContainer = document.getElementById(`sn-container-pos-${rowIndex}`);
+    const negContainer = document.getElementById(`sn-container-neg-${rowIndex}`);
+    const disabledContainer = document.getElementById(`sn-disabled-${rowIndex}`);
     const snInput = document.getElementById(`sn-input-${rowIndex}`);
-    const snInstr = document.getElementById(`sn-instruction-${rowIndex}`);
     
     if (isSerialized && diff !== 0) {
-      snContainer.classList.remove('hidden');
-      snDisabled.classList.add('hidden');
-      snInput.setAttribute('required', 'required');
+      disabledContainer.classList.add('hidden');
       
       if (diff > 0) {
-        snInstr.innerText = `Barang bertambah (+${diff}). Masukkan SN BARU yang ditemukan.`;
-        snInstr.className ="text-[10px] text-green-600 mb-1 leading-tight";
+        posContainer.classList.remove('hidden');
+        negContainer.classList.add('hidden');
+        document.getElementById(`sn-instruction-pos-${rowIndex}`).innerText = `SN Baru (+${absDiff})`;
+        snInput.setAttribute('required', 'required');
       } else {
-        snInstr.innerText = `Barang berkurang (${diff}). Masukkan SN yang HILANG/RUSAK.`;
-        snInstr.className ="text-[10px] text-red-600 mb-1 leading-tight";
+        posContainer.classList.add('hidden');
+        negContainer.classList.remove('hidden');
+        document.getElementById(`sn-instruction-neg-${rowIndex}`).innerText = `SN yang Berkurang (${absDiff})`;
+        snInput.removeAttribute('required');
+        renderCheckboxes(rowIndex);
       }
       
       validateSnCount(rowIndex);
     } else {
-      snContainer.classList.add('hidden');
-      snDisabled.classList.remove('hidden');
+      posContainer.classList.add('hidden');
+      negContainer.classList.add('hidden');
+      disabledContainer.classList.remove('hidden');
       snInput.removeAttribute('required');
-      snInput.value = '';
+      document.getElementById(`sn-hidden-${rowIndex}`).value = '';
     }
+  }
+
+  function renderCheckboxes(rowIndex) {
+     const container = document.getElementById(`sn-checkboxes-${rowIndex}`);
+     const serials = rowSerials[rowIndex] || [];
+     
+     // Keep existing selections if any
+     const hiddenVal = document.getElementById(`sn-hidden-${rowIndex}`).value;
+     const selected = hiddenVal.split(',').map(s => s.trim()).filter(s => s);
+
+     let html = '';
+     if (serials.length === 0) {
+         html = '<p class="text-xs text-gray-500">Tidak ada SN tersedia di gudang ini.</p>';
+     } else {
+         serials.forEach(sn => {
+             const isChecked = selected.includes(sn.serial_number) ? 'checked' : '';
+             const loc = sn.location_name ? ` <span class="text-xs text-gray-500">(${sn.location_name})</span>` : '';
+             html += `
+               <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded cursor-pointer sn-label-${rowIndex}">
+                 <input type="checkbox" value="${sn.serial_number}" ${isChecked} class="sn-check-${rowIndex} rounded border-gray-300 text-blue-600 focus:ring-blue-500" onchange="updateSelectedSn(${rowIndex})">
+                 <span class="text-gray-700 dark:text-gray-300 sn-text-${rowIndex}">${sn.serial_number}${loc}</span>
+               </label>
+             `;
+         });
+     }
+     container.innerHTML = html;
+  }
+
+  function updateSelectedSn(rowIndex) {
+     const checks = document.querySelectorAll(`.sn-check-${rowIndex}:checked`);
+     const selected = Array.from(checks).map(c => c.value);
+     document.getElementById(`sn-hidden-${rowIndex}`).value = selected.join(',');
+     validateSnCount(rowIndex);
+  }
+
+  function filterSn(rowIndex) {
+     const term = document.getElementById(`sn-search-${rowIndex}`).value.toLowerCase();
+     const labels = document.querySelectorAll(`.sn-label-${rowIndex}`);
+     labels.forEach(lbl => {
+         const text = lbl.querySelector(`.sn-text-${rowIndex}`).innerText.toLowerCase();
+         if (text.includes(term)) {
+             lbl.style.display = 'flex';
+         } else {
+             lbl.style.display = 'none';
+         }
+     });
   }
 
   function validateSnCount(rowIndex) {
     const sysQty = parseInt(document.getElementById(`sys-qty-input-${rowIndex}`).value) || 0;
     const actQty = parseInt(document.getElementById(`actual-qty-${rowIndex}`).value) || 0;
-    const diff = Math.abs(actQty - sysQty);
+    const diff = actQty - sysQty;
+    const absDiff = Math.abs(diff);
     
-    const snInput = document.getElementById(`sn-input-${rowIndex}`);
-    const counter = document.getElementById(`sn-counter-${rowIndex}`);
-    
-    const rawText = snInput.value;
-    const snArray = rawText.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
-    const actualCount = snArray.length;
-    
-    counter.innerText = `SN Diisi: ${actualCount} / ${diff}`;
-    
-    if (actualCount === diff) {
-      counter.className ="text-[10px] font-bold text-green-500 mt-1";
-    } else {
-      counter.className ="text-[10px] font-bold text-red-500 mt-1";
+    if (diff > 0) {
+        const textarea = document.getElementById(`sn-input-${rowIndex}`);
+        const raw = textarea.value;
+        const arr = raw.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
+        document.getElementById(`sn-hidden-${rowIndex}`).value = arr.join(',');
+        
+        const counter = document.getElementById(`sn-counter-pos-${rowIndex}`);
+        counter.innerText = `SN Diisi: ${arr.length} / ${absDiff}`;
+        counter.className = (arr.length === absDiff) ? "text-[10px] font-bold text-green-500 mt-1" : "text-[10px] font-bold text-red-500 mt-1";
+    } else if (diff < 0) {
+        const checks = document.querySelectorAll(`.sn-check-${rowIndex}:checked`);
+        const counter = document.getElementById(`sn-counter-neg-${rowIndex}`);
+        counter.innerText = `Terpilih: ${checks.length} / ${absDiff}`;
+        counter.className = (checks.length === absDiff) ? "text-[10px] font-bold text-green-500 mt-1" : "text-[10px] font-bold text-red-500 mt-1";
     }
   }
+
+  document.querySelector('form').addEventListener('submit', function(e) {
+      const rows = document.querySelectorAll('.item-row');
+      let valid = true;
+      let errorMsg = '';
+      
+      for (let row of rows) {
+          const idx = row.dataset.index;
+          const sys = parseInt(document.getElementById(`sys-qty-input-${idx}`).value) || 0;
+          const act = parseInt(document.getElementById(`actual-qty-${idx}`).value) || 0;
+          const diff = act - sys;
+          const absDiff = Math.abs(diff);
+          
+          const sel = row.querySelector('.item-select');
+          const isSerialized = sel.options[sel.selectedIndex]?.getAttribute('data-serialized') == '1';
+          
+          if (isSerialized && diff !== 0) {
+              const hidden = document.getElementById(`sn-hidden-${idx}`).value;
+              const count = hidden ? hidden.split(',').length : 0;
+              if (count !== absDiff) {
+                  valid = false;
+                  errorMsg = `Jumlah SN pada baris ke-${parseInt(idx)+1} tidak sesuai dengan selisih (${absDiff}). Saat ini ${diff > 0 ? 'diisi' : 'terpilih'} ${count}.`;
+                  break;
+              }
+          }
+      }
+      
+      if (!valid) {
+          e.preventDefault();
+          AppToast.error(errorMsg); // using global AppToast if available, else alert
+          if (typeof AppToast === 'undefined') alert(errorMsg);
+      }
+  });
 
   addItemRow();
 </script>
