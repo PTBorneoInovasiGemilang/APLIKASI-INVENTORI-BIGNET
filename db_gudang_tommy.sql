@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 19, 2026 at 04:36 PM
+-- Generation Time: Sep 18, 2026 at 08:56 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,46 @@ SET time_zone = "+00:00";
 --
 -- Database: `db_gudang_tommy`
 --
+
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `reset_bignet_test_database` ()   BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE tbl VARCHAR(255);
+
+    DECLARE cur CURSOR FOR
+        SELECT TABLE_NAME
+        FROM INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_SCHEMA = @db
+          AND TABLE_TYPE = 'BASE TABLE'
+          AND TABLE_NAME NOT IN (
+              'users'
+          );
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN cur;
+
+    reset_loop: LOOP
+        FETCH cur INTO tbl;
+
+        IF done = 1 THEN
+            LEAVE reset_loop;
+        END IF;
+
+        SET @sql = CONCAT('TRUNCATE TABLE `', tbl, '`');
+
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    END LOOP;
+
+    CLOSE cur;
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -57,25 +97,6 @@ CREATE TABLE `audit_logs` (
   `user_agent` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `audit_logs`
---
-
-INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `entity`, `entity_id`, `old_data`, `new_data`, `ip_address`, `user_agent`, `created_at`) VALUES
-(1, 3382, 'CREATE', 'item_categories', 112, NULL, NULL, NULL, NULL, '2026-08-19 08:20:23'),
-(2, 3382, 'CREATE', 'units', 66, NULL, NULL, NULL, NULL, '2026-08-19 08:20:36'),
-(3, 3382, 'CREATE', 'warehouses', 58, NULL, NULL, NULL, NULL, '2026-08-19 08:20:50'),
-(4, 3382, 'CREATE', 'locations', 32, NULL, NULL, NULL, NULL, '2026-08-19 08:22:55'),
-(5, 3382, 'CREATE', 'master_items', 189, NULL, NULL, NULL, NULL, '2026-08-19 08:23:22'),
-(6, 3382, 'CREATE', 'master_items', 190, NULL, NULL, NULL, NULL, '2026-08-19 08:23:41'),
-(7, 3382, 'CREATE', 'incoming', 45, NULL, NULL, NULL, NULL, '2026-08-19 08:27:27'),
-(8, 3382, 'CREATE', 'incoming', 46, NULL, NULL, NULL, NULL, '2026-08-19 08:27:54'),
-(9, 3646, 'CREATE', 'submissions', 35, NULL, NULL, NULL, NULL, '2026-08-19 08:30:34'),
-(10, 3382, 'APPROVE', 'submissions', 35, NULL, '{\"status\":\"APPROVED\"}', NULL, NULL, '2026-08-19 10:37:28'),
-(11, 3382, 'CREATE', 'outgoing', 1, NULL, NULL, NULL, NULL, '2026-08-19 11:05:38'),
-(12, 3646, 'CREATE', 'installations', 2, NULL, NULL, NULL, NULL, '2026-08-19 12:04:18'),
-(13, 3646, 'CREATE', 'loans', 2, NULL, NULL, NULL, NULL, '2026-08-19 12:20:52');
 
 -- --------------------------------------------------------
 
@@ -131,14 +152,6 @@ CREATE TABLE `incoming` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `incoming`
---
-
-INSERT INTO `incoming` (`id`, `transaction_code`, `warehouse_id`, `received_by`, `supplier_info`, `notes`, `status`, `created_at`) VALUES
-(45, 'INC-20260819-0001', 58, 3382, '', '', 'COMPLETED', '2026-08-19 08:27:27'),
-(46, 'INC-20260819-0002', 58, 3382, '', '', 'COMPLETED', '2026-08-19 08:27:54');
-
 -- --------------------------------------------------------
 
 --
@@ -151,14 +164,6 @@ CREATE TABLE `incoming_items` (
   `master_item_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `incoming_items`
---
-
-INSERT INTO `incoming_items` (`id`, `incoming_id`, `master_item_id`, `quantity`) VALUES
-(43, 45, 189, 5),
-(44, 46, 190, 3);
 
 -- --------------------------------------------------------
 
@@ -179,13 +184,6 @@ CREATE TABLE `installations` (
   `installed_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `installations`
---
-
-INSERT INTO `installations` (`id`, `transaction_code`, `technician_id`, `customer_name`, `customer_site`, `status`, `reference_code`, `notes`, `photo_path`, `installed_at`) VALUES
-(2, 'INS-20260819-0001', 3646, 'KONTOL', 'KONTOL - SDFSDF', 'INSTALLED', '', '', 'installations/inst_6a859bc26406c.jpg', '2026-08-19 12:04:18');
-
 -- --------------------------------------------------------
 
 --
@@ -199,13 +197,6 @@ CREATE TABLE `installation_items` (
   `serial_number_id` int(11) DEFAULT NULL,
   `quantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `installation_items`
---
-
-INSERT INTO `installation_items` (`id`, `installation_id`, `master_item_id`, `serial_number_id`, `quantity`) VALUES
-(1, 2, 189, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -223,13 +214,6 @@ CREATE TABLE `item_categories` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `item_categories`
---
-
-INSERT INTO `item_categories` (`id`, `code`, `name`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
-(112, 'KAT-000001', 'MODEM', '', 1, '2026-08-19 08:20:23', '2026-08-19 08:20:23');
-
 -- --------------------------------------------------------
 
 --
@@ -242,6 +226,7 @@ CREATE TABLE `loans` (
   `borrower_id` int(11) NOT NULL,
   `warehouse_id` int(11) DEFAULT NULL,
   `submission_id` int(11) DEFAULT NULL,
+  `outgoing_id` int(11) DEFAULT NULL,
   `loan_type` varchar(50) NOT NULL DEFAULT 'INTERNAL',
   `loan_date` date DEFAULT NULL,
   `processed_by` int(11) NOT NULL,
@@ -256,13 +241,6 @@ CREATE TABLE `loans` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `loans`
---
-
-INSERT INTO `loans` (`id`, `transaction_code`, `borrower_id`, `warehouse_id`, `submission_id`, `loan_type`, `loan_date`, `processed_by`, `approved_by`, `approved_at`, `approval_notes`, `handed_over_by`, `handed_over_at`, `status`, `notes`, `due_date`, `created_at`) VALUES
-(2, 'LOAN-20260819-0001', 3646, 58, NULL, 'INTERNAL', '2026-08-19', 3646, NULL, NULL, NULL, NULL, NULL, 'BORROWED', '', '2026-08-20', '2026-08-19 12:20:52');
-
 -- --------------------------------------------------------
 
 --
@@ -273,6 +251,8 @@ CREATE TABLE `loan_items` (
   `id` int(11) NOT NULL,
   `loan_id` int(11) NOT NULL,
   `master_item_id` int(11) NOT NULL,
+  `requested_quantity` int(11) NOT NULL DEFAULT 0,
+  `approved_quantity` int(11) NOT NULL DEFAULT 0,
   `serial_number_id` int(11) DEFAULT NULL,
   `quantity` int(11) NOT NULL,
   `returned_quantity` int(11) NOT NULL DEFAULT 0
@@ -286,7 +266,8 @@ CREATE TABLE `loan_items` (
 
 CREATE TABLE `loan_item_serials` (
   `id` int(11) NOT NULL,
-  `loan_item_id` int(11) NOT NULL,
+  `loan_item_id` int(11) DEFAULT NULL,
+  `loan_manual_item_id` int(11) DEFAULT NULL,
   `serial_number_id` int(11) NOT NULL,
   `status` enum('PENDING','BORROWED','RETURNED') NOT NULL DEFAULT 'PENDING'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -301,19 +282,15 @@ CREATE TABLE `loan_manual_items` (
   `id` int(11) NOT NULL,
   `loan_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
+  `master_item_id` int(11) DEFAULT NULL,
+  `requested_quantity` int(11) NOT NULL DEFAULT 0,
+  `approved_quantity` int(11) NOT NULL DEFAULT 0,
   `specification` text DEFAULT NULL,
   `unit` varchar(100) DEFAULT NULL,
   `quantity` int(11) NOT NULL DEFAULT 1,
   `returned_quantity` int(11) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `loan_manual_items`
---
-
-INSERT INTO `loan_manual_items` (`id`, `loan_id`, `name`, `specification`, `unit`, `quantity`, `returned_quantity`, `created_at`) VALUES
-(1, 2, 'kondom', NULL, NULL, 1, 0, '2026-08-19 12:20:52');
 
 -- --------------------------------------------------------
 
@@ -331,13 +308,6 @@ CREATE TABLE `locations` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `locations`
---
-
-INSERT INTO `locations` (`id`, `warehouse_id`, `code`, `name`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
-(32, 58, 'LOK-000001', 'RUANG GUDANG', '', 1, '2026-08-19 08:22:55', '2026-08-19 08:22:55');
 
 -- --------------------------------------------------------
 
@@ -359,14 +329,6 @@ CREATE TABLE `master_items` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `master_items`
---
-
-INSERT INTO `master_items` (`id`, `kode_barang`, `nama`, `item_category_id`, `unit_id`, `is_serialized`, `stok_minimum`, `deskripsi`, `is_active`, `created_at`, `updated_at`) VALUES
-(189, 'KAT-000001-000001', 'MODEM TRIKOM', 112, 66, 1, 100, '', 1, '2026-08-19 08:23:22', '2026-08-19 08:23:22'),
-(190, 'KAT-000001-000002', 'MODEM ZTE', 112, 66, 1, 100, '', 1, '2026-08-19 08:23:41', '2026-08-19 08:23:41');
-
 -- --------------------------------------------------------
 
 --
@@ -385,14 +347,6 @@ CREATE TABLE `master_item_attachments` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `master_item_attachments`
---
-
-INSERT INTO `master_item_attachments` (`id`, `master_item_id`, `file_path`, `original_name`, `mime_type`, `file_size`, `sort_order`, `uploaded_by`, `created_at`) VALUES
-(5, 189, 'items/item_6a8567faa2dfe.jpg', '46144262_1751124028331092_7923117258321166336_n.jpg', 'image/jpeg', 220251, 0, 3382, '2026-08-19 08:23:22'),
-(6, 190, 'items/item_6a85680d14af4.jpg', 'photo_2025-04-09_14-48-52.jpg', 'image/jpeg', 148045, 0, 3382, '2026-08-19 08:23:41');
-
 -- --------------------------------------------------------
 
 --
@@ -410,16 +364,6 @@ CREATE TABLE `notifications` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `notifications`
---
-
-INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `source_route`, `read_at`, `created_at`) VALUES
-(338, 3382, 'Pengajuan Barang Baru', 'TOMMY RYAN DWIPUTRA mengajukan 2 MODEM TRIKOM (REQ-20260819-0001).', 'info', '/submissions/show?id=35', NULL, '2026-08-19 15:30:34'),
-(339, 3646, 'Pengajuan Disetujui', 'Pengajuan REQ-20260819-0001 telah disetujui oleh Admin.', 'success', '/submissions/show?id=35', NULL, '2026-08-19 17:37:28'),
-(340, 3382, 'Instalasi Baru Dicatat', 'TOMMY RYAN DWIPUTRA mencatat instalasi INS-20260819-0001 untuk KONTOL.', 'info', '/installations/show?id=2', NULL, '2026-08-19 19:04:18'),
-(341, 3382, 'Peminjaman Barang Baru', 'TOMMY RYAN DWIPUTRA mengajukan peminjaman.', 'info', '/loans/show?id=2', NULL, '2026-08-19 19:20:52');
-
 -- --------------------------------------------------------
 
 --
@@ -431,18 +375,13 @@ CREATE TABLE `outgoing` (
   `transaction_code` varchar(50) NOT NULL,
   `warehouse_id` int(11) NOT NULL,
   `submission_id` int(11) DEFAULT NULL,
+  `purpose` varchar(30) NOT NULL DEFAULT 'ISSUE',
+  `loan_id` int(11) DEFAULT NULL,
   `processed_by` int(11) NOT NULL,
   `notes` text DEFAULT NULL,
   `status` varchar(50) NOT NULL DEFAULT 'COMPLETED',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `outgoing`
---
-
-INSERT INTO `outgoing` (`id`, `transaction_code`, `warehouse_id`, `submission_id`, `processed_by`, `notes`, `status`, `created_at`) VALUES
-(1, 'OUT-20260819-0001', 58, 35, 3382, '', 'COMPLETED', '2026-08-19 11:05:38');
 
 -- --------------------------------------------------------
 
@@ -457,13 +396,6 @@ CREATE TABLE `outgoing_items` (
   `submission_item_id` int(11) DEFAULT NULL,
   `quantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `outgoing_items`
---
-
-INSERT INTO `outgoing_items` (`id`, `outgoing_id`, `master_item_id`, `submission_item_id`, `quantity`) VALUES
-(1, 1, 189, 1, 2);
 
 -- --------------------------------------------------------
 
@@ -513,22 +445,6 @@ CREATE TABLE `schema_migrations` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `schema_migrations`
---
-
-INSERT INTO `schema_migrations` (`id`, `migration`, `created_at`) VALUES
-(1, '001_create_users_table.php', '2026-08-14 14:56:16'),
-(2, '002_create_master_tables.php', '2026-08-14 14:56:16'),
-(3, '003_create_master_items_table.php', '2026-08-14 14:56:16'),
-(4, '004_create_master_item_attachments_table.php', '2026-08-14 14:56:16'),
-(5, '005_create_stocks_and_ledgers_tables.php', '2026-08-14 14:56:16'),
-(6, '006_create_serial_numbers_and_movements_tables.php', '2026-08-14 14:56:16'),
-(7, '007_create_transactions_tables.php', '2026-08-14 14:56:16'),
-(8, '008_create_audit_logs_table.php', '2026-08-14 14:56:16'),
-(9, '009_create_attachments_table.php', '2026-08-14 14:56:16'),
-(10, '010_update_schema.php', '2026-08-15 04:50:31');
-
 -- --------------------------------------------------------
 
 --
@@ -551,23 +467,6 @@ CREATE TABLE `serial_movements` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `serial_movements`
---
-
-INSERT INTO `serial_movements` (`id`, `serial_number_id`, `from_status`, `to_status`, `from_warehouse_id`, `to_warehouse_id`, `from_holder_id`, `to_holder_id`, `reference_type`, `reference_id`, `performed_by`, `notes`, `created_at`) VALUES
-(1, 1, NULL, 'AVAILABLE', NULL, 58, NULL, NULL, 'incoming', 45, 3382, 'Barang masuk - INC-20260819-0001', '2026-08-19 08:27:27'),
-(2, 2, NULL, 'AVAILABLE', NULL, 58, NULL, NULL, 'incoming', 45, 3382, 'Barang masuk - INC-20260819-0001', '2026-08-19 08:27:27'),
-(3, 3, NULL, 'AVAILABLE', NULL, 58, NULL, NULL, 'incoming', 45, 3382, 'Barang masuk - INC-20260819-0001', '2026-08-19 08:27:27'),
-(4, 4, NULL, 'AVAILABLE', NULL, 58, NULL, NULL, 'incoming', 45, 3382, 'Barang masuk - INC-20260819-0001', '2026-08-19 08:27:27'),
-(5, 5, NULL, 'AVAILABLE', NULL, 58, NULL, NULL, 'incoming', 45, 3382, 'Barang masuk - INC-20260819-0001', '2026-08-19 08:27:27'),
-(6, 6, NULL, 'AVAILABLE', NULL, 58, NULL, NULL, 'incoming', 46, 3382, 'Barang masuk - INC-20260819-0002', '2026-08-19 08:27:54'),
-(7, 7, NULL, 'AVAILABLE', NULL, 58, NULL, NULL, 'incoming', 46, 3382, 'Barang masuk - INC-20260819-0002', '2026-08-19 08:27:54'),
-(8, 8, NULL, 'AVAILABLE', NULL, 58, NULL, NULL, 'incoming', 46, 3382, 'Barang masuk - INC-20260819-0002', '2026-08-19 08:27:54'),
-(9, 1, 'AVAILABLE', 'ISSUED', 58, NULL, NULL, 3646, 'outgoing', 1, 3382, 'Barang keluar - OUT-20260819-0001', '2026-08-19 11:05:38'),
-(10, 2, 'AVAILABLE', 'ISSUED', 58, NULL, NULL, 3646, 'outgoing', 1, 3382, 'Barang keluar - OUT-20260819-0001', '2026-08-19 11:05:38'),
-(11, 1, 'ISSUED', 'INSTALLED', NULL, NULL, 3646, NULL, 'installation', 2, 3646, 'Instalasi - INS-20260819-0001', '2026-08-19 12:04:18');
-
 -- --------------------------------------------------------
 
 --
@@ -587,20 +486,6 @@ CREATE TABLE `serial_numbers` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `serial_numbers`
---
-
-INSERT INTO `serial_numbers` (`id`, `master_item_id`, `serial_number`, `status`, `current_warehouse_id`, `current_location_id`, `current_holder_id`, `condition_status`, `created_at`, `updated_at`) VALUES
-(1, 189, 'SN01', 'INSTALLED', NULL, NULL, NULL, 'GOOD', '2026-08-19 08:27:27', '2026-08-19 12:04:18'),
-(2, 189, 'SN02', 'ISSUED', NULL, NULL, 3646, 'GOOD', '2026-08-19 08:27:27', '2026-08-19 11:05:38'),
-(3, 189, 'SN03', 'AVAILABLE', 58, NULL, NULL, 'GOOD', '2026-08-19 08:27:27', '2026-08-19 08:27:27'),
-(4, 189, 'SN04', 'AVAILABLE', 58, NULL, NULL, 'GOOD', '2026-08-19 08:27:27', '2026-08-19 08:27:27'),
-(5, 189, 'SN05', 'AVAILABLE', 58, NULL, NULL, 'GOOD', '2026-08-19 08:27:27', '2026-08-19 08:27:27'),
-(6, 190, 'PPK01', 'AVAILABLE', 58, NULL, NULL, 'GOOD', '2026-08-19 08:27:54', '2026-08-19 08:27:54'),
-(7, 190, 'PPK02', 'AVAILABLE', 58, NULL, NULL, 'GOOD', '2026-08-19 08:27:54', '2026-08-19 08:27:54'),
-(8, 190, 'PPK03', 'AVAILABLE', 58, NULL, NULL, 'GOOD', '2026-08-19 08:27:54', '2026-08-19 08:27:54');
-
 -- --------------------------------------------------------
 
 --
@@ -612,23 +497,6 @@ CREATE TABLE `settings` (
   `value` text DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `settings`
---
-
-INSERT INTO `settings` (`key`, `value`, `updated_at`) VALUES
-('app_name', 'APLIKASI PEPEK', '2026-08-18 08:04:07'),
-('app_short_name', 'BIG', '2026-08-14 18:17:54'),
-('company_name', 'PT BORNEO INOVASI GEMILANG', '2026-08-18 08:04:07'),
-('default_theme', 'light', '2026-08-14 18:18:26'),
-('favicon_path', 'favicon_b1219910bd827bd7.png', '2026-08-16 22:33:19'),
-('footer_text', '© 2026 PT. BIG. All rights reserved.', '2026-08-14 18:17:54'),
-('login_subtitle', 'Sign in to your account', '2026-08-14 18:17:54'),
-('login_title', 'GUDANG BIGNET', '2026-08-15 08:05:25'),
-('logo_path', 'logo_aeab9d90f5a913ac.jpg', '2026-08-18 08:04:09'),
-('primary_color', 'blue', '2026-08-15 07:42:37'),
-('sidebar_theme', 'dark', '2026-08-15 07:58:01');
 
 -- --------------------------------------------------------
 
@@ -643,14 +511,6 @@ CREATE TABLE `stocks` (
   `quantity` int(11) NOT NULL DEFAULT 0,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `stocks`
---
-
-INSERT INTO `stocks` (`id`, `master_item_id`, `warehouse_id`, `quantity`, `updated_at`) VALUES
-(57, 189, 58, 3, '2026-08-19 11:05:38'),
-(58, 190, 58, 3, '2026-08-19 08:27:54');
 
 -- --------------------------------------------------------
 
@@ -702,15 +562,6 @@ CREATE TABLE `stock_ledgers` (
   `notes` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `stock_ledgers`
---
-
-INSERT INTO `stock_ledgers` (`id`, `master_item_id`, `warehouse_id`, `transaction_type`, `reference_type`, `reference_id`, `quantity_delta`, `balance_before`, `balance_after`, `performed_by`, `notes`, `created_at`) VALUES
-(98, 189, 58, 'INCOMING', 'incoming', 45, 5, 0, 5, 3382, 'Incoming INC-20260819-0001', '2026-08-19 08:27:27'),
-(99, 190, 58, 'INCOMING', 'incoming', 46, 3, 0, 3, 3382, 'Incoming INC-20260819-0002', '2026-08-19 08:27:54'),
-(100, 189, 58, 'OUTGOING', 'outgoing', 1, -2, 5, 3, 3382, 'Fulfillment outgoing OUT-20260819-0001', '2026-08-19 11:05:38');
 
 -- --------------------------------------------------------
 
@@ -768,13 +619,6 @@ CREATE TABLE `submissions` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `submissions`
---
-
-INSERT INTO `submissions` (`id`, `submission_code`, `submitted_by`, `submission_type`, `status`, `notes`, `approved_by`, `approved_at`, `approval_notes`, `created_at`, `updated_at`) VALUES
-(35, 'REQ-20260819-0001', 3646, 'STOCK', 'COMPLETED', '', 3382, '2026-08-19 10:37:28', '', '2026-08-19 08:30:34', '2026-08-19 11:05:38');
-
 -- --------------------------------------------------------
 
 --
@@ -802,13 +646,6 @@ CREATE TABLE `submission_items` (
   `notes` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `submission_items`
---
-
-INSERT INTO `submission_items` (`id`, `submission_id`, `source_type`, `warehouse_id`, `master_item_id`, `manual_name`, `manual_spec`, `manual_unit`, `requested_quantity`, `approved_quantity`, `fulfilled_quantity`, `remaining_quantity`, `status`, `rejection_reason`, `processing_note`, `approved_by`, `approved_at`, `notes`) VALUES
-(1, 35, 'STOCK', 58, 189, NULL, NULL, NULL, 2, 2, 2, 0, 'APPROVED', '', NULL, 3382, '2026-08-19 17:37:28', '');
-
 -- --------------------------------------------------------
 
 --
@@ -822,7 +659,13 @@ CREATE TABLE `transfers` (
   `destination_warehouse_id` int(11) NOT NULL,
   `status` varchar(50) NOT NULL DEFAULT 'IN_TRANSIT',
   `sent_by` int(11) NOT NULL,
+  `driver_name` varchar(150) DEFAULT NULL,
+  `driver_phone` varchar(50) DEFAULT NULL,
+  `vehicle_number` varchar(50) DEFAULT NULL,
   `received_by` int(11) DEFAULT NULL,
+  `receiver_name` varchar(150) DEFAULT NULL,
+  `receiver_role` varchar(150) DEFAULT NULL,
+  `receiver_phone` varchar(50) DEFAULT NULL,
   `notes` text DEFAULT NULL,
   `sent_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `received_at` timestamp NULL DEFAULT NULL
@@ -858,6 +701,152 @@ CREATE TABLE `transfer_item_serials` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `transfer_receipts`
+--
+
+CREATE TABLE `transfer_receipts` (
+  `id` int(11) NOT NULL,
+  `transfer_id` int(11) NOT NULL,
+  `processed_by` int(11) DEFAULT NULL,
+  `receiver_name` varchar(150) NOT NULL,
+  `receiver_role` varchar(100) DEFAULT NULL,
+  `receiver_phone` varchar(50) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `received_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Triggers `transfer_receipts`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_transfer_receipt_history_note` BEFORE INSERT ON `transfer_receipts` FOR EACH ROW SET NEW.notes = CONCAT_WS(
+    '\n',
+    NULLIF(NEW.notes, ''),
+    (
+        SELECT CONCAT(
+            '[Barang diterima] ',
+            x.kind_count,
+            ' jenis · ',
+            x.total_qty,
+            ' unit — ',
+            x.summary
+        )
+        FROM (
+            SELECT
+                COUNT(*) AS kind_count,
+                COALESCE(SUM(delta_qty), 0) AS total_qty,
+                GROUP_CONCAT(
+                    CONCAT(item_name, ' — ', delta_qty, ' unit')
+                    ORDER BY item_name
+                    SEPARATOR '; '
+                ) AS summary
+            FROM (
+                SELECT
+                    m.nama AS item_name,
+                    ti.quantity_received -
+                    COALESCE(
+                        (
+                            SELECT MAX(s.cumulative_quantity)
+                            FROM transfer_receipt_item_snapshots s
+                            WHERE s.transfer_item_id = ti.id
+                        ),
+                        0
+                    ) AS delta_qty
+                FROM transfer_items ti
+                JOIN master_items m
+                    ON m.id = ti.master_item_id
+                WHERE ti.transfer_id = NEW.transfer_id
+            ) d
+            WHERE delta_qty > 0
+        ) x
+        WHERE x.total_qty > 0
+    )
+)
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_transfer_receipt_snapshot_after_insert` AFTER INSERT ON `transfer_receipts` FOR EACH ROW INSERT INTO transfer_receipt_item_snapshots (
+    receipt_id,
+    transfer_item_id,
+    master_item_id,
+    cumulative_quantity,
+    serial_numbers_json
+)
+SELECT
+    NEW.id,
+    ti.id,
+    ti.master_item_id,
+    ti.quantity_received,
+    (
+        SELECT CONCAT(
+            '[',
+            GROUP_CONCAT(
+                JSON_QUOTE(sn.serial_number)
+                ORDER BY sn.serial_number
+                SEPARATOR ','
+            ),
+            ']'
+        )
+        FROM transfer_item_serials tis
+        JOIN serial_numbers sn
+            ON sn.id = tis.serial_number_id
+        WHERE tis.transfer_item_id = ti.id
+          AND tis.status = 'RECEIVED'
+    )
+FROM transfer_items ti
+WHERE ti.transfer_id = NEW.transfer_id
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `transfer_receipt_item_snapshots`
+--
+
+CREATE TABLE `transfer_receipt_item_snapshots` (
+  `id` int(11) NOT NULL,
+  `receipt_id` int(11) NOT NULL,
+  `transfer_item_id` int(11) NOT NULL,
+  `master_item_id` int(11) NOT NULL,
+  `cumulative_quantity` int(11) NOT NULL DEFAULT 0,
+  `serial_numbers_json` longtext DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `transfer_surat_jalan_versions`
+--
+
+CREATE TABLE `transfer_surat_jalan_versions` (
+  `id` int(11) NOT NULL,
+  `transfer_id` int(11) NOT NULL,
+  `version_no` int(11) NOT NULL,
+  `document_no` varchar(80) NOT NULL,
+  `document_type` varchar(30) NOT NULL DEFAULT 'TRANSFER',
+  `event_label` varchar(100) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `created_by` int(11) DEFAULT NULL,
+  `sent_at` datetime DEFAULT NULL,
+  `received_at` datetime DEFAULT NULL,
+  `sender_name` varchar(150) DEFAULT NULL,
+  `driver_name` varchar(150) DEFAULT NULL,
+  `driver_phone` varchar(50) DEFAULT NULL,
+  `vehicle_number` varchar(80) DEFAULT NULL,
+  `receiver_name` varchar(150) DEFAULT NULL,
+  `receiver_role` varchar(150) DEFAULT NULL,
+  `receiver_phone` varchar(50) DEFAULT NULL,
+  `source_warehouse` varchar(150) DEFAULT NULL,
+  `destination_warehouse` varchar(150) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `items_json` longtext NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `units`
 --
 
@@ -870,13 +859,6 @@ CREATE TABLE `units` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `units`
---
-
-INSERT INTO `units` (`id`, `code`, `name`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
-(66, 'UNT-000001', 'UNIT', '', 1, '2026-08-19 08:20:36', '2026-08-19 08:20:36');
 
 -- --------------------------------------------------------
 
@@ -905,10 +887,13 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `role`, `account_status`, `phone`, `photo_path`, `rejection_reason`, `is_active`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(1, 'Super Admin', 'superadmin@ptbig.com', '$2y$10$SpNVJGcdsfjB1TaTbn7r.uV3Kl3FNc/9XquLsLbcGMY77q2C/vz/W', 'SUPERADMIN', 'APPROVED', 'superadmin@ptbig.com', 'profiles/profile_1_1786962425.jpg', NULL, 1, '2026-08-19 08:19:37', '2026-08-15 05:13:46', '2026-08-19 08:19:37'),
-(3382, 'MARIA TESA', 'mariatsa035@gmail.com', '$2y$10$.FS8Zrrftb8r4wxErBaUEuKuEvumDxAgn0ZpUUx52puLY7aKw1qru', 'ADMIN', 'APPROVED', '', 'profiles/profile_6a82fae69864e.jpg', NULL, 1, '2026-08-19 14:35:27', '2026-08-17 12:13:26', '2026-08-19 14:35:27'),
-(3646, 'TOMMY RYAN DWIPUTRA', 'kontol@gmail.com', '$2y$10$RIYig5nUW4PnbFaRKpO1rOWvjtIBG7t7eCuChf8T6sP8tHfmYcpjG', 'TEKNISI_NOC', 'APPROVED', '', NULL, NULL, 1, '2026-08-19 11:36:07', '2026-08-17 13:16:04', '2026-08-19 11:36:07'),
-(3743, 'Notif Register', 'notif_reg_1787040250429@ptbig.com', '$2y$10$zCqspt.M4tG6E.5yocuNs.9LubzDufTEgutO67z/ui1MAfQnwaU9a', 'TEKNISI_NOC', 'PENDING_APPROVAL', '0812', 'profiles/profile_6a8411fb39af1.png', NULL, 0, NULL, '2026-08-18 08:04:11', '2026-08-18 08:04:11');
+(1, 'Super Admin', 'superadmin@ptbig.com', '$2y$10$SpNVJGcdsfjB1TaTbn7r.uV3Kl3FNc/9XquLsLbcGMY77q2C/vz/W', 'SUPERADMIN', 'APPROVED', 'superadmin@ptbig.com', 'profiles/profile_1_6aa7592283f32.jpg', NULL, 1, '2026-09-18 05:19:49', '2026-08-15 05:13:46', '2026-09-18 05:19:49'),
+(3382, 'AISYAH', 'mariatsa035@gmail.com', '$2y$10$.FS8Zrrftb8r4wxErBaUEuKuEvumDxAgn0ZpUUx52puLY7aKw1qru', 'ADMIN', 'APPROVED', '', 'profiles/profile_3382_1787284966.jpg', NULL, 1, '2026-09-18 05:08:47', '2026-08-17 12:13:26', '2026-09-18 05:08:47'),
+(3646, 'TOMMY RYAN DWIPUTRA', 'kontol@gmail.com', '$2y$10$RIYig5nUW4PnbFaRKpO1rOWvjtIBG7t7eCuChf8T6sP8tHfmYcpjG', 'TEKNISI_NOC', 'APPROVED', '', NULL, NULL, 1, '2026-08-19 19:14:15', '2026-08-17 13:16:04', '2026-08-19 19:14:15'),
+(3778, 'PUKIMAY', 'pepekenak@gmail.com', '$2y$10$QaLLOxVxaMpot0ZI9Wrdce66bZmIY6QAkLmCyRig18KIjiukGR8ey', 'ADMIN', 'APPROVED', '0899345781312893', 'profiles/profile_6aa759593d557.jpg', NULL, 1, '2026-09-14 02:18:27', '2026-09-14 02:18:01', '2026-09-14 02:18:27'),
+(3779, 'UAT Test User', 'uat_test_1789356785973@ptbig.com', '$2y$10$kaFATQMkDAxp5DDDogKUbeC9Zw.wFI5Gkftc6E9ROewUvtm.hSPw6', 'TEKNISI_NOC', 'APPROVED', '', NULL, NULL, 1, NULL, '2026-09-14 03:33:36', '2026-09-14 03:33:36'),
+(3780, 'UAT Admin', 'admin@ptbig.com', '$2y$10$kGBs8cBQwpzwzFy9qFM2G.VsjESqmazcM3YHSKFaLJiVg7K/yEDl6', 'ADMIN', 'APPROVED', '', NULL, NULL, 1, '2026-09-17 23:57:36', '2026-09-14 03:42:08', '2026-09-17 23:57:36'),
+(3781, 'UAT Teknisi', 'teknisi@ptbig.com', '$2y$10$vPyHo7Uwd9eUBZscXyAA0.yIhtSphnEpbSWc1yXOvy8Lv/ltYvnDi', 'TEKNISI_NOC', 'APPROVED', '', NULL, NULL, 1, '2026-09-17 23:57:29', '2026-09-14 03:42:42', '2026-09-17 23:57:29');
 
 -- --------------------------------------------------------
 
@@ -926,13 +911,6 @@ CREATE TABLE `warehouses` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `warehouses`
---
-
-INSERT INTO `warehouses` (`id`, `code`, `name`, `address`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
-(58, 'GDG-000001', 'GUDANG 28 OKTOBER', 'PONTIANAK', '', 1, '2026-08-19 08:20:50', '2026-08-19 08:20:50');
 
 --
 -- Indexes for dumped tables
@@ -1249,6 +1227,35 @@ ALTER TABLE `transfer_item_serials`
   ADD KEY `serial_number_id` (`serial_number_id`);
 
 --
+-- Indexes for table `transfer_receipts`
+--
+ALTER TABLE `transfer_receipts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_transfer_receipts_transfer` (`transfer_id`),
+  ADD KEY `idx_transfer_receipts_received_at` (`received_at`),
+  ADD KEY `fk_transfer_receipts_processed_by` (`processed_by`);
+
+--
+-- Indexes for table `transfer_receipt_item_snapshots`
+--
+ALTER TABLE `transfer_receipt_item_snapshots`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_receipt_item_snapshot` (`receipt_id`,`transfer_item_id`),
+  ADD KEY `idx_receipt_snapshot_receipt` (`receipt_id`),
+  ADD KEY `idx_receipt_snapshot_transfer_item` (`transfer_item_id`),
+  ADD KEY `fk_receipt_snapshot_master_item` (`master_item_id`);
+
+--
+-- Indexes for table `transfer_surat_jalan_versions`
+--
+ALTER TABLE `transfer_surat_jalan_versions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_transfer_sj_version` (`transfer_id`,`version_no`),
+  ADD UNIQUE KEY `uq_transfer_sj_document_no` (`document_no`),
+  ADD KEY `idx_transfer_sj_versions_transfer` (`transfer_id`,`version_no`),
+  ADD KEY `fk_transfer_sj_versions_user` (`created_by`);
+
+--
 -- Indexes for table `units`
 --
 ALTER TABLE `units`
@@ -1283,55 +1290,55 @@ ALTER TABLE `attachments`
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `incidents`
 --
 ALTER TABLE `incidents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `incident_items`
 --
 ALTER TABLE `incident_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `incoming`
 --
 ALTER TABLE `incoming`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `incoming_items`
 --
 ALTER TABLE `incoming_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `installations`
 --
 ALTER TABLE `installations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `installation_items`
 --
 ALTER TABLE `installation_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `item_categories`
 --
 ALTER TABLE `item_categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `loans`
 --
 ALTER TABLE `loans`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `loan_items`
@@ -1349,43 +1356,43 @@ ALTER TABLE `loan_item_serials`
 -- AUTO_INCREMENT for table `loan_manual_items`
 --
 ALTER TABLE `loan_manual_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `locations`
 --
 ALTER TABLE `locations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `master_items`
 --
 ALTER TABLE `master_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=191;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `master_item_attachments`
 --
 ALTER TABLE `master_item_attachments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=342;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `outgoing`
 --
 ALTER TABLE `outgoing`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `outgoing_items`
 --
 ALTER TABLE `outgoing_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `returns`
@@ -1409,19 +1416,19 @@ ALTER TABLE `schema_migrations`
 -- AUTO_INCREMENT for table `serial_movements`
 --
 ALTER TABLE `serial_movements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `serial_numbers`
 --
 ALTER TABLE `serial_numbers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `stocks`
 --
 ALTER TABLE `stocks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `stock_adjustments`
@@ -1439,7 +1446,7 @@ ALTER TABLE `stock_adjustment_items`
 -- AUTO_INCREMENT for table `stock_ledgers`
 --
 ALTER TABLE `stock_ledgers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `stock_opnames`
@@ -1457,13 +1464,13 @@ ALTER TABLE `stock_opname_items`
 -- AUTO_INCREMENT for table `submissions`
 --
 ALTER TABLE `submissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `submission_items`
 --
 ALTER TABLE `submission_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `transfers`
@@ -1484,22 +1491,40 @@ ALTER TABLE `transfer_item_serials`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `transfer_receipts`
+--
+ALTER TABLE `transfer_receipts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `transfer_receipt_item_snapshots`
+--
+ALTER TABLE `transfer_receipt_item_snapshots`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `transfer_surat_jalan_versions`
+--
+ALTER TABLE `transfer_surat_jalan_versions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `units`
 --
 ALTER TABLE `units`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3778;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3784;
 
 --
 -- AUTO_INCREMENT for table `warehouses`
 --
 ALTER TABLE `warehouses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -1749,6 +1774,28 @@ ALTER TABLE `transfer_items`
 ALTER TABLE `transfer_item_serials`
   ADD CONSTRAINT `transfer_item_serials_ibfk_1` FOREIGN KEY (`transfer_item_id`) REFERENCES `transfer_items` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `transfer_item_serials_ibfk_2` FOREIGN KEY (`serial_number_id`) REFERENCES `serial_numbers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `transfer_receipts`
+--
+ALTER TABLE `transfer_receipts`
+  ADD CONSTRAINT `fk_transfer_receipts_processed_by` FOREIGN KEY (`processed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_transfer_receipts_transfer` FOREIGN KEY (`transfer_id`) REFERENCES `transfers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `transfer_receipt_item_snapshots`
+--
+ALTER TABLE `transfer_receipt_item_snapshots`
+  ADD CONSTRAINT `fk_receipt_snapshot_master_item` FOREIGN KEY (`master_item_id`) REFERENCES `master_items` (`id`),
+  ADD CONSTRAINT `fk_receipt_snapshot_receipt` FOREIGN KEY (`receipt_id`) REFERENCES `transfer_receipts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_receipt_snapshot_transfer_item` FOREIGN KEY (`transfer_item_id`) REFERENCES `transfer_items` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `transfer_surat_jalan_versions`
+--
+ALTER TABLE `transfer_surat_jalan_versions`
+  ADD CONSTRAINT `fk_transfer_sj_versions_transfer` FOREIGN KEY (`transfer_id`) REFERENCES `transfers` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_transfer_sj_versions_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -106,6 +106,16 @@ class IncomingController {
             exit;
         }
 
+        $seenItems = [];
+        foreach ($item_ids as $item_id) {
+            if (isset($seenItems[$item_id])) {
+                $_SESSION['error'] = "Terdapat duplikasi jenis barang pada formulir. Silakan gabungkan kuantitas untuk satu jenis barang yang sama.";
+                header("Location: " . url('/incoming/create'));
+                exit;
+            }
+            $seenItems[$item_id] = true;
+        }
+
         $pdo = Database::getInstance()->getConnection();
         $stockService = new StockService();
         $user_id = AuthHelper::user()['id'];
@@ -170,6 +180,14 @@ class IncomingController {
                 $stockService->mutateStock($item_id, $warehouse_id, $qty, 'INCOMING', 'incoming', $incoming_id, "Incoming $transaction_code");
             }
 
+            // Upload Evidence if exists
+            if (!empty($_FILES['evidence']['name'])) {
+                $attId = \App\Helpers\AttachmentHelper::store('INCOMING', $incoming_id, $_FILES['evidence'], $user_id);
+                if (!$attId) {
+                    throw new \Exception("Gagal mengunggah foto bukti barang masuk.");
+                }
+            }
+
             // Audit Log
             $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'CREATE', 'incoming', ?)");
             $auditStmt->execute([$user_id, $incoming_id]);
@@ -184,6 +202,86 @@ class IncomingController {
         }
 
         header("Location: " . url('/incoming'));
+        exit;
+    }
+
+    public function show() {
+        AuthHelper::requireRole(['SUPERADMIN', 'ADMIN']);
+        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        
+        $pdo = Database::getInstance()->getConnection();
+        $stmt = $pdo->prepare("SELECT i.*, w.name as warehouse_name, u.name as receiver_name 
+                               FROM incoming i 
+                               JOIN warehouses w ON i.warehouse_id = w.id 
+                               JOIN users u ON i.received_by = u.id 
+                               WHERE i.id = ?");
+        $stmt->execute([$id]);
+        $incoming = $stmt->fetch();
+        
+        if (!$incoming) {
+            header("Location: " . url('/incoming'));
+            exit;
+        }
+        
+        // Get items
+        $stmtItems = $pdo->prepare("SELECT ii.*, m.kode_barang, m.nama, m.is_serialized, u.name as unit_name 
+                                    FROM incoming_items ii 
+                                    JOIN master_items m ON ii.master_item_id = m.id 
+                                    LEFT JOIN units u ON m.unit_id = u.id 
+                                    WHERE ii.incoming_id = ?");
+        $stmtItems->execute([$id]);
+        $items = $stmtItems->fetchAll();
+        
+        // Get serials for each item if serialized
+        $itemSerials = [];
+        foreach ($items as $item) {
+            if ($item['is_serialized']) {
+                $stmtSn = $pdo->prepare("SELECT sm.serial_number_id, s.serial_number 
+                                         FROM serial_movements sm 
+                                         JOIN serial_numbers s ON sm.serial_number_id = s.id 
+                                         WHERE sm.reference_type = 'incoming' AND sm.reference_id = ? AND s.master_item_id = ?");
+                $stmtSn->execute([$id, $item['master_item_id']]);
+                $itemSerials[$item['id']] = $stmtSn->fetchAll();
+            }
+        }
+        
+        // Timeline (Audit Logs)
+        $stmtTimeline = $pdo->prepare("SELECT a.*, u.name as user_name 
+                                       FROM audit_logs a 
+                                       JOIN users u ON a.user_id = u.id 
+                                       WHERE a.entity = 'incoming' AND a.entity_id = ? 
+                                       ORDER BY a.created_at DESC");
+        $stmtTimeline->execute([$id]);
+        $timeline = $stmtTimeline->fetchAll();
+        
+        // Evidence
+        $attachments = \App\Helpers\AttachmentHelper::forReference('INCOMING', $id);
+        
+        require __DIR__ . '/../../resources/views/transactions/incoming/show.php';
+    }
+
+    public function uploadEvidence() {
+        AuthHelper::requireRole(['ADMIN']);
+        if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
+            $_SESSION['error'] = "CSRF validation failed";
+            header('Location: ' . url('/incoming'));
+            exit;
+        }
+        $id = (int)($_POST['id'] ?? 0);
+        try {
+            $attId = \App\Helpers\AttachmentHelper::store('INCOMING', $id, $_FILES['evidence'] ?? [], (int)AuthHelper::user()['id']);
+            if ($attId) {
+                $pdo = Database::getInstance()->getConnection();
+                $audit = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id, ip_address, user_agent) VALUES (?, 'UPLOAD_EVIDENCE', 'incoming', ?, ?, ?)");
+                $audit->execute([AuthHelper::user()['id'], $id, $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? '']);
+                $_SESSION['success'] = "Bukti berhasil diunggah.";
+            } else {
+                $_SESSION['error'] = "Pilih file bukti terlebih dahulu.";
+            }
+        } catch (\Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+        header('Location: ' . url('/incoming/show?id=' . $id));
         exit;
     }
 }

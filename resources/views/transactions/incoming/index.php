@@ -44,6 +44,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Gudang Tujuan</th>
         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Penerima</th>
         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pemasok</th>
+        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">Aksi</th>
       </tr>
     </thead>
     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -82,11 +83,16 @@ require __DIR__ . '/../../components/table/toolbar.php';
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($inc['warehouse_name']); ?></td>
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($inc['receiver_name']); ?></td>
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($inc['supplier_info']); ?></td>
+        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-center">
+          <a href="<?php echo url('/incoming/show?id=' . $inc['id']); ?>" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Lihat Detail">
+            <i class="fas fa-eye"></i>
+          </a>
+        </td>
       </tr>
       <?php endforeach; ?>
       <?php if (empty($incomings)): ?>
         <?php 
-        $colspan = 7;
+        $colspan = 8;
         $emptyMessage ="Belum ada transaksi barang masuk.";
         require __DIR__ . '/../../components/table/empty_state.php';
         ?>

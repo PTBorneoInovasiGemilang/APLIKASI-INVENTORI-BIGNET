@@ -27,6 +27,8 @@
 - [x] Route registration for all main modules
 - [x] Role-based login and basic dashboard display
 - [x] Audit Backend Logic for Core Inventory Transactions (Atomic transactions, permission assertions, locking)
+- [x] Transaksi Barang Masuk (Atomic, validation SN, stock movement, audit log, UX Multi-Item Searchable Select, Bukti Lampiran/Evidence).
+- [x] Transaksi Barang Keluar (Atomic, guard SN availability).
 - [x] PHASE 1: Created Shared Table Components (Toolbar, Pagination, Empty State)
 - [x] Batch A: Master Data & Inventory UI Standardization
 - [x] Batch B: Operational Transactions UI Standardization
