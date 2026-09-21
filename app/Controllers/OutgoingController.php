@@ -67,7 +67,6 @@ class OutgoingController {
         \App\Helpers\AuthHelper::requireRole('ADMIN');
         $pdo = Database::getInstance()->getConnection();
         $warehouses = $pdo->query("SELECT * FROM warehouses WHERE is_active = 1")->fetchAll();
-        $items = $pdo->query("SELECT id, kode_barang, nama, is_serialized FROM master_items WHERE is_active = 1")->fetchAll();
         
         // Fetch approved submissions with requester name, date, and item summary for informative dropdown labels.
         $submissions = $pdo->query("SELECT s.id, s.submission_code, s.created_at, u.name AS submitter_name,
@@ -130,13 +129,22 @@ class OutgoingController {
         $quantities = $_POST['quantities'] ?? [];
         $sn_list = $_POST['sn_list'] ?? [];
 
+        $pdo = Database::getInstance()->getConnection();
+        
+        $wh = $pdo->prepare("SELECT id FROM warehouses WHERE id = ? AND is_active = 1");
+        $wh->execute([$warehouse_id]);
+        if (!$wh->fetch()) {
+            $_SESSION['error'] = "Gudang asal tidak valid atau tidak aktif.";
+            header("Location: " . url('/outgoing/create'));
+            exit;
+        }
+
         if (empty($item_ids)) {
             $_SESSION['error'] = "Tidak ada barang yang dipilih.";
             header("Location: " . url('/outgoing/create'));
             exit;
         }
 
-        $pdo = Database::getInstance()->getConnection();
         $stockService = new StockService();
         $user_id = AuthHelper::user()['id'];
         $transaction_code = \App\Helpers\TransactionHelper::generateCode('OUT', 'outgoing');

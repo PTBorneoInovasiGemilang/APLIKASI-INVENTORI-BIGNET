@@ -20,7 +20,7 @@ if (empty($_SESSION['csrf_token'])) {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <div>
         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Gudang Tujuan <span class="text-red-500">*</span></label>
-        <select name="warehouse_id" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select name="warehouse_id" id="warehouse_id" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="handleWarehouseChange(this.value)">
           <option value="">Pilih Gudang</option>
           <?php foreach ($warehouses as $wh): ?>
             <option value="<?php echo $wh['id']; ?>"><?php echo htmlspecialchars($wh['name']); ?></option>
@@ -53,7 +53,7 @@ if (empty($_SESSION['csrf_token'])) {
     <div class="mb-6 border-t border-gray-200 dark:border-gray-700 pt-4">
       <div class="flex justify-between items-center mb-2">
         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold">Daftar Barang Masuk</label>
-        <button type="button" onclick="addItemRow()" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 text-gray-800 text-sm font-semibold py-1 px-3 rounded transition-colors">
+        <button type="button" id="btnAddRow" onclick="addItemRow()" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 text-gray-800 text-sm font-semibold py-1 px-3 rounded transition-colors">
           <i class="fas fa-plus"></i> Tambah Baris
         </button>
       </div>
@@ -85,10 +85,49 @@ if (empty($_SESSION['csrf_token'])) {
 </div>
 
 <script>
-  const itemsData = <?php echo json_encode($items); ?>;
-  
+  let itemsData = [];
   let rowCount = 0;
   
+  function handleWarehouseChange(whId) {
+      const tbody = document.getElementById('itemsBody');
+      const btnAddRow = document.getElementById('btnAddRow');
+      
+      tbody.innerHTML = '';
+      rowCount = 0;
+      itemsData = [];
+      
+      if (!whId) {
+          btnAddRow.disabled = true;
+          btnAddRow.classList.add('opacity-50', 'cursor-not-allowed');
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td colspan="4" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400 italic">
+            Pilih gudang terlebih dahulu untuk menambahkan barang
+          </td>`;
+          tbody.appendChild(tr);
+          checkDuplicates();
+          return;
+      }
+      
+      btnAddRow.disabled = true;
+      btnAddRow.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat...';
+      
+      fetch(`<?= url('/api/items/by-warehouse') ?>?warehouse_id=${whId}&purpose=incoming`)
+          .then(res => res.json())
+          .then(data => {
+              itemsData = data;
+              btnAddRow.disabled = false;
+              btnAddRow.classList.remove('opacity-50', 'cursor-not-allowed');
+              btnAddRow.innerHTML = '<i class="fas fa-plus"></i> Tambah Baris';
+              addItemRow();
+          })
+          .catch(err => {
+              console.error(err);
+              btnAddRow.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Gagal memuat';
+              if (typeof AppToast !== 'undefined') AppToast.error('Gagal memuat data barang.');
+          });
+  }
+
   function addItemRow() {
     const tbody = document.getElementById('itemsBody');
     const rowIndex = rowCount++;
@@ -324,8 +363,8 @@ if (empty($_SESSION['csrf_token'])) {
     return checkDuplicates();
   }
 
-  // Add first row on load
-  addItemRow();
+  // Initialize
+  handleWarehouseChange(document.getElementById('warehouse_id').value);
 </script>
 
 <?php
