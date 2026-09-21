@@ -12,7 +12,7 @@ if (empty($_SESSION['csrf_token'])) {
       <i class="fas fa-arrow-left"></i>
     </a>
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Penyesuaian Stok Baru (Opname)</h1>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Penyesuaian Stok Baru</h1>
     </div>
   </div>
 
@@ -107,7 +107,7 @@ if (empty($_SESSION['csrf_token'])) {
     let selectHtml = `<select name="item_ids[]" required class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm item-select" onchange="handleItemChange(this, ${rowIndex})">
       <option value="">Pilih Barang</option>`;
     itemsData.forEach(item => {
-      selectHtml += `<option value="${item.id}" data-serialized="${item.is_serialized}">${item.nama} (${item.kode_barang})</option>`;
+      selectHtml += `<option value="${item.id}" data-serialized="${item.is_serialized}">${item.nama}</option>`;
     });
     selectHtml += `</select>`;
     

@@ -9,7 +9,7 @@ ob_start();
       <i class="fas fa-arrow-left"></i>
     </a>
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Detail Penyesuaian Stok (Opname)</h1>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Detail Penyesuaian Stok</h1>
       <p class="text-sm text-gray-500 dark:text-gray-400"><?= htmlspecialchars($adjustment['transaction_code']) ?></p>
     </div>
   </div>
