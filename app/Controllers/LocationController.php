@@ -133,6 +133,7 @@ class LocationController {
 
                 $pdo->commit();
                 $success = true;
+                $_SESSION['success'] = "Lokasi berhasil ditambahkan.";
             } catch (\PDOException $e) {
                 $pdo->rollBack();
                 // 1062 = duplicate entry (collision kode) — coba kode berikutnya.
