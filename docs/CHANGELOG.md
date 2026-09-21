@@ -15,6 +15,20 @@
 **Remaining:**
 **Next:**
 
+## 2026-09-21 — FIX ITEM SELECTION SCOPING BY WAREHOUSE
+**Task:** Item Selection bergantung pada gudang untuk Barang Masuk & Barang Keluar.
+**Goal:** User dipaksa memilih gudang sebelum bisa memilih item, dan pilihan item bergantung pada gudang yang dipilih (Barang Keluar hanya menampilkan yang memiliki stok di gudang tersebut).
+**Changed:**
+- `routes/web.php` & `ApiController.php`: Tambah endpoint `/api/items/by-warehouse`.
+- `IncomingController.php` & `OutgoingController.php`: Tambah guard backend untuk validasi gudang aktif.
+- `incoming/create.php` & `outgoing/create.php`: UI logic untuk disable select item sebelum gudang dipilih, dan fetch item secara dinamis dari API ketika gudang dipilih/diubah.
+**Business impact:** Mencegah admin memilih item sebelum menentukan gudang. Mencegah error 'stok tidak cukup' di kemudian hari dengan hanya menampilkan item yang tersedia secara real-time pada form Barang Keluar.
+**Database impact:** Tidak ada perubahan skema.
+**Verification:** PHP Syntax check lulus (0 errors). Alur UI dan dropdown dinamis telah diperbarui.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-09-21 — FIX MASTER ITEM PHOTO MANAGEMENT
 **Task:** Bug FIX BUG-054 — Foto master barang tidak dapat dihapus atau diganti di halaman edit.
 **Goal:** Admin dapat mengelola (hapus & ganti) foto-foto lama secara satuan di halaman Ubah Barang tanpa merusak alur form utama.
