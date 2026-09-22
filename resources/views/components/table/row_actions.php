@@ -70,19 +70,21 @@ if ($viewItem && preg_match('#/users/show/([0-9]+)$#', (string)(parse_url($viewI
   }
 }
 ?>
-<td data-label="Aksi" class="px-4 py-3 whitespace-nowrap text-sm font-medium min-w-[140px] text-center align-middle">
-  <div class="flex w-full items-center justify-center gap-2">
+<td data-label="Aksi" class="px-4 py-3 whitespace-nowrap text-sm font-medium min-w-[168px] text-center align-middle">
+  <div class="inline-flex items-center justify-center gap-2 min-w-[152px]">
   <?php if ($viewItem): ?>
     <a href="<?= htmlspecialchars($viewItem['url']) ?>"
       title="<?= htmlspecialchars($viewItem['title'] ?? $viewItem['label'] ?? 'Lihat') ?>"
-      class="inline-flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 whitespace-nowrap">
+      class="inline-flex items-center justify-center min-w-[84px] text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 whitespace-nowrap">
       <i class="fas <?= htmlspecialchars($viewItem['icon'] ?? 'fa-eye') ?> mr-1 text-xs"></i>
       <?= htmlspecialchars($viewItem['label'] ?? 'Lihat') ?>
     </a>
+  <?php else: ?>
+    <span class="inline-block min-w-[84px]" aria-hidden="true"></span>
   <?php endif; ?>
 
   <?php if (!empty($menuItems)): ?>
-  <div class="relative inline-block text-left" data-actions>
+  <div class="relative inline-block text-left shrink-0" data-actions>
     <button type="button" data-actions-toggle title="Aksi lainnya" aria-label="Aksi lainnya" aria-haspopup="menu" aria-expanded="false"
         class="inline-flex items-center justify-center w-9 h-9 shrink-0 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
       <i class="fas fa-ellipsis-v text-sm"></i>
