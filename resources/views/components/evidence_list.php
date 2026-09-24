@@ -14,6 +14,8 @@ $evidenceItems = $evidenceItems ?? [];
 $evidenceCanUpload = $evidenceCanUpload ?? false;
 $evidenceUploadAction = $evidenceUploadAction ?? '';
 $evidenceReferenceId = $evidenceReferenceId ?? 0;
+$evidenceAccept = $evidenceAccept ?? '.jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf';
+$evidenceFormatsText = $evidenceFormatsText ?? 'JPG/PNG/WEBP/PDF, maks 5MB';
 $currentUser = \App\Helpers\AuthHelper::user();
 ?>
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -34,9 +36,9 @@ $currentUser = \App\Helpers\AuthHelper::user();
   <form id="evidenceUploadForm" method="POST" action="<?= url($evidenceUploadAction) ?>" enctype="multipart/form-data" class="hidden px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
     <input type="hidden" name="id" value="<?= (int)$evidenceReferenceId ?>">
-    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Pilih file (JPG/PNG/WEBP/PDF, maks 5MB)</label>
+    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Pilih file (<?= htmlspecialchars($evidenceFormatsText) ?>)</label>
     <div class="flex flex-col sm:flex-row gap-2">
-      <input type="file" name="evidence" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required
+      <input type="file" name="evidence" accept="<?= htmlspecialchars($evidenceAccept) ?>" required
         class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400">
       <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-semibold transition-colors whitespace-nowrap">
         <i class="fas fa-check mr-1"></i> Simpan Bukti
