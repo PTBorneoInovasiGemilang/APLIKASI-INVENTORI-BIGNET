@@ -319,7 +319,6 @@ if (!function_exists('dashboardBadge')) {
           <div class="flex-1 min-w-0">
             <p class="text-sm text-gray-700 dark:text-gray-300 truncate">
               <span class="font-medium"><?= htmlspecialchars($lg['item_name']) ?></span>
-              <span class="text-xs text-gray-400">(<?= htmlspecialchars($lg['kode_barang']) ?>)</span>
             </p>
             <p class="text-xs text-gray-400 dark:text-gray-500">
               <?= htmlspecialchars($lg['warehouse_name']) ?> · <?= htmlspecialchars($lg['transaction_type']) ?> · oleh <?= htmlspecialchars($lg['user_name'] ?? 'Sistem') ?>
