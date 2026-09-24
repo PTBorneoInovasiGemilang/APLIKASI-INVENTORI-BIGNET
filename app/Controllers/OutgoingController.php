@@ -128,6 +128,17 @@ class OutgoingController {
         $item_ids = $_POST['item_ids'] ?? [];
         $quantities = $_POST['quantities'] ?? [];
         $sn_list = $_POST['sn_list'] ?? [];
+        $evidenceFiles = $_FILES['evidence'] ?? [];
+
+        $evidenceCount = 0;
+        if (!empty($evidenceFiles) && isset($evidenceFiles['name']) && is_array($evidenceFiles['name'])) {
+            $evidenceCount = count(array_filter($evidenceFiles['name'], static fn($name) => (string)$name !== ''));
+        }
+        if ($evidenceCount < 1 || $evidenceCount > 3) {
+            $_SESSION['error'] = "Foto bukti Barang Keluar wajib 1–3 foto.";
+            header("Location: " . url('/outgoing/create'));
+            exit;
+        }
 
         $pdo = Database::getInstance()->getConnection();
         
@@ -137,6 +148,31 @@ class OutgoingController {
             $_SESSION['error'] = "Gudang asal tidak valid atau tidak aktif.";
             header("Location: " . url('/outgoing/create'));
             exit;
+        }
+
+        // Evidence Barang Keluar harus berupa gambar; AttachmentHelper tetap melakukan validasi MIME + ukuran.
+        if (!isset($evidenceFiles['tmp_name']) || !is_array($evidenceFiles['tmp_name'])) {
+            $_SESSION['error'] = "Foto bukti Barang Keluar wajib berupa 1–3 foto."; 
+            header("Location: " . url('/outgoing/create'));
+            exit;
+        }
+        $allowedEvidenceMimes = ['image/jpeg', 'image/png', 'image/webp'];
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        foreach ($evidenceFiles['tmp_name'] as $idx => $tmpName) {
+            if (($evidenceFiles['error'][$idx] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                throw new \RuntimeException("Salah satu foto bukti gagal diunggah.");
+            }
+            if (($evidenceFiles['size'][$idx] ?? 0) > \App\Helpers\AttachmentHelper::MAX_SIZE) {
+                $_SESSION['error'] = "Ukuran setiap foto bukti maksimal 5MB.";
+                header("Location: " . url('/outgoing/create'));
+                exit;
+            }
+            $mime = $finfo->file($tmpName) ?: '';
+            if (!in_array($mime, $allowedEvidenceMimes, true)) {
+                $_SESSION['error'] = "Foto bukti hanya boleh JPG, PNG, atau WEBP.";
+                header("Location: " . url('/outgoing/create'));
+                exit;
+            }
         }
 
         if (empty($item_ids)) {
@@ -299,6 +335,21 @@ class OutgoingController {
                 }
             }
 
+            // Evidence wajib: simpan seluruh 1–3 foto sebagai attachment transaksi Barang Keluar.
+            foreach ($evidenceFiles['tmp_name'] as $idx => $tmpName) {
+                $file = [
+                    'name' => $evidenceFiles['name'][$idx] ?? 'evidence',
+                    'type' => $evidenceFiles['type'][$idx] ?? '',
+                    'tmp_name' => $tmpName,
+                    'error' => $evidenceFiles['error'][$idx] ?? UPLOAD_ERR_NO_FILE,
+                    'size' => $evidenceFiles['size'][$idx] ?? 0,
+                ];
+                $attId = \App\Helpers\AttachmentHelper::store('OUTGOING', (int)$outgoing_id, $file, (int)$user_id);
+                if (!$attId) {
+                    throw new \Exception("Gagal menyimpan salah satu foto bukti Barang Keluar.");
+                }
+            }
+
             // Audit Log
             $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'CREATE', 'outgoing', ?)");
             $auditStmt->execute([$user_id, $outgoing_id]);
@@ -385,7 +436,60 @@ class OutgoingController {
             ];
         }
 
+        $attachments = \App\Helpers\AttachmentHelper::forReference('OUTGOING', $id);
+
         $pageTitle = 'Detail Barang Keluar';
         require __DIR__ . '/../../resources/views/transactions/outgoing/show.php';
     }
+    public function uploadEvidence() {
+        AuthHelper::requireRole(['ADMIN']);
+        if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
+            $_SESSION['error'] = "CSRF validation failed.";
+            header('Location: ' . url('/outgoing'));
+            exit;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $pdo = Database::getInstance()->getConnection();
+        $check = $pdo->prepare("SELECT id FROM outgoing WHERE id = ?");
+        $check->execute([$id]);
+        if (!$check->fetch()) {
+            $_SESSION['error'] = "Transaksi Barang Keluar tidak ditemukan.";
+            header('Location: ' . url('/outgoing'));
+            exit;
+        }
+
+        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM attachments WHERE reference_type = 'OUTGOING' AND reference_id = ?");
+        $countStmt->execute([$id]);
+        $currentCount = (int)$countStmt->fetchColumn();
+        if ($currentCount >= 3) {
+            $_SESSION['error'] = "Maksimal 3 foto bukti untuk satu transaksi Barang Keluar.";
+            header('Location: ' . url('/outgoing/show?id=' . $id));
+            exit;
+        }
+
+        $file = $_FILES['evidence'] ?? [];
+        try {
+            if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                throw new \RuntimeException('Pilih foto bukti terlebih dahulu.');
+            }
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($file['tmp_name']) ?: '';
+            if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+                throw new \RuntimeException('Foto bukti hanya boleh JPG, PNG, atau WEBP.');
+            }
+            $attId = \App\Helpers\AttachmentHelper::store('OUTGOING', $id, $file, (int)AuthHelper::user()['id']);
+            if (!$attId) throw new \RuntimeException('Gagal menyimpan foto bukti.');
+
+            $audit = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id, ip_address, user_agent) VALUES (?, 'UPLOAD_EVIDENCE', 'outgoing', ?, ?, ?)");
+            $audit->execute([AuthHelper::user()['id'], $id, $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? '']);
+            $_SESSION['success'] = "Foto bukti berhasil ditambahkan.";
+        } catch (\Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+
+        header('Location: ' . url('/outgoing/show?id=' . $id));
+        exit;
+    }
+
 }
