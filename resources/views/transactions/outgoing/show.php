@@ -67,6 +67,20 @@ ob_start();
     </div>
   </div>
 
+
+  <!-- Evidence Foto Barang Keluar -->
+  <?php
+  $evidenceItems = $attachments ?? [];
+  $evidenceCanUpload = count($evidenceItems) < 3 && \App\Helpers\AuthHelper::hasRole('ADMIN');
+  $evidenceUploadAction = '/outgoing/evidence/upload';
+  $evidenceReferenceId = $outgoing['id'];
+  $evidenceTitle = 'Foto Bukti Barang Keluar';
+  $evidenceEmptyMessage = 'Belum ada foto bukti untuk transaksi ini.';
+  $evidenceAccept = '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp';
+  $evidenceFormatsText = 'JPG/PNG/WEBP, maks 5MB';
+  require __DIR__ . '/../../components/evidence_list.php';
+  ?>
+
   <!-- Item -->
   <div class="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 border border-gray-200 dark:border-gray-700">
     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
