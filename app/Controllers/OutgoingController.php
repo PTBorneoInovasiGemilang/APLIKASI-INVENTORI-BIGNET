@@ -160,7 +160,9 @@ class OutgoingController {
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         foreach ($evidenceFiles['tmp_name'] as $idx => $tmpName) {
             if (($evidenceFiles['error'][$idx] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-                throw new \RuntimeException("Salah satu foto bukti gagal diunggah.");
+                $_SESSION['error'] = "Salah satu foto bukti gagal diunggah.";
+                header("Location: " . url('/outgoing/create'));
+                exit;
             }
             if (($evidenceFiles['size'][$idx] ?? 0) > \App\Helpers\AttachmentHelper::MAX_SIZE) {
                 $_SESSION['error'] = "Ukuran setiap foto bukti maksimal 5MB.";
