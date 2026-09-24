@@ -68,6 +68,14 @@ if (empty($_SESSION['csrf_token'])) {
     </div>
 
     <div class="mb-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+      <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Foto Bukti Barang Keluar <span class="text-red-500">*</span></label>
+      <input type="file" name="evidence[]" accept="image/jpeg,image/png,image/webp" multiple required class="block w-full text-sm text-gray-500 dark:text-gray-400
+        file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold
+        file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300">
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Wajib 1–3 foto. Format JPG, PNG, WEBP. Maksimal 5MB per foto. Pilih foto barang yang benar-benar akan dikeluarkan.</p>
+    </div>
+
+    <div class="mb-6 border-t border-gray-200 dark:border-gray-700 pt-4">
       <div class="flex justify-between items-center mb-2">
         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold">Daftar Barang Keluar</label>
         <button type="button" id="btnAddRow" onclick="addItemRow()" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 text-gray-800 text-sm font-semibold py-1 px-3 rounded transition-colors">
