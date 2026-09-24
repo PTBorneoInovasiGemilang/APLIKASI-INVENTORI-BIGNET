@@ -70,17 +70,17 @@ if ($viewItem && preg_match('#/users/show/([0-9]+)$#', (string)(parse_url($viewI
   }
 }
 ?>
-<td data-label="Aksi" class="px-4 py-3 whitespace-nowrap text-sm font-medium min-w-[168px] text-center align-middle">
-  <div class="inline-flex items-center justify-center gap-2 min-w-[152px]">
+<td data-label="Aksi" class="px-4 py-3 whitespace-nowrap text-sm font-medium text-center align-middle">
+  <div class="inline-grid grid-cols-[96px_36px] items-center justify-center gap-2">
   <?php if ($viewItem): ?>
     <a href="<?= htmlspecialchars($viewItem['url']) ?>"
       title="<?= htmlspecialchars($viewItem['title'] ?? $viewItem['label'] ?? 'Lihat') ?>"
-      class="inline-flex items-center justify-center min-w-[84px] text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 whitespace-nowrap">
+      class="inline-flex h-9 w-[96px] items-center justify-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 whitespace-nowrap">
       <i class="fas <?= htmlspecialchars($viewItem['icon'] ?? 'fa-eye') ?> mr-1 text-xs"></i>
       <?= htmlspecialchars($viewItem['label'] ?? 'Lihat') ?>
     </a>
   <?php else: ?>
-    <span class="inline-block min-w-[84px]" aria-hidden="true"></span>
+    <span class="inline-block h-9 w-[96px]" aria-hidden="true"></span>
   <?php endif; ?>
 
   <?php if (!empty($menuItems)): ?>
@@ -127,6 +127,8 @@ if ($viewItem && preg_match('#/users/show/([0-9]+)$#', (string)(parse_url($viewI
       <?php endforeach; ?>
     </div>
   </div>
+  <?php else: ?>
+    <span class="inline-block h-9 w-[36px]" aria-hidden="true"></span>
   <?php endif; ?>
   </div>
 </td>
