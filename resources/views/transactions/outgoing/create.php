@@ -17,7 +17,7 @@ if (empty($_SESSION['csrf_token'])) {
 <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
   <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6">Tambah Barang Keluar Baru</h2>
 
-  <form action="<?php echo url('/outgoing/store'); ?>" method="POST" id="outgoingForm">
+  <form action="<?php echo url('/outgoing/store'); ?>" method="POST" id="outgoingForm" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
