@@ -370,6 +370,105 @@ class MasterItemController {
         require __DIR__ . '/../../resources/views/inventory/items/show.php';
     }
 
+    public function incomingEvidenceHistory($id) {
+        // Read-only Inventory 360 evidence history for ADMIN/SUPERADMIN.
+        \App\Helpers\AuthHelper::requireRole(['SUPERADMIN', 'ADMIN']);
+        $pdo = Database::getInstance()->getConnection();
+        $id = (int)$id;
+        $warehouseId = isset($_GET['warehouse_id']) ? (int)$_GET['warehouse_id'] : 0;
+
+        $stmt = $pdo->prepare("SELECT m.id, m.kode_barang, m.nama, m.is_active, m.is_serialized,
+                                      c.name AS category_name, u.name AS unit_name
+                               FROM master_items m
+                               LEFT JOIN item_categories c ON m.item_category_id = c.id
+                               LEFT JOIN units u ON m.unit_id = u.id
+                               WHERE m.id = ?");
+        $stmt->execute([$id]);
+        $item = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$item) {
+            $_SESSION['error'] = "Barang tidak ditemukan.";
+            header("Location: " . url('/items'));
+            exit;
+        }
+
+        $photoStmt = $pdo->prepare("SELECT id, file_path, original_name, mime_type, file_size, created_at
+                                    FROM master_item_attachments
+                                    WHERE master_item_id = ?
+                                    ORDER BY id ASC");
+        $photoStmt->execute([$id]);
+        $masterPhotos = $photoStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $sql = "SELECT i.id AS incoming_id, i.transaction_code, i.created_at, i.supplier_info,
+                       i.warehouse_id, w.name AS warehouse_name,
+                       a.id AS attachment_id, a.file_path, a.original_name, a.mime_type,
+                       a.file_size, a.created_at AS attachment_created_at,
+                       u.name AS uploader_name
+                FROM incoming_items ii
+                JOIN incoming i ON i.id = ii.incoming_id
+                JOIN warehouses w ON w.id = i.warehouse_id
+                LEFT JOIN attachments a
+                  ON a.reference_type = 'INCOMING'
+                 AND a.reference_id = i.id
+                LEFT JOIN users u ON u.id = a.uploaded_by
+                WHERE ii.master_item_id = ?";
+        $params = [$id];
+
+        if ($warehouseId > 0) {
+            $sql .= " AND i.warehouse_id = ?";
+            $params[] = $warehouseId;
+        }
+
+        $sql .= " ORDER BY i.created_at DESC, a.created_at ASC, a.id ASC";
+
+        $incomingStmt = $pdo->prepare($sql);
+        $incomingStmt->execute($params);
+        $rows = $incomingStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $incomingEvidence = [];
+        $incomingCount = 0;
+        $photoCount = 0;
+
+        foreach ($rows as $row) {
+            $incomingId = (int)$row['incoming_id'];
+            if (!isset($incomingEvidence[$incomingId])) {
+                $incomingEvidence[$incomingId] = [
+                    'incoming_id' => $incomingId,
+                    'transaction_code' => $row['transaction_code'],
+                    'created_at' => $row['created_at'],
+                    'supplier_info' => $row['supplier_info'],
+                    'warehouse_id' => (int)$row['warehouse_id'],
+                    'warehouse_name' => $row['warehouse_name'],
+                    'photos' => [],
+                ];
+                $incomingCount++;
+            }
+
+            if (!empty($row['attachment_id'])) {
+                $incomingEvidence[$incomingId]['photos'][] = [
+                    'id' => (int)$row['attachment_id'],
+                    'file_path' => $row['file_path'],
+                    'original_name' => $row['original_name'],
+                    'mime_type' => $row['mime_type'],
+                    'file_size' => (int)$row['file_size'],
+                    'created_at' => $row['attachment_created_at'],
+                    'uploader_name' => $row['uploader_name'] ?? 'System',
+                ];
+                $photoCount++;
+            }
+        }
+
+        $incomingEvidence = array_values($incomingEvidence);
+        $selectedWarehouseName = null;
+        if ($warehouseId > 0) {
+            $whStmt = $pdo->prepare("SELECT name FROM warehouses WHERE id = ?");
+            $whStmt->execute([$warehouseId]);
+            $selectedWarehouseName = $whStmt->fetchColumn() ?: null;
+        }
+
+        require __DIR__ . '/../../resources/views/inventory/items/incoming_evidence.php';
+    }
+
     public function edit($id) {
         // Write Master Barang HANYA untuk ADMIN.
         \App\Helpers\AuthHelper::requireRole('ADMIN');
