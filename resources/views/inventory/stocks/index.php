@@ -176,6 +176,11 @@ require __DIR__ . '/../../components/table/toolbar.php';
           'label' => 'Lihat',
           'icon' => 'fa-eye',
           'title' => 'Detail Inventory 360'
+        ], [
+          'type' => 'link',
+          'url' => url('/items/incoming-evidence/' . (int)$stock['master_item_id'] . '?warehouse_id=' . (int)$stock['warehouse_id']),
+          'label' => 'Riwayat Foto Masuk',
+          'icon' => 'fa-camera'
         ]];
         require __DIR__ . '/../../components/table/row_actions.php';
         ?>
