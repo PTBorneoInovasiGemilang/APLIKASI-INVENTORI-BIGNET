@@ -556,10 +556,10 @@ function renderHeader($label, $sidebarGroupText) {
     if (!heading) return;
 
     // Hindari duplikasi pada heading yang sudah memiliki icon badge, seperti Transfer Gudang.
-    let parent = heading;
-    for (let i = 0; i < 4 && parent; i++, parent = parent.parentElement) {
-      if (parent.querySelector && parent.querySelector('i.fas, i.far, i.fab')) return;
-    }
+    if (heading.querySelector('i.fas, i.far, i.fab')) return;
+    const headingWrapper = heading.parentElement;
+    const previousSibling = headingWrapper ? headingWrapper.previousElementSibling : null;
+    if (previousSibling && previousSibling.querySelector && previousSibling.querySelector('i.fas, i.far, i.fab')) return;
 
     const icon = document.createElement('i');
     icon.className = 'fas ' + config.icon + ' mr-3 ' + config.color;
@@ -640,6 +640,7 @@ function renderHeader($label, $sidebarGroupText) {
     }
 
     initSidebarScroll();
+    initPageHeadingIcons();
 
     document.querySelectorAll('a[href*="/dashboard"]').forEach(function(link) {
       link.addEventListener('click', function() {
