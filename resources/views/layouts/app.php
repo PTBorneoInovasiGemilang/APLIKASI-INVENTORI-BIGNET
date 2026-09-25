@@ -204,8 +204,9 @@ function renderHeader($label, $sidebarGroupText) {
     .sidebar-link { transition: all 0.15s ease; }
     .sidebar-link:hover { transform: translateX(2px); }
     .fade-in { animation: fadeIn 0.25s ease-in-out; }
-    /* Semua halaman daftar memakai lebar konten yang konsisten; wrapper max-w-7xl tidak lagi membuat halaman tertentu tampak menyempit. */
-    main .fade-in > .max-w-7xl { width: 100% !important; max-width: none !important; margin-left: auto !important; margin-right: auto !important; }
+    /* Standard shell: semua halaman dari seluruh role mendapat lebar konten dan tepi horizontal yang konsisten. */
+    main .fade-in { width: 100%; max-width: 1280px; margin-left: auto; margin-right: auto; }
+    main .fade-in > .max-w-7xl { width: 100% !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     .toast { animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 4.7s forwards; }
     @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -385,8 +386,8 @@ function renderHeader($label, $sidebarGroupText) {
         <?= renderMenu('Cetak Label Massal', 'fas fa-print', '/labels/create', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderHeader('Transaksi Monitoring', $sidebarGroupText) ?>
         <?= renderMenu('Pengajuan Barang', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-        <?= renderMenu('Barang Masuk', 'fas fa-arrow-down', '/incoming', $currentPath, $sidebarActive, $sidebarHover, 'text-green-500', 'text-green-500') ?>
-        <?= renderMenu('Barang Keluar', 'fas fa-arrow-up', '/outgoing', $currentPath, $sidebarActive, $sidebarHover, 'text-red-400', 'text-red-400') ?>
+        <?= renderMenu('Barang Masuk', 'fas fa-arrow-down', '/incoming', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
+        <?= renderMenu('Barang Keluar', 'fas fa-arrow-up', '/outgoing', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Transfer Gudang', 'fas fa-exchange-alt', '/transfers', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Peminjaman', 'fas fa-hand-holding', '/loans', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Pengembalian', 'fas fa-undo', '/returns', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
@@ -428,8 +429,8 @@ function renderHeader($label, $sidebarGroupText) {
         <?= renderMenu('Riwayat Timeline', 'fas fa-history', '/timeline', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderHeader('Transaksi', $sidebarGroupText) ?>
         <?= renderMenu('Pengajuan Barang', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-        <?= renderMenu('Barang Masuk', 'fas fa-arrow-down', '/incoming', $currentPath, $sidebarActive, $sidebarHover, 'text-green-500', 'text-green-500') ?>
-        <?= renderMenu('Barang Keluar', 'fas fa-arrow-up', '/outgoing', $currentPath, $sidebarActive, $sidebarHover, 'text-red-400', 'text-red-400') ?>
+        <?= renderMenu('Barang Masuk', 'fas fa-arrow-down', '/incoming', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
+        <?= renderMenu('Barang Keluar', 'fas fa-arrow-up', '/outgoing', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Transfer Gudang', 'fas fa-exchange-alt', '/transfers', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Peminjaman', 'fas fa-hand-holding', '/loans', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Pengembalian', 'fas fa-undo', '/returns', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
@@ -504,7 +505,7 @@ function renderHeader($label, $sidebarGroupText) {
     </div>
 
     <main class="flex-1 bg-gray-50 dark:bg-gray-950 p-4 2xl:p-6 2xl:flex 2xl:gap-6">
-      <div class="flex-1 min-w-0"><div class="fade-in"><?= $content ?></div></div>
+      <div class="flex-1 min-w-0 w-full"><div class="fade-in"><?= $content ?></div></div>
       <?php
       if (!isset($guide) && !isset($guide_content)) $guide = \App\Helpers\PageGuideHelper::forPath($currentPath);
       if (isset($guide) || (isset($guide_content) && !empty($guide_content))):
