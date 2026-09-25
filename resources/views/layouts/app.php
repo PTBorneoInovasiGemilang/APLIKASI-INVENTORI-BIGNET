@@ -204,9 +204,25 @@ function renderHeader($label, $sidebarGroupText) {
     .sidebar-link { transition: all 0.15s ease; }
     .sidebar-link:hover { transform: translateX(2px); }
     .fade-in { animation: fadeIn 0.25s ease-in-out; }
-    /* Standard shell: semua halaman dari seluruh role mendapat lebar konten dan tepi horizontal yang konsisten. */
-    main .fade-in { width: 100%; max-width: 1280px; margin-left: auto; margin-right: auto; }
-    main .fade-in > .max-w-7xl { width: 100% !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+    /* Standard shell: semua halaman dari seluruh role mendapat lebar, posisi horizontal, dan jarak atas yang konsisten. */
+    main .fade-in {
+      width: 100%;
+      max-width: 1280px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 32px 16px;
+      box-sizing: border-box;
+    }
+    main .fade-in > .max-w-7xl {
+      width: 100% !important;
+      max-width: none !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     .toast { animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 4.7s forwards; }
     @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
