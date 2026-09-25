@@ -81,6 +81,72 @@ if (!function_exists('menuClass')) {
 }
 if (!function_exists('iconClass')) {
   function iconClass($path, $currentPath, $primaryText, $sidebarIcon) {
+    // Semantic icon colors are global so all roles use the same visual language.
+    // Base color is optimized for light mode; dark: variant keeps contrast in dark mode.
+    $semantic = [
+      '/dashboard' => 'text-blue-500 dark:text-blue-400',
+      '/search' => 'text-cyan-500 dark:text-cyan-400',
+
+      // Master data
+      '/categories' => 'text-violet-500 dark:text-violet-400',
+      '/units' => 'text-cyan-500 dark:text-cyan-400',
+      '/warehouses' => 'text-amber-500 dark:text-amber-400',
+      '/locations' => 'text-rose-500 dark:text-rose-400',
+      '/items' => 'text-blue-500 dark:text-blue-400',
+
+      // Inventory
+      '/stocks' => 'text-green-500 dark:text-green-400',
+      '/serials' => 'text-violet-500 dark:text-violet-400',
+      '/labels/create' => 'text-indigo-500 dark:text-indigo-400',
+
+      // Transactions
+      '/submissions' => 'text-purple-500 dark:text-purple-400',
+      '/incoming' => 'text-green-500 dark:text-green-400',
+      '/outgoing' => 'text-red-500 dark:text-red-400',
+      '/transfers' => 'text-sky-500 dark:text-sky-400',
+      '/loans' => 'text-amber-500 dark:text-amber-400',
+      '/returns' => 'text-emerald-500 dark:text-emerald-400',
+      '/installations' => 'text-teal-500 dark:text-teal-400',
+      '/installations/my_items' => 'text-teal-500 dark:text-teal-400',
+      '/installations/photos' => 'text-fuchsia-500 dark:text-fuchsia-400',
+      '/adjustments' => 'text-yellow-500 dark:text-yellow-400',
+      '/incidents' => 'text-orange-500 dark:text-orange-400',
+      '/incidents/create' => 'text-orange-500 dark:text-orange-400',
+      '/opnames' => 'text-indigo-500 dark:text-indigo-400',
+
+      // Reports
+      '/reports/ledger' => 'text-blue-500 dark:text-blue-400',
+      '/reports/serials' => 'text-violet-500 dark:text-violet-400',
+      '/reports/submissions' => 'text-purple-500 dark:text-purple-400',
+      '/reports/incoming' => 'text-green-500 dark:text-green-400',
+      '/reports/outgoing' => 'text-red-500 dark:text-red-400',
+      '/reports/transfers' => 'text-sky-500 dark:text-sky-400',
+      '/reports/loans' => 'text-amber-500 dark:text-amber-400',
+      '/reports/returns' => 'text-emerald-500 dark:text-emerald-400',
+      '/reports/installations' => 'text-teal-500 dark:text-teal-400',
+      '/reports/adjustments' => 'text-yellow-500 dark:text-yellow-400',
+      '/timeline' => 'text-slate-500 dark:text-slate-400',
+      '/reports/audit' => 'text-red-500 dark:text-red-400',
+
+      // System
+      '/users' => 'text-cyan-500 dark:text-cyan-400',
+      '/settings' => 'text-slate-500 dark:text-slate-400',
+
+      // Technician
+      '/returns/create' => 'text-emerald-500 dark:text-emerald-400',
+      '/serials' => 'text-violet-500 dark:text-violet-400',
+    ];
+
+    if (isset($semantic[$path])) {
+      return $semantic[$path];
+    }
+
+    // Query-string paths (e.g. import-export?tab=import) use their path key.
+    $basePath = parse_url($path, PHP_URL_PATH);
+    if ($basePath && isset($semantic[$basePath])) {
+      return $semantic[$basePath];
+    }
+
     return isActive($path, $currentPath) ? $primaryText : $sidebarIcon;
   }
 }
