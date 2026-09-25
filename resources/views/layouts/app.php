@@ -210,7 +210,7 @@ function renderHeader($label, $sidebarGroupText) {
       max-width: 1280px;
       margin-left: auto;
       margin-right: auto;
-      padding: 32px 16px;
+      padding: 0 0 24px;
       box-sizing: border-box;
     }
     main .fade-in > .max-w-7xl {
