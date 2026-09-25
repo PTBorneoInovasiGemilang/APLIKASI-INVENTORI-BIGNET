@@ -83,9 +83,9 @@ require __DIR__ . '/../../components/table/toolbar.php';
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($inc['warehouse_name']); ?></td>
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($inc['receiver_name']); ?></td>
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($inc['supplier_info']); ?></td>
-        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-center">
-          <a href="<?php echo url('/incoming/show?id=' . $inc['id']); ?>" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Lihat Detail">
-            <i class="fas fa-eye"></i>
+        <td class="px-4 py-3 text-center text-sm">
+          <a href="<?php echo url('/incoming/show?id=' . $inc['id']); ?>" class="inline-flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 font-semibold">
+            <i class="fas fa-eye mr-1 text-xs"></i>Lihat
           </a>
         </td>
       </tr>
