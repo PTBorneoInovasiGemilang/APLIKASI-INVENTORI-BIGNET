@@ -204,16 +204,19 @@ function renderHeader($label, $sidebarGroupText) {
     .sidebar-link { transition: all 0.15s ease; }
     .sidebar-link:hover { transform: translateX(2px); }
     .fade-in { animation: fadeIn 0.25s ease-in-out; }
-    /* Standard shell: semua halaman dari seluruh role mendapat lebar, posisi horizontal, dan jarak atas yang konsisten. */
-    main .fade-in {
+    /* Standard shell: semua halaman dari seluruh role memakai titik awal horizontal/vertical yang sama. */
+    main > .flex-1 > .fade-in {
       width: 100%;
-      max-width: 1280px;
+      max-width: none;
       margin-left: auto;
       margin-right: auto;
-      padding: 0 0 24px;
+      padding: 20px 24px 32px;
       box-sizing: border-box;
     }
-    main .fade-in > .max-w-7xl {
+
+    /* Normalisasi wrapper halaman lama (max-w-7xl, max-w-5xl, dll) agar tidak menggeser
+       sebagian menu lebih ke tengah atau memberi padding ganda. */
+    main > .flex-1 > .fade-in > [class*="max-w-"] {
       width: 100% !important;
       max-width: none !important;
       margin-left: 0 !important;
