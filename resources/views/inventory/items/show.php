@@ -20,6 +20,9 @@ ob_start();
       </div>
     </div>
     <div class="flex gap-2">
+      <a href="<?= url('/items/incoming-evidence/' . (int)$item['id'] . (($warehouse_id ?? null) ? '?warehouse_id=' . (int)$warehouse_id : '')) ?>" class="px-4 py-2 bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/40 dark:text-green-400 dark:hover:bg-green-800/50 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+        <i class="fas fa-camera"></i> Riwayat Foto Masuk
+      </a>
       <a href="<?= url('/timeline?search=' . urlencode($snDetail ? $snDetail['serial_number'] : $item['kode_barang'])) ?>" class="px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/40 dark:text-purple-400 dark:hover:bg-purple-800/50 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
         <i class="fas fa-route"></i> Buka Timeline Penuh
       </a>
