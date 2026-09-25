@@ -517,6 +517,57 @@ function renderHeader($label, $sidebarGroupText) {
   <script>
   const isDashboardPage = <?= json_encode($isDashboardPage) ?>;
 
+  const pageHeadingIconMap = [
+    { match: '/dashboard', icon: 'fa-th-large', color: 'text-blue-500 dark:text-blue-400' },
+    { match: '/search', icon: 'fa-search', color: 'text-cyan-500 dark:text-cyan-400' },
+    { match: '/categories', icon: 'fa-tags', color: 'text-violet-500 dark:text-violet-400' },
+    { match: '/units', icon: 'fa-ruler', color: 'text-cyan-500 dark:text-cyan-400' },
+    { match: '/warehouses', icon: 'fa-warehouse', color: 'text-amber-500 dark:text-amber-400' },
+    { match: '/locations', icon: 'fa-map-marker-alt', color: 'text-rose-500 dark:text-rose-400' },
+    { match: '/items', icon: 'fa-box', color: 'text-blue-500 dark:text-blue-400' },
+    { match: '/stocks', icon: 'fa-cubes', color: 'text-green-500 dark:text-green-400' },
+    { match: '/serials', icon: 'fa-barcode', color: 'text-purple-500 dark:text-purple-400' },
+    { match: '/labels', icon: 'fa-print', color: 'text-indigo-500 dark:text-indigo-400' },
+    { match: '/submissions', icon: 'fa-clipboard-list', color: 'text-purple-500 dark:text-purple-400' },
+    { match: '/incoming', icon: 'fa-arrow-down', color: 'text-green-500 dark:text-green-400' },
+    { match: '/outgoing', icon: 'fa-arrow-up', color: 'text-red-500 dark:text-red-400' },
+    { match: '/transfers', icon: 'fa-exchange-alt', color: 'text-sky-500 dark:text-sky-400' },
+    { match: '/loans', icon: 'fa-hand-holding', color: 'text-amber-500 dark:text-amber-400' },
+    { match: '/returns', icon: 'fa-undo', color: 'text-emerald-500 dark:text-emerald-400' },
+    { match: '/installations', icon: 'fa-tools', color: 'text-teal-500 dark:text-teal-400' },
+    { match: '/adjustments', icon: 'fa-sliders-h', color: 'text-yellow-500 dark:text-yellow-400' },
+    { match: '/incidents', icon: 'fa-exclamation-triangle', color: 'text-orange-500 dark:text-orange-400' },
+    { match: '/opnames', icon: 'fa-clipboard-check', color: 'text-indigo-500 dark:text-indigo-400' },
+    { match: '/reports', icon: 'fa-chart-bar', color: 'text-blue-500 dark:text-blue-400' },
+    { match: '/timeline', icon: 'fa-history', color: 'text-slate-500 dark:text-slate-400' },
+    { match: '/audit', icon: 'fa-shield-alt', color: 'text-red-500 dark:text-red-400' },
+    { match: '/users', icon: 'fa-users', color: 'text-cyan-500 dark:text-cyan-400' },
+    { match: '/settings', icon: 'fa-cog', color: 'text-slate-500 dark:text-slate-400' },
+    { match: '/import-export', icon: 'fa-file-export', color: 'text-indigo-500 dark:text-indigo-400' },
+    { match: '/notifications', icon: 'fa-bell', color: 'text-amber-500 dark:text-amber-400' }
+  ];
+
+  function initPageHeadingIcons() {
+    const path = window.location.pathname || '';
+    const config = pageHeadingIconMap.find(item => path === item.match || path.startsWith(item.match + '/'));
+    if (!config) return;
+
+    const heading = document.querySelector('main h1, main h2');
+    if (!heading) return;
+
+    // Hindari duplikasi pada heading yang sudah memiliki icon badge, seperti Transfer Gudang.
+    let parent = heading;
+    for (let i = 0; i < 4 && parent; i++, parent = parent.parentElement) {
+      if (parent.querySelector && parent.querySelector('i.fas, i.far, i.fab')) return;
+    }
+
+    const icon = document.createElement('i');
+    icon.className = 'fas ' + config.icon + ' mr-3 ' + config.color;
+    icon.setAttribute('aria-hidden', 'true');
+    heading.prepend(icon);
+  }
+
+
   function resetSidebarScroll() {
     const sidebarScrollArea = document.getElementById("sidebarScrollArea");
     if (sidebarScrollArea) {
