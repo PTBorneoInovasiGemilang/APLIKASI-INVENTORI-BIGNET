@@ -7,11 +7,25 @@ use PDO;
 class NotificationHelper {
 
     /**
+     * UI guard: empty parentheses are never valid in notification text.
+     * Supports normal and full-width parentheses and normalizes spacing.
+     */
+    private static function cleanUiText(?string $value): string {
+        $value = (string)$value;
+        $value = preg_replace('/[\\(（]\\s*[\\)）]/u', '', $value);
+        $value = preg_replace('/[ \\t]{2,}/u', ' ', $value);
+        return trim($value);
+    }
+
+    /**
      * Buat notifikasi untuk daftar user (user-isolated, bukan broadcast).
      */
     public static function createForUsers(array $userIds, string $title, string $message = '', string $type = 'info', ?string $sourceRoute = null): void {
         $userIds = array_values(array_unique(array_map('intval', array_filter($userIds))));
         if (empty($userIds)) return;
+
+        $title = self::cleanUiText($title);
+        $message = self::cleanUiText($message);
 
         $pdo = Database::getInstance()->getConnection();
         $stmt = $pdo->prepare("INSERT INTO notifications (user_id, title, message, type, source_route) VALUES (?, ?, ?, ?, ?)");
@@ -45,7 +59,22 @@ class NotificationHelper {
         $pdo = Database::getInstance()->getConnection();
         $stmt = $pdo->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT " . (int)$limit);
         $stmt->execute([$userId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Bersihkan juga notifikasi lama yang sudah tersimpan sebelum guard ini ditambahkan.
+        $update = $pdo->prepare("UPDATE notifications SET title = ?, message = ? WHERE id = ? AND user_id = ?");
+        foreach ($notifications as &$notification) {
+            $cleanTitle = self::cleanUiText($notification['title'] ?? '');
+            $cleanMessage = self::cleanUiText($notification['message'] ?? '');
+            if ($cleanTitle !== ($notification['title'] ?? '') || $cleanMessage !== ($notification['message'] ?? '')) {
+                $update->execute([$cleanTitle, $cleanMessage, (int)$notification['id'], $userId]);
+                $notification['title'] = $cleanTitle;
+                $notification['message'] = $cleanMessage;
+            }
+        }
+        unset($notification);
+
+        return $notifications;
     }
 
     /**
@@ -76,6 +105,9 @@ class NotificationHelper {
     public static function createForUsersOnce(array $userIds, string $title, string $message = '', string $type = 'info', ?string $sourceRoute = null): void {
         $userIds = array_values(array_unique(array_map('intval', array_filter($userIds))));
         if (empty($userIds)) return;
+
+        $title = self::cleanUiText($title);
+        $message = self::cleanUiText($message);
 
         $pdo = Database::getInstance()->getConnection();
         $chk = $pdo->prepare("SELECT id FROM notifications WHERE user_id = ? AND title = ? AND source_route = ? AND read_at IS NULL LIMIT 1");
