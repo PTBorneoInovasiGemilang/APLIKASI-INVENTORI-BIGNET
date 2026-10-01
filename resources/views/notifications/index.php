@@ -1,6 +1,10 @@
 <?php
 $pageTitle = 'Notifikasi';
 ob_start();
+$cleanNotificationText = static function ($value) {
+  return trim((string)preg_replace('/\\s*\\(\\s*\\)/u', '', (string)$value));
+};
+
 $typeIcon = [
   'success' => ['fa-check-circle', 'text-green-500'],
   'warning' => ['fa-exclamation-triangle', 'text-amber-500'],
@@ -68,7 +72,7 @@ $typeIcon = [
                   <span class="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap"><?= date('d M Y H:i', strtotime($n['created_at'])) ?></span>
                 </div>
                 <?php if ($n['message']): ?>
-                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><?= htmlspecialchars($n['message']) ?></p>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><?= htmlspecialchars($cleanNotificationText($n['message'])) ?></p>
                 <?php endif; ?>
                 <div class="mt-2 flex items-center gap-3">
                   <?php if ($n['source_route']): ?>
