@@ -82,6 +82,64 @@ body>*{visibility:hidden!important}
 
   <div class="no-print mb-6 flex flex-wrap items-center justify-between gap-3"><div><a href="<?=url('/transfers')?>" class="mr-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"><i class="fas fa-arrow-left"></i></a><span class="text-2xl font-bold">Detail Transfer</span><div class="ml-14 mt-1 text-sm text-gray-500 dark:text-gray-400"><?=htmlspecialchars($transfer['transaction_code'])?></div></div><button type="button" onclick="printSuratJalan()" class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white"><i class="fas fa-print mr-2"></i>Cetak / Simpan PDF</button></div>
 
+  <div class="no-print mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+    <section class="rounded-2xl border border-blue-200 bg-white dark:bg-gray-800 p-5 shadow-sm dark:border-gray-700">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-base font-bold text-gray-900 dark:text-white"><i class="fas fa-truck text-blue-500 mr-2"></i>Dokumentasi Barang Dikirim</h2>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Bukti foto saat transfer berangkat dari gudang asal.</p>
+        </div>
+        <span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"><?=count($dispatchPhotos)?> foto</span>
+      </div>
+      <?php if(empty($dispatchPhotos)): ?>
+        <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+          <i class="fas fa-camera-slash text-2xl mb-2"></i>
+          <p>Belum ada dokumentasi foto pengiriman.</p>
+        </div>
+      <?php else: ?>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <?php foreach($dispatchPhotos as $photo): ?>
+            <a href="<?=url('/evidence/'.(int)$photo['id'])?>" target="_blank" rel="noopener" class="group block overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <img src="<?=url('/evidence/'.(int)$photo['id'])?>" alt="<?=htmlspecialchars($photo['original_name']??'Foto pengiriman')?>" class="h-36 w-full object-cover transition-transform duration-200 group-hover:scale-105">
+              <div class="p-2">
+                <div class="truncate text-[11px] font-semibold text-gray-800 dark:text-gray-200"><?=htmlspecialchars($photo['original_name']??'Foto pengiriman')?></div>
+                <div class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400"><?=date('d M Y H:i',strtotime($photo['created_at']))?></div>
+              </div>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </section>
+
+    <section class="rounded-2xl border border-green-200 bg-white dark:bg-gray-800 p-5 shadow-sm dark:border-gray-700">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-base font-bold text-gray-900 dark:text-white"><i class="fas fa-warehouse text-green-500 mr-2"></i>Dokumentasi Barang Diterima</h2>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Bukti foto saat barang diterima di gudang tujuan.</p>
+        </div>
+        <span class="inline-flex items-center rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300"><?=count($receivePhotos)?> foto</span>
+      </div>
+      <?php if(empty($receivePhotos)): ?>
+        <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+          <i class="fas fa-camera-slash text-2xl mb-2"></i>
+          <p>Belum ada dokumentasi foto penerimaan.</p>
+        </div>
+      <?php else: ?>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <?php foreach($receivePhotos as $photo): ?>
+            <a href="<?=url('/evidence/'.(int)$photo['id'])?>" target="_blank" rel="noopener" class="group block overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <img src="<?=url('/evidence/'.(int)$photo['id'])?>" alt="<?=htmlspecialchars($photo['original_name']??'Foto penerimaan')?>" class="h-36 w-full object-cover transition-transform duration-200 group-hover:scale-105">
+              <div class="p-2">
+                <div class="truncate text-[11px] font-semibold text-gray-800 dark:text-gray-200"><?=htmlspecialchars($photo['original_name']??'Foto penerimaan')?></div>
+                <div class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400"><?=date('d M Y H:i',strtotime($photo['created_at']))?></div>
+              </div>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </section>
+  </div>
+
   <div class="no-print mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
     <div class="rounded-2xl border bg-white dark:bg-gray-800 p-5 shadow-sm"><div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400">Rute</div><div class="mt-2 font-bold"><?=htmlspecialchars($transfer['source_warehouse'])?></div><div class="text-xs text-gray-400">↓</div><div class="font-bold text-blue-600"><?=htmlspecialchars($transfer['dest_warehouse'])?></div></div>
     <div class="rounded-2xl border bg-white dark:bg-gray-800 p-5 shadow-sm"><div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400">Pembawa Barang</div><div class="mt-2 font-bold"><?=htmlspecialchars($transfer['driver_name']??'-')?></div><div class="text-xs text-gray-500 dark:text-gray-400"><?=htmlspecialchars($transfer['driver_phone']??'')?></div><div class="mt-1 text-xs text-gray-500 dark:text-gray-400"><?=htmlspecialchars($transfer['vehicle_number']??'Tanpa nomor kendaraan')?></div></div>
