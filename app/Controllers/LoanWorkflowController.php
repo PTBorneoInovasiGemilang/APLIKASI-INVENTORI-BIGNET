@@ -68,6 +68,182 @@ class LoanWorkflowController extends LoanController
             $pdo->prepare("UPDATE loans SET status='BORROWED',outgoing_id=?,handed_over_by=?,handed_over_at=NOW(),processed_by=? WHERE id=?")->execute([$outId,$uid,$uid,$id]);$this->audit($pdo,$uid,'HANDOVER',$id,'Peminjaman dieksekusi melalui Barang Keluar. Stok fisik tetap; availability berkurang karena custody.',['status'=>'APPROVED'],['status'=>'BORROWED','outgoing_id'=>$outId]);$pdo->commit();$_SESSION['success']='Barang Keluar peminjaman berhasil dibuat dan barang diserahkan.';
         }catch(\Throwable $e){if($pdo->inTransaction())$pdo->rollBack();$_SESSION['error']='Gagal memproses Barang Keluar peminjaman: '.$e->getMessage();}$this->go('/loans/show?id='.$id);
     }
+    public function confirmReturn(): void {
+        AuthHelper::requireRole(['ADMIN']);
+        AuthHelper::denySuperadminWrite();
+        $this->csrf('/loans');
+        $pdo = Database::getInstance()->getConnection();
+        $svc = new StockService();
+        $uid = (int)AuthHelper::user()['id'];
+        $id = (int)($_POST['id'] ?? 0);
+
+        try {
+            $pdo->beginTransaction();
+
+            $q = $pdo->prepare("SELECT * FROM loans WHERE id=? FOR UPDATE");
+            $q->execute([$id]);
+            $loan = $q->fetch(PDO::FETCH_ASSOC);
+            if (!$loan || !in_array($loan['status'], ['BORROWED','PARTIAL_RETURNED'], true)) {
+                throw new \Exception('Peminjaman tidak sedang memiliki barang yang perlu dikembalikan.');
+            }
+
+            // Bila teknisi sudah membuat pengajuan pengembalian, Admin harus memproses pengajuan
+            // tersebut agar pemeriksaan kondisi dan riwayat tetap satu jalur.
+            $pending = $pdo->prepare("SELECT id, transaction_code FROM returns WHERE reference_type='LOAN' AND reference_id=? AND status='PENDING' ORDER BY id DESC LIMIT 1 FOR UPDATE");
+            $pending->execute([$id]);
+            $pendingReturn = $pending->fetch(PDO::FETCH_ASSOC);
+            if ($pendingReturn) {
+                throw new \Exception("Sudah ada pengajuan pengembalian {$pendingReturn['transaction_code']} yang menunggu pemeriksaan Admin. Buka pengajuan tersebut lalu proses.");
+            }
+
+            $code = \App\Helpers\TransactionHelper::generateCode('RET', 'returns');
+            $pdo->prepare("INSERT INTO returns (transaction_code, reference_type, reference_id, technician_id, warehouse_id, notes, status, processed_by) VALUES (?, 'LOAN', ?, ?, ?, ?, 'COMPLETED', ?)")
+                ->execute([
+                    $code,
+                    $id,
+                    (int)$loan['borrower_id'],
+                    (int)$loan['warehouse_id'],
+                    'Pengembalian dikonfirmasi langsung oleh Admin.',
+                    $uid
+                ]);
+            $returnId = (int)$pdo->lastInsertId();
+
+            $createdLines = 0;
+
+            // Bulk / non-serialized: kembalikan seluruh sisa kuantitas.
+            $q = $pdo->prepare("SELECT li.*, m.nama FROM loan_items li JOIN master_items m ON m.id=li.master_item_id WHERE li.loan_id=? AND li.quantity > li.returned_quantity ORDER BY li.id FOR UPDATE");
+            $q->execute([$id]);
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $it) {
+                $remaining = max(0, (int)$it['quantity'] - (int)$it['returned_quantity']);
+                if ($remaining <= 0) continue;
+
+                $pdo->prepare("INSERT INTO return_items (return_id, master_item_id, quantity, serial_number_id, condition_status, loan_item_id, loan_manual_item_id) VALUES (?, ?, ?, NULL, 'GOOD', ?, NULL)")
+                    ->execute([$returnId, (int)$it['master_item_id'], $remaining, (int)$it['id']]);
+                $pdo->prepare("UPDATE loan_items SET returned_quantity=LEAST(quantity, returned_quantity+?) WHERE id=?")
+                    ->execute([$remaining, (int)$it['id']]);
+                $createdLines++;
+            }
+
+            // Serialized stock items: hanya serial yang masih berada dalam custody pinjaman.
+            $q = $pdo->prepare("SELECT li.id loan_item_id, li.master_item_id, lis.serial_number_id, sn.serial_number, m.nama
+                                FROM loan_items li
+                                JOIN master_items m ON m.id=li.master_item_id
+                                JOIN loan_item_serials lis ON lis.loan_item_id=li.id AND lis.status='BORROWED'
+                                JOIN serial_numbers sn ON sn.id=lis.serial_number_id
+                                WHERE li.loan_id=? AND m.is_serialized=1
+                                ORDER BY li.id, sn.serial_number
+                                FOR UPDATE");
+            $q->execute([$id]);
+            $serializedRows = $q->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($serializedRows as $it) {
+                $pdo->prepare("INSERT INTO return_items (return_id, master_item_id, quantity, serial_number_id, condition_status, loan_item_id, loan_manual_item_id) VALUES (?, ?, 1, ?, 'GOOD', ?, NULL)")
+                    ->execute([$returnId, (int)$it['master_item_id'], (int)$it['serial_number_id'], (int)$it['loan_item_id']]);
+                $svc->moveSerial(
+                    (int)$it['serial_number_id'],
+                    'AVAILABLE',
+                    (int)$loan['warehouse_id'],
+                    null,
+                    null,
+                    'return',
+                    $returnId,
+                    'Pengembalian dikonfirmasi Admin.'
+                );
+                $pdo->prepare("UPDATE loan_item_serials SET status='RETURNED' WHERE loan_item_id=? AND serial_number_id=? AND status='BORROWED'")
+                    ->execute([(int)$it['loan_item_id'], (int)$it['serial_number_id']]);
+                $pdo->prepare("UPDATE loan_items SET returned_quantity=LEAST(quantity, returned_quantity+1) WHERE id=?")
+                    ->execute([(int)$it['loan_item_id']]);
+                $createdLines++;
+            }
+
+            // Manual request yang sudah dipetakan ke Master Barang.
+            $q = $pdo->prepare("SELECT lmi.*, m.nama, m.is_serialized
+                                FROM loan_manual_items lmi
+                                JOIN master_items m ON m.id=lmi.master_item_id
+                                WHERE lmi.loan_id=? AND lmi.master_item_id IS NOT NULL AND lmi.quantity > lmi.returned_quantity
+                                ORDER BY lmi.id
+                                FOR UPDATE");
+            $q->execute([$id]);
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $it) {
+                if ((int)$it['is_serialized'] === 1) {
+                    continue; // serial manual diproses dari daftar loan_item_serials di bawah.
+                }
+                $remaining = max(0, (int)$it['quantity'] - (int)$it['returned_quantity']);
+                if ($remaining <= 0) continue;
+
+                $pdo->prepare("INSERT INTO return_items (return_id, master_item_id, quantity, serial_number_id, condition_status, loan_item_id, loan_manual_item_id) VALUES (?, ?, ?, NULL, 'GOOD', NULL, ?)")
+                    ->execute([$returnId, (int)$it['master_item_id'], $remaining, (int)$it['id']]);
+                $pdo->prepare("UPDATE loan_manual_items SET returned_quantity=LEAST(quantity, returned_quantity+?) WHERE id=?")
+                    ->execute([$remaining, (int)$it['id']]);
+                $createdLines++;
+            }
+
+            // Manual request serialized: ambil serial yang masih BORROWED.
+            $q = $pdo->prepare("SELECT lmi.id loan_manual_item_id, lmi.master_item_id, lis.serial_number_id, sn.serial_number
+                                FROM loan_manual_items lmi
+                                JOIN loan_item_serials lis ON lis.loan_manual_item_id=lmi.id AND lis.status='BORROWED'
+                                JOIN serial_numbers sn ON sn.id=lis.serial_number_id
+                                WHERE lmi.loan_id=? AND lmi.master_item_id IS NOT NULL
+                                ORDER BY lmi.id, sn.serial_number
+                                FOR UPDATE");
+            $q->execute([$id]);
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $it) {
+                $pdo->prepare("INSERT INTO return_items (return_id, master_item_id, quantity, serial_number_id, condition_status, loan_item_id, loan_manual_item_id) VALUES (?, ?, 1, ?, 'GOOD', NULL, ?)")
+                    ->execute([$returnId, (int)$it['master_item_id'], (int)$it['serial_number_id'], (int)$it['loan_manual_item_id']]);
+                $svc->moveSerial(
+                    (int)$it['serial_number_id'],
+                    'AVAILABLE',
+                    (int)$loan['warehouse_id'],
+                    null,
+                    null,
+                    'return',
+                    $returnId,
+                    'Pengembalian dikonfirmasi Admin.'
+                );
+                $pdo->prepare("UPDATE loan_item_serials SET status='RETURNED' WHERE loan_manual_item_id=? AND serial_number_id=? AND status='BORROWED'")
+                    ->execute([(int)$it['loan_manual_item_id'], (int)$it['serial_number_id']]);
+                $pdo->prepare("UPDATE loan_manual_items SET returned_quantity=LEAST(quantity, returned_quantity+1) WHERE id=?")
+                    ->execute([(int)$it['loan_manual_item_id']]);
+                $createdLines++;
+            }
+
+            if ($createdLines === 0) {
+                $pdo->prepare("DELETE FROM returns WHERE id=?")->execute([$returnId]);
+                throw new \Exception('Tidak ada barang yang masih tercatat sebagai dipinjam.');
+            }
+
+            $pdo->prepare("UPDATE loans SET status='RETURNED', processed_by=? WHERE id=?")->execute([$uid, $id]);
+            $this->audit(
+                $pdo,
+                $uid,
+                'ADMIN_CONFIRM_RETURN',
+                $id,
+                'Admin mengonfirmasi langsung seluruh sisa barang sudah dikembalikan. Status peminjaman menjadi Dikembalikan.',
+                ['status'=>$loan['status']],
+                ['status'=>'RETURNED','return_id'=>$returnId]
+            );
+
+            $pdo->commit();
+
+            try {
+                NotificationHelper::createForUsers(
+                    [(int)$loan['borrower_id']],
+                    'Pengembalian Dikonfirmasi Admin',
+                    'Admin telah mengonfirmasi barang pinjaman Anda sudah dikembalikan.',
+                    'success',
+                    '/loans/show?id='.$id
+                );
+            } catch (\Throwable $ignored) {}
+
+            $_SESSION['success'] = 'Pengembalian barang berhasil dikonfirmasi Admin. Status teknisi otomatis menjadi Dikembalikan.';
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $_SESSION['error'] = 'Gagal mengonfirmasi pengembalian: '.$e->getMessage();
+        }
+
+        $this->go('/loans/show?id='.$id);
+    }
+
     public function show(): void {
         $id=(int)($_GET['id']??0);$pdo=Database::getInstance()->getConnection();$u=AuthHelper::user();$q=$pdo->prepare("SELECT l.*,w.name warehouse_name,u.name borrower_name,o.transaction_code outgoing_code FROM loans l JOIN warehouses w ON w.id=l.warehouse_id JOIN users u ON u.id=l.borrower_id LEFT JOIN outgoing o ON o.id=l.outgoing_id WHERE l.id=?");$q->execute([$id]);$loan=$q->fetch(PDO::FETCH_ASSOC);if(!$loan){$_SESSION['error']='Peminjaman tidak ditemukan.';$this->go('/loans');}if($u['role']==='TEKNISI_NOC'&&(int)$loan['borrower_id']!==(int)$u['id'])$this->go('/loans');$items=[];$q=$pdo->prepare("SELECT li.id,li.master_item_id,li.requested_quantity,li.approved_quantity,li.quantity,li.returned_quantity,m.nama,m.is_serialized,'STOCK' source_type FROM loan_items li JOIN master_items m ON m.id=li.master_item_id WHERE li.loan_id=? ORDER BY li.id");$q->execute([$id]);foreach($q->fetchAll(PDO::FETCH_ASSOC) as $r)$items[]=$r;$q=$pdo->prepare("SELECT lmi.id,lmi.master_item_id,lmi.name nama,lmi.requested_quantity,lmi.approved_quantity,lmi.quantity,lmi.returned_quantity,lmi.specification,lmi.unit,m.nama mapped_name,m.is_serialized,'MANUAL' source_type FROM loan_manual_items lmi LEFT JOIN master_items m ON m.id=lmi.master_item_id WHERE lmi.loan_id=? ORDER BY lmi.id");$q->execute([$id]);foreach($q->fetchAll(PDO::FETCH_ASSOC) as $r){$r['is_serialized']=(int)($r['is_serialized']??0);$items[]=$r;}$snQ=$pdo->prepare("SELECT lis.serial_number_id,lis.loan_item_id,lis.loan_manual_item_id,lis.status,sn.serial_number FROM loan_item_serials lis JOIN serial_numbers sn ON sn.id=lis.serial_number_id WHERE (lis.loan_item_id=? AND ?>0) OR (lis.loan_manual_item_id=? AND ? >0) ORDER BY sn.serial_number");foreach($items as &$it){$it['serial_numbers']=[];$key=(int)$it['id'];if(($it['source_type']??'')==='STOCK'){$snQ->execute([$key,$key,0,0]);}else{$snQ->execute([0,0,$key,$key]);}$it['serial_numbers']=$snQ->fetchAll(PDO::FETCH_ASSOC);}unset($it);$masterItems=$pdo->query("SELECT id,nama,is_serialized FROM master_items WHERE is_active=1 ORDER BY nama")->fetchAll(PDO::FETCH_ASSOC);$availableSerials=[];if($loan['status']==='PENDING_APPROVAL'&&AuthHelper::hasRole(['ADMIN'])){foreach($items as $it){if(!(int)$it['is_serialized'])continue;$masterId=(int)($it['master_item_id']??0);if($masterId<=0)continue;$qq=$pdo->prepare("SELECT id,serial_number FROM serial_numbers WHERE master_item_id=? AND current_warehouse_id=? AND status='AVAILABLE' ORDER BY serial_number");$qq->execute([$masterId,$loan['warehouse_id']]);$availableSerials[$it['source_type']==='MANUAL'?'m'.$it['id']:$it['id']]=$qq->fetchAll(PDO::FETCH_ASSOC);}}$q=$pdo->prepare("SELECT a.*,u.name user_name FROM audit_logs a LEFT JOIN users u ON u.id=a.user_id WHERE a.entity='loans' AND a.entity_id=? ORDER BY a.created_at DESC,a.id DESC");$q->execute([$id]);$timeline=$q->fetchAll(PDO::FETCH_ASSOC);require __DIR__.'/../../resources/views/workflow/loans/show.php';
     }
