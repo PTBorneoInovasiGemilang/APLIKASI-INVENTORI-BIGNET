@@ -89,7 +89,7 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
         <?php elseif($role==='TEKNISI_NOC'&&in_array($ln['status'],['BORROWED','PARTIAL_RETURNED'],true)): ?>
          <a href="<?=$returnUrl?>" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold"><i class="fas fa-undo mr-1.5"></i>Kembalikan</a>
         <?php elseif($role==='ADMIN'&&in_array($ln['status'],['BORROWED','PARTIAL_RETURNED'],true)): ?>
-         <a href="<?=$detail?>#return" class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-orange-200 text-orange-700 bg-orange-50 text-xs font-semibold"><i class="fas fa-clipboard-check mr-1.5"></i>Lihat Pengembalian</a>
+         <a href="<?=$detail?>#admin-return" class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-emerald-200 text-emerald-700 bg-emerald-50 text-xs font-semibold"><i class="fas fa-clipboard-check mr-1.5"></i>Konfirmasi Kembali</a>
         <?php else: ?>
          <a href="<?=$detail?>" class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-blue-200 text-blue-700 bg-blue-50 text-xs font-semibold"><i class="fas fa-eye mr-1.5"></i>Lihat</a>
         <?php endif; ?>
