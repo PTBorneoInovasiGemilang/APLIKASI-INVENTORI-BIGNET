@@ -684,7 +684,7 @@ function renderHeader($label, $sidebarGroupText) {
         if (node.nodeType === 3) {
           const parent = node.parentElement;
           if (parent && !skipTags.has(parent.tagName)) {
-            node.nodeValue = (node.nodeValue || '').replace(/\\s*\\(\\s*\\)/g, '');
+            node.nodeValue = (node.nodeValue || '').replace(/\s*\(\s*\)/g, '');
           }
           return;
         }
