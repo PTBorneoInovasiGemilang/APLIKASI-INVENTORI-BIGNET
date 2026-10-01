@@ -205,7 +205,9 @@ class SubmissionController {
             error_log('[BIGNET] Notification gagal (submission create #' . $submission_id . '): ' . $notifEx->getMessage());
         }
 
-        header("Location: " . url('/submissions'));
+        // Setelah pengajuan berhasil dibuat, teknisi langsung diarahkan ke detail pengajuan
+        // yang baru saja dibuat agar dapat melihat barang, status, dan progres persetujuan.
+        header("Location: " . url('/submissions/show?id=' . (int)$submission_id));
         exit;
     }
 
