@@ -96,7 +96,7 @@ ob_start();
                   <select name="mapped_item_ids[<?php echo $item['id']; ?>]" class="shadow border rounded w-full py-1 px-2 text-sm focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     <option value="">-- Pilih Jika Disetujui --</option>
                     <?php foreach ($master_items as $mi): ?>
-                      <option value="<?php echo $mi['id']; ?>" <?php echo $item['master_item_id'] == $mi['id'] ? 'selected' : ''; ?>><?php echo $mi['nama']; ?> (<?php echo $mi['kode_barang']; ?>)</option>
+                      <option value="<?php echo $mi['id']; ?>" <?php echo $item['master_item_id'] == $mi['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($mi['nama']); ?><?php if (trim((string)($mi['kode_barang'] ?? '')) !== ''): ?> (<?php echo htmlspecialchars($mi['kode_barang']); ?>)<?php endif; ?></option>
                     <?php endforeach; ?>
                   </select>
                 </div>
