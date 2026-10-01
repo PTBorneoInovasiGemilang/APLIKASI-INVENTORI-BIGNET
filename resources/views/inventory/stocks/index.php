@@ -136,7 +136,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
             <div class="mt-3 grid grid-cols-3 gap-2">
               <div class="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-700 dark:bg-gray-900/40">
                 <div class="text-sm font-bold text-gray-900 dark:text-gray-100"><?= number_format($physical) ?></div>
-                <div class="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">Total</div>
+                <div class="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">Stok Fisik</div>
               </div>
               <div class="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5 dark:border-orange-900/30 dark:bg-orange-950/20">
                 <div class="text-sm font-bold text-orange-600 dark:text-orange-400"><?= number_format($borrowed) ?></div>
