@@ -431,6 +431,7 @@ function renderHeader($label, $sidebarGroupText) {
         <?= renderMenu('Insiden (Damage/Lost)', 'fas fa-exclamation-triangle', '/incidents', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Stock Opname', 'fas fa-clipboard-check', '/opnames', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderHeader('Laporan', $sidebarGroupText) ?>
+        <?= renderMenu('Laporan Posisi Stok', 'fas fa-boxes-stacked', '/reports/stock-position', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Laporan Stok & Mutasi', 'fas fa-chart-bar', '/reports/ledger', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Laporan Nomor Seri', 'fas fa-barcode', '/reports/serials', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Laporan Pengajuan', 'fas fa-clipboard-check', '/reports/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
