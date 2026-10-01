@@ -39,6 +39,119 @@ class ReportController {
         ]);
     }
 
+    public function stockPosition() {
+        $guide_content = '
+            <ul class="list-disc pl-4 space-y-1">
+                <li><strong>Stok Fisik di Gudang:</strong> jumlah barang yang saat ini berada secara fisik di gudang tersebut.</li>
+                <li><strong>Tersedia:</strong> barang di gudang yang siap digunakan atau dikeluarkan.</li>
+                <li><strong>Dipinjam:</strong> barang yang sudah diserahkan ke teknisi dan masih tercatat sebagai custody.</li>
+                <li><strong>Dalam Pengiriman:</strong> barang yang sudah keluar dari gudang asal tetapi belum diterima di tujuan.</li>
+                <li>Laporan ini menunjukkan <strong>posisi inventory saat ini</strong>. Gunakan Laporan Stok &amp; Mutasi untuk histori perubahan.</li>
+            </ul>
+        ';
+
+        $borrowedExpr = "CASE WHEN m.is_serialized = 1
+            THEN (SELECT COUNT(*) FROM loan_item_serials lis
+                  JOIN loan_items li ON li.id = lis.loan_item_id
+                  JOIN loans l ON l.id = li.loan_id
+                  WHERE li.master_item_id = m.id
+                    AND l.warehouse_id = s.warehouse_id
+                    AND l.status IN ('BORROWED','PARTIAL_RETURNED')
+                    AND lis.status = 'BORROWED')
+            ELSE (
+                SELECT COALESCE(SUM(x.remaining_qty), 0) FROM (
+                    SELECT (li.quantity - li.returned_quantity) AS remaining_qty
+                    FROM loan_items li
+                    JOIN loans l ON l.id = li.loan_id
+                    WHERE li.master_item_id = m.id
+                      AND l.warehouse_id = s.warehouse_id
+                      AND l.status IN ('BORROWED','PARTIAL_RETURNED')
+                      AND li.quantity > li.returned_quantity
+                    UNION ALL
+                    SELECT (lmi.quantity - lmi.returned_quantity) AS remaining_qty
+                    FROM loan_manual_items lmi
+                    JOIN loans lm ON lm.id = lmi.loan_id
+                    WHERE lmi.master_item_id = m.id
+                      AND lm.warehouse_id = s.warehouse_id
+                      AND lm.status IN ('BORROWED','PARTIAL_RETURNED')
+                      AND lmi.quantity > lmi.returned_quantity
+                ) x
+            ) END";
+
+        $inTransitExpr = "(SELECT COALESCE(SUM(ti.quantity_sent - ti.quantity_received), 0)
+            FROM transfer_items ti
+            JOIN transfers t ON t.id = ti.transfer_id
+            WHERE ti.master_item_id = m.id
+              AND t.source_warehouse_id = s.warehouse_id
+              AND t.status IN ('IN_TRANSIT','PARTIAL_RECEIVED')
+              AND ti.quantity_sent > ti.quantity_received)";
+
+        $physicalExpr = "CASE WHEN m.is_serialized = 1
+            THEN (SELECT COUNT(*) FROM serial_numbers sn
+                  WHERE sn.master_item_id = m.id
+                    AND sn.current_warehouse_id = s.warehouse_id)
+            ELSE GREATEST(s.quantity - (" . $borrowedExpr . "), 0) END";
+
+        $availableExpr = "CASE WHEN m.is_serialized = 1
+            THEN (SELECT COUNT(*) FROM serial_numbers sn
+                  WHERE sn.master_item_id = m.id
+                    AND sn.current_warehouse_id = s.warehouse_id
+                    AND sn.status = 'AVAILABLE')
+            ELSE GREATEST(s.quantity - (" . $borrowedExpr . "), 0) END";
+
+        $baseQuery = "SELECT
+                s.id, s.warehouse_id, s.master_item_id,
+                m.item_category_id, m.kode_barang, m.nama AS item_name,
+                m.is_serialized, m.stok_minimum, m.is_active,
+                w.name AS warehouse_name, u.name AS unit_name,
+                (" . $physicalExpr . ") AS physical_quantity,
+                (" . $availableExpr . ") AS available_quantity,
+                (" . $borrowedExpr . ") AS borrowed_quantity,
+                " . $inTransitExpr . " AS in_transit_quantity
+            FROM stocks s
+            JOIN master_items m ON m.id = s.master_item_id
+            JOIN warehouses w ON w.id = s.warehouse_id
+            LEFT JOIN units u ON u.id = m.unit_id";
+
+        $this->handleReport([
+            'title' => 'Laporan Posisi Stok',
+            'base_query' => "SELECT p.*,
+                    (p.physical_quantity + p.borrowed_quantity + p.in_transit_quantity) AS total_asset_quantity,
+                    CASE
+                        WHEN p.physical_quantity = 0 AND p.borrowed_quantity = 0 AND p.in_transit_quantity = 0 THEN 'KOSONG'
+                        WHEN p.stok_minimum > 0 AND p.physical_quantity <= p.stok_minimum THEN 'STOK RENDAH'
+                        WHEN p.borrowed_quantity > 0 AND p.in_transit_quantity > 0 THEN 'DIPINJAM & DIKIRIM'
+                        WHEN p.borrowed_quantity > 0 THEN 'SEBAGIAN DIPINJAM'
+                        WHEN p.in_transit_quantity > 0 THEN 'DALAM PENGIRIMAN'
+                        ELSE 'TERSEDIA'
+                    END AS stock_status
+                FROM (" . $baseQuery . ") p",
+            'headers' => ['Gudang', 'Kode Barang', 'Nama Barang', 'Satuan', 'Stok Fisik', 'Tersedia', 'Dipinjam', 'Dalam Pengiriman', 'Total Aset', 'Status'],
+            'columns' => ['warehouse_name', 'kode_barang', 'item_name', 'unit_name', 'physical_quantity', 'available_quantity', 'borrowed_quantity', 'in_transit_quantity', 'total_asset_quantity', 'stock_status'],
+            'warehouse_column' => 'warehouse_id',
+            'category_column' => 'item_category_id',
+            'date_column' => null,
+            'hide_date_filter' => true,
+            'order_by' => 'warehouse_name ASC, item_name ASC',
+            'per_page' => 15,
+            'summary_columns' => [
+                'physical_total' => 'physical_quantity',
+                'available_total' => 'available_quantity',
+                'borrowed_total' => 'borrowed_quantity',
+                'in_transit_total' => 'in_transit_quantity',
+                'asset_total' => 'total_asset_quantity'
+            ],
+            'summary_cards' => [
+                ['key' => 'physical_total', 'label' => 'Stok Fisik', 'icon' => 'fa-boxes-stacked', 'tone' => 'green', 'help' => 'Barang yang saat ini berada di gudang'],
+                ['key' => 'available_total', 'label' => 'Tersedia', 'icon' => 'fa-circle-check', 'tone' => 'blue', 'help' => 'Siap digunakan atau dikeluarkan'],
+                ['key' => 'borrowed_total', 'label' => 'Dipinjam', 'icon' => 'fa-hand-holding', 'tone' => 'amber', 'help' => 'Sedang dalam custody teknisi'],
+                ['key' => 'in_transit_total', 'label' => 'Dalam Pengiriman', 'icon' => 'fa-truck', 'tone' => 'indigo', 'help' => 'Sudah dikirim, belum diterima'],
+                ['key' => 'asset_total', 'label' => 'Total Aset Tercatat', 'icon' => 'fa-layer-group', 'tone' => 'slate', 'help' => 'Fisik + dipinjam + dalam pengiriman']
+            ],
+            'guide_content' => $guide_content
+        ]);
+    }
+
     public function stockLedger() {
         $guide_content = '
             <ul class="list-disc pl-4 space-y-1">
@@ -288,15 +401,17 @@ class ReportController {
         $actionType = $_GET['action_type'] ?? '';
         $search = trim($_GET['search'] ?? '');
         
-        // Date filter
+        // Date filter (state reports can disable date filtering)
         $dateColumn = $config['date_column'] ?? 'created_at';
-        if (!empty($startDate)) {
-            $where[] = "DATE({$dateColumn}) >= ?";
-            $params[] = $startDate;
-        }
-        if (!empty($endDate)) {
-            $where[] = "DATE({$dateColumn}) <= ?";
-            $params[] = $endDate;
+        if ($dateColumn !== null && empty($config['disable_date_filter'])) {
+            if (!empty($startDate)) {
+                $where[] = "DATE({$dateColumn}) >= ?";
+                $params[] = $startDate;
+            }
+            if (!empty($endDate)) {
+                $where[] = "DATE({$dateColumn}) <= ?";
+                $params[] = $endDate;
+            }
         }
         
         // Warehouse filter (if table or join has warehouse_id)
@@ -411,7 +526,23 @@ class ReportController {
         }
         
         if (!$autoPrint) {
-            // Pagination
+            $summary = [];
+        $summaryCards = $config['summary_cards'] ?? [];
+        if (!empty($config['summary_columns'])) {
+            $summarySelect = [];
+            foreach ($config['summary_columns'] as $key => $column) {
+                $safeColumn = preg_replace('/[^A-Za-z0-9_]/', '', (string)$column);
+                if ($safeColumn === '') continue;
+                $summarySelect[] = "COALESCE(SUM(CAST(" . $safeColumn . " AS DECIMAL(20,2))),0) AS " . $key;
+            }
+            if ($summarySelect) {
+                $summaryStmt = $pdo->prepare("SELECT " . implode(', ', $summarySelect) . " FROM ({$derivedSql}) AS report_summary");
+                $summaryStmt->execute($params);
+                $summary = $summaryStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+            }
+        }
+
+        // Pagination
             $page = max(1, (int)($_GET['page'] ?? 1));
             $limit = (int)($config['per_page'] ?? 15);
             $offset = ($page - 1) * $limit;
