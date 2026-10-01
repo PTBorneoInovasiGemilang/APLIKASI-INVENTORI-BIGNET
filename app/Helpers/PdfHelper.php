@@ -32,6 +32,51 @@ class PdfHelper
         }
     }
 
+    private static function loadLogoImage(): ?array
+    {
+        $path = __DIR__ . '/../../Big-Color Logo.png';
+        if (!is_file($path) || !function_exists('imagecreatefrompng') || !function_exists('imagejpeg')) {
+            return null;
+        }
+
+        try {
+            $src = @imagecreatefrompng($path);
+            if (!$src) return null;
+
+            $width = imagesx($src);
+            $height = imagesy($src);
+            if ($width <= 0 || $height <= 0) {
+                imagedestroy($src);
+                return null;
+            }
+
+            // Flatten transparency onto white so the logo prints cleanly.
+            $canvas = imagecreatetruecolor($width, $height);
+            $white = imagecolorallocate($canvas, 255, 255, 255);
+            imagefill($canvas, 0, 0, $white);
+            imagealphablending($canvas, true);
+            imagecopy($canvas, $src, 0, 0, 0, 0, $width, $height);
+            imagesavealpha($canvas, false);
+
+            ob_start();
+            imagejpeg($canvas, null, 92);
+            $jpeg = ob_get_clean();
+
+            imagedestroy($src);
+            imagedestroy($canvas);
+
+            if ($jpeg === false || $jpeg === '') return null;
+
+            return [
+                'data' => $jpeg,
+                'width' => $width,
+                'height' => $height,
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     public static function tableReport(string $title, array $headers, array $rows, array $metadata = [], array $columns = []): string
     {
         $generatedAt = date('d F Y H:i');
@@ -47,6 +92,7 @@ class PdfHelper
         $appName = self::getSetting('app_short_name', 'BIG');
         $companyName = self::getSetting('company_name', 'PT. BIG');
         $appSystem = 'Sistem Gudang';
+        $logoImage = self::loadLogoImage();
 
         $pages = [];
         $current = [];
@@ -64,11 +110,23 @@ class PdfHelper
             }
         };
 
-        $drawBranding = function () use (&$current, &$y, $margin, $pageW, $appName, $appSystem, $companyName): void {
-            $current[] = "0.1 0.4 0.8 rg {$margin} " . ($y - 34) . " 34 34 re f";
-            $current[] = 'BT /F2 12 Tf 1 1 1 rg ' . ($margin + 6) . ' ' . ($y - 22) . ' Td (' . self::sanitize($appName) . ') Tj ET';
-            $current[] = 'BT /F2 16 Tf 0 0 0 rg ' . ($margin + 46) . ' ' . ($y - 11) . ' Td (' . self::sanitize($appName) . ') Tj ET';
-            $current[] = 'BT /F1 10 Tf 0.4 0.4 0.4 rg ' . ($margin + 46) . ' ' . ($y - 25) . ' Td (' . self::sanitize($appSystem) . ') Tj ET';
+        $drawBranding = function () use (&$current, &$y, $margin, $pageW, $appName, $appSystem, $companyName, $logoImage): void {
+            $logoBox = 34.0;
+            if ($logoImage) {
+                $ratio = $logoImage['height'] / max(1, $logoImage['width']);
+                $logoW = $logoBox;
+                $logoH = min($logoBox, max(12.0, $logoW * $ratio));
+                $logoY = $y - $logoBox + (($logoBox - $logoH) / 2);
+                $current[] = 'q ' . $logoW . ' 0 0 ' . $logoH . ' ' . $margin . ' ' . $logoY . ' cm /Logo Do Q';
+                $brandX = $margin + 46;
+            } else {
+                $current[] = "0.1 0.4 0.8 rg {$margin} " . ($y - 34) . " 34 34 re f";
+                $current[] = 'BT /F2 12 Tf 1 1 1 rg ' . ($margin + 6) . ' ' . ($y - 22) . ' Td (' . self::sanitize($appName) . ') Tj ET';
+                $brandX = $margin + 46;
+            }
+
+            $current[] = 'BT /F2 16 Tf 0 0 0 rg ' . $brandX . ' ' . ($y - 11) . ' Td (' . self::sanitize($companyName) . ') Tj ET';
+            $current[] = 'BT /F1 10 Tf 0.4 0.4 0.4 rg ' . $brandX . ' ' . ($y - 25) . ' Td (' . self::sanitize($appSystem) . ') Tj ET';
 
             $fs = 14;
             if (strlen($companyName) > 28) $fs = 11;
@@ -199,6 +257,17 @@ class PdfHelper
 
         $fontBoldId = $objId;
         $fontRegId = $objId + 1;
+        $logoObjectId = $logoImage ? ($fontRegId + 1) : null;
+
+        if ($logoObjectId !== null) {
+            foreach ($pageObjects as $pageId => $spec) {
+                $pageObjects[$pageId] = str_replace(
+                    '/Resources << /Font << /F1 ' . ($objId + 1) . ' 0 R /F2 ' . $objId . ' 0 R >> >>',
+                    '/Resources << /Font << /F1 ' . ($objId + 1) . ' 0 R /F2 ' . $objId . ' 0 R >> /XObject << /Logo ' . $logoObjectId . ' 0 R >> >>',
+                    $spec
+                );
+            }
+        }
 
         $objects = [
             1 => '<< /Type /Catalog /Pages 2 0 R >>',
@@ -207,6 +276,9 @@ class PdfHelper
         foreach ($pageObjects as $id => $spec) $objects[$id] = $spec;
         $objects[$fontBoldId] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
         $objects[$fontRegId] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+        if ($logoObjectId !== null) {
+            $objects[$logoObjectId] = '<< /Type /XObject /Subtype /Image /Width ' . (int)$logoImage['width'] . ' /Height ' . (int)$logoImage['height'] . ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' . strlen($logoImage['data']) . ' >>\nstream\n' . $logoImage['data'] . '\nendstream';
+        }
         foreach ($contentStreams as $id => $body) $objects[$id] = $body;
 
         ksort($objects);
