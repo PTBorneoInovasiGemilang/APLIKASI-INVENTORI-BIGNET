@@ -62,8 +62,33 @@ ob_start();
 @media print {
  body * { visibility: hidden; }
  .labels-grid, .labels-grid * { visibility: visible; }
- .labels-grid { position: absolute; left: 0; top: 0; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
- .label-card { border: 1px solid #000; border-radius: 4px; page-break-inside: avoid; }
+ .labels-grid {
+   position: absolute;
+   left: 0;
+   top: 0;
+   width: 100%;
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 4px;
+   padding: 0;
+ }
+ .label-card {
+   border: 1px solid #000;
+   border-radius: 3px;
+   page-break-inside: avoid;
+   min-height: 105px !important;
+   max-width: none !important;
+   padding: 6px !important;
+ }
+ .label-card .mb-2 { margin-bottom: 3px !important; }
+ .label-card .mb-1 { margin-bottom: 2px !important; }
+ .label-card .w-6.h-6 { width: 18px !important; height: 18px !important; }
+ .label-card img.w-6.h-6 { width: 18px !important; height: 18px !important; }
+ .label-card .text-\[12px\] { font-size: 9px !important; }
+ .label-card .text-\[11px\] { font-size: 8px !important; }
+ .label-card .text-\[10px\] { font-size: 7px !important; }
+ .label-card .text-\[8\.5px\] { font-size: 6px !important; }
+ .label-card .barcode-svg { height: 11px !important; width: auto !important; max-width: 100% !important; }
 }
 </style>
 
