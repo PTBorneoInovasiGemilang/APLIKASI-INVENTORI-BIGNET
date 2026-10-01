@@ -111,7 +111,7 @@ class LoanWorkflowController extends LoanController
             $createdLines = 0;
 
             // Bulk / non-serialized: kembalikan seluruh sisa kuantitas.
-            $q = $pdo->prepare("SELECT li.*, m.nama FROM loan_items li JOIN master_items m ON m.id=li.master_item_id WHERE li.loan_id=? AND li.quantity > li.returned_quantity ORDER BY li.id FOR UPDATE");
+            $q = $pdo->prepare("SELECT li.*, m.nama FROM loan_items li JOIN master_items m ON m.id=li.master_item_id WHERE li.loan_id=? AND li.quantity > li.returned_quantity AND m.is_serialized=0 ORDER BY li.id FOR UPDATE");
             $q->execute([$id]);
             foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $it) {
                 $remaining = max(0, (int)$it['quantity'] - (int)$it['returned_quantity']);
@@ -160,7 +160,7 @@ class LoanWorkflowController extends LoanController
             $q = $pdo->prepare("SELECT lmi.*, m.nama, m.is_serialized
                                 FROM loan_manual_items lmi
                                 JOIN master_items m ON m.id=lmi.master_item_id
-                                WHERE lmi.loan_id=? AND lmi.master_item_id IS NOT NULL AND lmi.quantity > lmi.returned_quantity
+                                WHERE lmi.loan_id=? AND lmi.master_item_id IS NOT NULL AND lmi.quantity > lmi.returned_quantity AND m.is_serialized=0
                                 ORDER BY lmi.id
                                 FOR UPDATE");
             $q->execute([$id]);
