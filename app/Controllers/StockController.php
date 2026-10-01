@@ -127,9 +127,21 @@ class StockController
             $row['available_quantity'] = max(0, (int)$row['available_quantity']);
             $row['borrowed_quantity'] = max(0, (int)$row['borrowed_quantity']);
             $row['in_transit_quantity'] = max(0, (int)$row['in_transit_quantity']);
-            $row['physical_quantity'] = $row['available_quantity'] + $row['borrowed_quantity'] + $row['in_transit_quantity'];
+
+            // Stok Fisik = barang yang benar-benar masih berada di gudang.
+            // Barang dipinjam dan dalam pengiriman ditampilkan terpisah.
+            if ((int)$row['is_serialized'] === 1) {
+                $row['physical_quantity'] = (int)$pdo->query(
+                    "SELECT COUNT(*) FROM serial_numbers WHERE master_item_id = " . (int)$row['master_item_id'] .
+                    " AND current_warehouse_id = " . (int)$row['warehouse_id']
+                )->fetchColumn();
+            } else {
+                $row['physical_quantity'] = max(0, (int)$row['quantity'] - $row['borrowed_quantity']);
+                $row['available_quantity'] = $row['physical_quantity'];
+            }
+
             $row['is_low_stock'] = (int)$row['stok_minimum'] > 0
-                && $row['available_quantity'] <= (int)$row['stok_minimum'];
+                && $row['physical_quantity'] <= (int)$row['stok_minimum'];
         }
         unset($row);
 
