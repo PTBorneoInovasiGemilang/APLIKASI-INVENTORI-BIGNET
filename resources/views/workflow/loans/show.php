@@ -95,6 +95,18 @@ $isApproved=$loan['status']==='APPROVED';
  <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6" id="handover"><h2 class="font-semibold text-lg">Barang Keluar &amp; Serah Terima</h2><p class="text-sm text-gray-600 dark:text-gray-300 mt-1 mb-3">Buat transaksi Barang Keluar untuk Peminjaman. Stok fisik tetap, tetapi barang menjadi custody.</p><form method="POST" action="<?=url('/loans/handover')?>" id="handoverForm"><input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>"><input type="hidden" name="id" value="<?=$loan['id']?>"><button type="button" onclick="openHandoverModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold">Proses &amp; Serahkan</button></form></div>
  <?php endif; ?>
 
+ <?php if($role==='ADMIN'&&in_array($loan['status'],['BORROWED','PARTIAL_RETURNED'],true)): ?>
+ <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 mb-6" id="admin-return">
+  <h2 class="font-semibold text-emerald-900">Konfirmasi Pengembalian</h2>
+  <p class="text-sm text-emerald-800 dark:text-emerald-200 mt-1 mb-3">Admin dapat mengonfirmasi langsung bahwa seluruh sisa barang pinjaman sudah kembali. Setelah dikonfirmasi, status peminjaman teknisi otomatis menjadi <strong>Dikembalikan</strong>.</p>
+  <form method="POST" action="<?=url('/loans/confirm-return')?>" id="adminReturnForm">
+   <input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>">
+   <input type="hidden" name="id" value="<?=$loan['id']?>">
+   <button type="button" onclick="openAdminReturnModal()" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-semibold"><i class="fas fa-clipboard-check"></i>Barang Sudah Dikembalikan</button>
+  </form>
+ </div>
+ <?php endif; ?>
+
  <?php if($role==='TEKNISI_NOC'&&in_array($loan['status'],['BORROWED','PARTIAL_RETURNED'],true)): ?>
  <div class="bg-orange-50 border border-orange-200 rounded-xl p-5 mb-6"><h2 class="font-semibold">Pengembalian</h2><p class="text-sm text-gray-600 dark:text-gray-300 mt-1 mb-3">Pengembalian diajukan teknisi, lalu diperiksa Admin.</p><a href="<?=url('/returns/create?loan_id='.(int)$loan['id'])?>" class="inline-block bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold">Ajukan Pengembalian</a></div>
  <?php endif; ?>
@@ -117,6 +129,7 @@ function openLoanModal({title,text,body='',primary='Lanjutkan',danger=false,onCo
 function closeLoanModal(){loanModal.classList.remove('is-open');loanModal.setAttribute('aria-hidden','true');loanModalBody.innerHTML='';loanModalAction=null}
 loanModal.addEventListener('click',e=>{if(e.target===loanModal)closeLoanModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&loanModal.classList.contains('is-open'))closeLoanModal()});loanModalPrimary.addEventListener('click',()=>{const fn=loanModalAction;closeLoanModal();if(fn)fn()});
 function showValidationModal(message){openLoanModal({title:'Data belum lengkap',text:message,primary:'Mengerti',onConfirm:null})}
+function openAdminReturnModal(){openLoanModal({title:'Konfirmasi Barang Sudah Dikembalikan',text:'Semua sisa barang pada peminjaman ini akan ditandai sudah kembali ke gudang dan status teknisi akan otomatis menjadi Dikembalikan.',body:'<div class="rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800">Tindakan ini hanya boleh dilakukan jika barang memang sudah diterima kembali oleh gudang.</div>',primary:'Ya, Konfirmasi Pengembalian',onConfirm:()=>document.getElementById('adminReturnForm').submit()})}
 function openHandoverModal(){openLoanModal({title:'Proses Barang Keluar',text:'Transaksi Barang Keluar untuk peminjaman akan dibuat dan barang diserahkan kepada peminjam.',body:'<div class="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800">Stok fisik tidak berkurang. Barang akan tercatat sebagai sedang dipinjam/custody.</div>',primary:'Proses & Serahkan',onConfirm:()=>document.getElementById('handoverForm').submit()})}
 function openRejectModal(){openLoanModal({title:'Tolak Peminjaman',text:'Peminjaman akan ditolak dan alasan akan dicatat pada riwayat.',body:'<textarea id="rejectReason" class="loan-confirm-textarea" placeholder="Alasan penolakan (wajib)"></textarea>',primary:'Tolak Peminjaman',danger:true,onConfirm:()=>{const reason=(document.getElementById('rejectReason')?.value||'').trim();if(!reason){openLoanModal({title:'Alasan diperlukan',text:'Masukkan alasan penolakan sebelum melanjutkan.',primary:'Mengerti',onConfirm:null});return;}const form=document.createElement('form');form.method='POST';form.action='<?=url('/loans/reject')?>';form.innerHTML='<input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>"><input type="hidden" name="id" value="<?=$loan['id']?>"><input type="hidden" name="approval_notes" value="'+reason.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')+'">';document.body.appendChild(form);form.submit()}})}
 function byKey(selector,key){return document.querySelector(selector+'[data-key="'+CSS.escape(String(key))+'"]')}
