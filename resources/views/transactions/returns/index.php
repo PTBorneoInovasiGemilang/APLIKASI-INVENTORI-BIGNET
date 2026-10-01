@@ -102,7 +102,7 @@ if (empty($_SESSION['csrf_token'])) {
               $rowActions = [[
                 'type' => 'view',
                 'url' => url('/returns/show?id=' . (int)$ret['id']),
-                'label' => $isPending && in_array($role, ['ADMIN','SUPERADMIN'], true) ? 'Periksa' : 'Lihat',
+                'label' => $isPending && in_array($role, ['ADMIN','SUPERADMIN'], true) ? 'Approve' : 'Lihat',
                 'icon' => $isPending && in_array($role, ['ADMIN','SUPERADMIN'], true) ? 'fa-clipboard-check' : 'fa-eye',
                 'title' => $isPending ? 'Periksa Pengembalian' : 'Detail Pengembalian'
               ]];
