@@ -27,7 +27,7 @@ $router->get('/loans/show', 'LoanWorkflowController@show');
 $router->get('/loans/api/items', 'LoanController@apiItems');
 $router->post('/loans/approve', 'LoanWorkflowController@approve');
 $router->post('/loans/reject', 'LoanWorkflowController@reject');
-$router->post('/loans/handover', 'LoanWorkflowController@handover');
+$router->post('/loans/handover', 'LoanWorkflowController@handover'); $router->post('/loans/confirm-return', 'LoanWorkflowController@confirmReturn');
 
 // Return workflow: technician request -> admin condition check -> stock/custody update
 $router->get('/returns', 'ReturnWorkflowController@index');
