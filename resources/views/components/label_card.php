@@ -31,16 +31,11 @@ $faviconUrl = setting('favicon_path') ? url('/file?path=' . urlencode(setting('f
     <?php endif; ?>
   </div>
 
-  <!-- Barcode -->
+  <!-- Barcode Code 128 -->
   <div class="flex justify-center w-full mb-2 overflow-hidden px-2">
     <?php echo \App\Helpers\BarcodeHelper::code128($bcText, 24, 2); ?>
   </div>
 
-  <!-- QR -->
-  <div class="flex flex-col items-center justify-center w-full mb-2">
-    <div class="qr-box mb-1" data-qr="<?= htmlspecialchars($bcText, ENT_QUOTES) ?>"></div>
-    <div class="text-[10px] font-mono text-gray-900 dark:text-gray-100 font-bold tracking-wider"><?= htmlspecialchars($bcText) ?></div>
-  </div>
 
   <!-- Footer Kepemilikan -->
   <div class="text-[8.5px] font-bold text-gray-500 dark:text-gray-400 uppercase mt-auto tracking-tight border-t border-gray-200 dark:border-gray-700 pt-1.5 w-full">
