@@ -420,11 +420,11 @@ function renderHeader($label, $sidebarGroupText) {
         <?= renderMenu('Nomor Seri', 'fas fa-barcode', '/serials', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Cetak Label Massal', 'fas fa-print', '/labels/create', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderHeader('Transaksi Monitoring', $sidebarGroupText) ?>
-        <?= renderMenu('Pengajuan Barang', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon, $adminPendingSubmissionCount) ?>
+        <?= renderMenu('Pengajuan Barang', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Barang Masuk', 'fas fa-arrow-down', '/incoming', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Barang Keluar', 'fas fa-arrow-up', '/outgoing', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Transfer Gudang', 'fas fa-exchange-alt', '/transfers', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-        <?= renderMenu('Peminjaman', 'fas fa-hand-holding', '/loans', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon, $adminPendingLoanCount) ?>
+        <?= renderMenu('Peminjaman', 'fas fa-hand-holding', '/loans', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Pengembalian', 'fas fa-undo', '/returns', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Instalasi', 'fas fa-tools', '/installations', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Penyesuaian Stok', 'fas fa-sliders-h', '/adjustments', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
@@ -463,11 +463,11 @@ function renderHeader($label, $sidebarGroupText) {
         <?= renderMenu('Cetak Label Massal', 'fas fa-print', '/labels/create', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Riwayat Timeline', 'fas fa-history', '/timeline', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderHeader('Transaksi', $sidebarGroupText) ?>
-        <?= renderMenu('Pengajuan Barang', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
+        <?= renderMenu('Pengajuan Barang', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon, $adminPendingSubmissionCount) ?>
         <?= renderMenu('Barang Masuk', 'fas fa-arrow-down', '/incoming', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Barang Keluar', 'fas fa-arrow-up', '/outgoing', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Transfer Gudang', 'fas fa-exchange-alt', '/transfers', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-        <?= renderMenu('Peminjaman', 'fas fa-hand-holding', '/loans', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
+        <?= renderMenu('Peminjaman', 'fas fa-hand-holding', '/loans', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon, $adminPendingLoanCount) ?>
         <?= renderMenu('Pengembalian', 'fas fa-undo', '/returns', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Instalasi', 'fas fa-tools', '/installations', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Penyesuaian Stok', 'fas fa-sliders-h', '/adjustments', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
@@ -677,8 +677,39 @@ function renderHeader($label, $sidebarGroupText) {
       document.addEventListener('click', function(e) { if (!dropdownMenu.contains(e.target) && !dropdownBtn.contains(e.target)) dropdownMenu.classList.add('hidden'); });
     }
 
+    function sanitizeEmptyParentheses(root) {
+      const skip = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT']);
+      const walker = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      let node;
+      while ((node = walker.nextNode())) {
+        const parent = node.parentElement;
+        if (!parent || skip.has(parent.tagName)) continue;
+        if (/\(\s*\)/.test(node.nodeValue || '')) nodes.push(node);
+      }
+      nodes.forEach(node => {
+        node.nodeValue = (node.nodeValue || '').replace(/\s*\(\s*\)/g, '');
+      });
+    }
+
     initSidebarScroll();
     initPageHeadingIcons();
+    sanitizeEmptyParentheses(document.body);
+
+    const emptyParenthesesObserver = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        mutation.addedNodes.forEach(function(node) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            if (/\(\s*\)/.test(node.nodeValue || '')) {
+              node.nodeValue = (node.nodeValue || '').replace(/\s*\(\s*\)/g, '');
+            }
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            sanitizeEmptyParentheses(node);
+          }
+        });
+      });
+    });
+    emptyParenthesesObserver.observe(document.body, { childList: true, subtree: true });
 
     document.querySelectorAll('a[href*="/dashboard"]').forEach(function(link) {
       link.addEventListener('click', function() {
