@@ -8,7 +8,7 @@
 
 $faviconUrl = setting('favicon_path') ? url('/file?path=' . urlencode(setting('favicon_path'))) : '';
 ?>
-<div class="label-card flex flex-col items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-400 border-dashed rounded-lg text-center w-full h-full min-h-[220px] max-w-[280px] mx-auto box-border overflow-hidden">
+<div class="label-card flex flex-col items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-400 border-dashed rounded-lg text-center w-full h-full min-h-[170px] max-w-[280px] mx-auto box-border overflow-hidden">
   <!-- Header -->
   <div class="flex items-center justify-center gap-2 mb-2 w-full">
     <?php if ($faviconUrl): ?>
@@ -32,8 +32,8 @@ $faviconUrl = setting('favicon_path') ? url('/file?path=' . urlencode(setting('f
   </div>
 
   <!-- Barcode Code 128 -->
-  <div class="flex justify-center w-full mb-2 overflow-hidden px-2">
-    <?php echo \App\Helpers\BarcodeHelper::code128($bcText, 24, 2); ?>
+  <div class="flex justify-center w-full mb-1 overflow-hidden px-1">
+    <?php echo \App\Helpers\BarcodeHelper::code128($bcText, 16, 1); ?>
   </div>
 
 
