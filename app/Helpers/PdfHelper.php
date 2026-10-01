@@ -35,43 +35,99 @@ class PdfHelper
     private static function loadLogoImage(): ?array
     {
         $path = __DIR__ . '/../../Big-Color Logo.png';
-        if (!is_file($path) || !function_exists('imagecreatefrompng') || !function_exists('imagejpeg')) {
-            return null;
+        if (!is_file($path)) return null;
+
+        // Use GD when available.
+        if (function_exists('imagecreatefrompng') && function_exists('imagejpeg')) {
+            try {
+                $src = @imagecreatefrompng($path);
+                if ($src) {
+                    $width = imagesx($src);
+                    $height = imagesy($src);
+                    $canvas = imagecreatetruecolor($width, $height);
+                    $white = imagecolorallocate($canvas, 255, 255, 255);
+                    imagefill($canvas, 0, 0, $white);
+                    imagealphablending($canvas, true);
+                    imagecopy($canvas, $src, 0, 0, 0, 0, $width, $height);
+                    imagesavealpha($canvas, false);
+                    ob_start();
+                    imagejpeg($canvas, null, 92);
+                    $jpeg = ob_get_clean();
+                    imagedestroy($src);
+                    imagedestroy($canvas);
+                    if ($jpeg !== false && $jpeg !== '') {
+                        return ['data' => $jpeg, 'width' => $width, 'height' => $height, 'filter' => 'DCTDecode'];
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Continue to the dependency-free PNG decoder.
+            }
         }
 
+        // Dependency-free fallback for common 8-bit non-interlaced PNGs.
         try {
-            $src = @imagecreatefrompng($path);
-            if (!$src) return null;
-
-            $width = imagesx($src);
-            $height = imagesy($src);
-            if ($width <= 0 || $height <= 0) {
-                imagedestroy($src);
-                return null;
+            $png = @file_get_contents($path);
+            if ($png === false || substr($png, 0, 8) !== "\x89PNG\r\n\x1a\n") return null;
+            $offset = 8; $length = strlen($png); $width = 0; $height = 0; $bitDepth = 0; $colorType = 0; $interlace = 0; $idat = '';
+            while ($offset + 8 <= $length) {
+                $chunkLength = unpack('Nlen', substr($png, $offset, 4))['len'];
+                $type = substr($png, $offset + 4, 4);
+                $chunkData = substr($png, $offset + 8, $chunkLength);
+                $offset += 12 + $chunkLength;
+                if ($type === 'IHDR') {
+                    if (strlen($chunkData) < 13) return null;
+                    $width = unpack('Nw', substr($chunkData, 0, 4))['w'];
+                    $height = unpack('Nh', substr($chunkData, 4, 4))['h'];
+                    $bitDepth = ord($chunkData[8]);
+                    $colorType = ord($chunkData[9]);
+                    $interlace = ord($chunkData[12]);
+                } elseif ($type === 'IDAT') {
+                    $idat .= $chunkData;
+                } elseif ($type === 'IEND') {
+                    break;
+                }
             }
-
-            // Flatten transparency onto white so the logo prints cleanly.
-            $canvas = imagecreatetruecolor($width, $height);
-            $white = imagecolorallocate($canvas, 255, 255, 255);
-            imagefill($canvas, 0, 0, $white);
-            imagealphablending($canvas, true);
-            imagecopy($canvas, $src, 0, 0, 0, 0, $width, $height);
-            imagesavealpha($canvas, false);
-
-            ob_start();
-            imagejpeg($canvas, null, 92);
-            $jpeg = ob_get_clean();
-
-            imagedestroy($src);
-            imagedestroy($canvas);
-
-            if ($jpeg === false || $jpeg === '') return null;
-
-            return [
-                'data' => $jpeg,
-                'width' => $width,
-                'height' => $height,
-            ];
+            $channelsMap = [0 => 1, 2 => 3, 4 => 2, 6 => 4];
+            if ($width <= 0 || $height <= 0 || $bitDepth !== 8 || $interlace !== 0 || !isset($channelsMap[$colorType]) || $idat === '') return null;
+            $channels = $channelsMap[$colorType]; $rowBytes = $width * $channels;
+            $raw = function_exists('zlib_decode') ? @zlib_decode($idat) : @gzuncompress($idat);
+            if ($raw === false || strlen($raw) < (($rowBytes + 1) * $height)) return null;
+            $recon = ''; $prev = str_repeat("\0", $rowBytes); $pos = 0;
+            for ($y = 0; $y < $height; $y++) {
+                $filter = ord($raw[$pos++]); $scan = substr($raw, $pos, $rowBytes); $pos += $rowBytes;
+                if (strlen($scan) !== $rowBytes) return null;
+                $row = '';
+                for ($i = 0; $i < $rowBytes; $i++) {
+                    $left = $i >= $channels ? ord($row[$i - $channels]) : 0;
+                    $up = ord($prev[$i]); $upLeft = $i >= $channels ? ord($prev[$i - $channels]) : 0; $x = ord($scan[$i]);
+                    if ($filter === 0) $value = $x;
+                    elseif ($filter === 1) $value = ($x + $left) & 255;
+                    elseif ($filter === 2) $value = ($x + $up) & 255;
+                    elseif ($filter === 3) $value = ($x + (int)floor(($left + $up) / 2)) & 255;
+                    elseif ($filter === 4) {
+                        $p = $left + $up - $upLeft; $pa = abs($p - $left); $pb = abs($p - $up); $pc = abs($p - $upLeft);
+                        $predictor = ($pa <= $pb && $pa <= $pc) ? $left : (($pb <= $pc) ? $up : $upLeft);
+                        $value = ($x + $predictor) & 255;
+                    } else return null;
+                    $row .= chr($value);
+                }
+                $recon .= $row; $prev = $row;
+            }
+            $rgb = ''; $pos = 0;
+            for ($y = 0; $y < $height; $y++) {
+                for ($x = 0; $x < $width; $x++) {
+                    if ($colorType === 2) { $rgb .= substr($recon, $pos, 3); $pos += 3; }
+                    elseif ($colorType === 6) {
+                        $r = ord($recon[$pos]); $g = ord($recon[$pos + 1]); $b = ord($recon[$pos + 2]); $a = ord($recon[$pos + 3]) / 255; $pos += 4;
+                        $rgb .= chr((int)round($r * $a + 255 * (1 - $a))) . chr((int)round($g * $a + 255 * (1 - $a))) . chr((int)round($b * $a + 255 * (1 - $a)));
+                    }
+                    elseif ($colorType === 0) { $v = ord($recon[$pos++]); $rgb .= chr($v) . chr($v) . chr($v); }
+                    elseif ($colorType === 4) { $v = ord($recon[$pos]); $a = ord($recon[$pos + 1]) / 255; $pos += 2; $v = (int)round($v * $a + 255 * (1 - $a)); $rgb .= chr($v) . chr($v) . chr($v); }
+                }
+            }
+            $compressed = gzcompress($rgb, 9);
+            if ($compressed === false) return null;
+            return ['data' => $compressed, 'width' => $width, 'height' => $height, 'filter' => 'FlateDecode'];
         } catch (\Throwable $e) {
             return null;
         }
@@ -277,7 +333,14 @@ class PdfHelper
         $objects[$fontBoldId] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
         $objects[$fontRegId] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
         if ($logoObjectId !== null) {
-            $objects[$logoObjectId] = '<< /Type /XObject /Subtype /Image /Width ' . (int)$logoImage['width'] . ' /Height ' . (int)$logoImage['height'] . ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' . strlen($logoImage['data']) . ' >>\nstream\n' . $logoImage['data'] . '\nendstream';
+            $objects[$logoObjectId] =
+                "<< /Type /XObject /Subtype /Image"
+                . " /Width " . (int)$logoImage['width']
+                . " /Height " . (int)$logoImage['height']
+                . " /ColorSpace /DeviceRGB /BitsPerComponent 8"
+                . " /Filter /" . $logoImage['filter']
+                . " /Length " . strlen($logoImage['data']) . " >>\n"
+                . "stream\n" . $logoImage['data'] . "\nendstream";
         }
         foreach ($contentStreams as $id => $body) $objects[$id] = $body;
 
