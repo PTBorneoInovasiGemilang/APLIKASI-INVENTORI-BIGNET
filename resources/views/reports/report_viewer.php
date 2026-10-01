@@ -116,18 +116,14 @@ ob_start();
           <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Pencarian</label>
           <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Cari kode, nama, serial..." class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300">
         </div>
-        <?php if (empty($config['hide_date_filter'])): ?>
         <div>
           <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Tanggal Mulai</label>
           <input type="date" name="start_date" value="<?= htmlspecialchars($_GET['start_date'] ?? '') ?>" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300">
         </div>
-        <?php endif; ?>
-        <?php if (empty($config['hide_date_filter'])): ?>
         <div>
           <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Tanggal Akhir</label>
           <input type="date" name="end_date" value="<?= htmlspecialchars($_GET['end_date'] ?? '') ?>" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300">
         </div>
-        <?php endif; ?>
         <?php if (isset($config['warehouse_column'])): ?>
         <div>
           <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Gudang</label>
@@ -190,39 +186,7 @@ ob_start();
     </form>
   </div>
 
-  <?php if (!empty($summaryCards)): ?>
-  <?php
-    $summaryTone = [
-      'green' => ['wrap' => 'bg-green-50 dark:bg-green-900/20', 'icon' => 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-300', 'value' => 'text-green-700 dark:text-green-300'],
-      'blue' => ['wrap' => 'bg-blue-50 dark:bg-blue-900/20', 'icon' => 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300', 'value' => 'text-blue-700 dark:text-blue-300'],
-      'amber' => ['wrap' => 'bg-amber-50 dark:bg-amber-900/20', 'icon' => 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300', 'value' => 'text-amber-700 dark:text-amber-300'],
-      'indigo' => ['wrap' => 'bg-indigo-50 dark:bg-indigo-900/20', 'icon' => 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300', 'value' => 'text-indigo-700 dark:text-indigo-300'],
-      'slate' => ['wrap' => 'bg-slate-50 dark:bg-slate-900/30', 'icon' => 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300', 'value' => 'text-slate-700 dark:text-slate-300'],
-    ];
-  ?>
-  <div class="mb-4 rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-sm text-blue-800 dark:border-blue-900/50 dark:bg-blue-950/20 dark:text-blue-200">
-    <div class="flex items-start gap-3">
-      <i class="fas fa-circle-info mt-0.5 text-blue-500"></i>
-      <div><strong>Posisi stok saat ini.</strong> Stok Fisik menunjukkan barang yang berada di gudang. Barang Dipinjam dan Dalam Pengiriman ditampilkan terpisah agar Owner dapat membaca posisi inventory dengan jelas.</div>
-    </div>
-  </div>
-  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3 mb-6">
-    <?php foreach ($summaryCards as $card): ?>
-      <?php $tone = $summaryTone[$card['tone'] ?? 'blue'] ?? $summaryTone['blue']; ?>
-      <div class="rounded-2xl border border-gray-200 dark:border-gray-700 <?= $tone['wrap'] ?> p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <div class="text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400"><?= htmlspecialchars($card['label']) ?></div>
-            <div class="mt-1 text-2xl font-black <?= $tone['value'] ?>"><?= number_format((float)($summary[$card['key']] ?? 0), 0, ',', '.') ?></div>
-            <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400"><?= htmlspecialchars($card['help'] ?? '') ?></div>
-          </div>
-          <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl <?= $tone['icon'] ?>"><i class="fas <?= htmlspecialchars($card['icon']) ?>"></i></span>
-        </div>
-      </div>
-    <?php endforeach; ?>
-  </div>
-
-    <!-- Data Table / Empty State -->
+  <!-- Data Table / Empty State -->
   <?php if (empty($data)): ?>
     <?php
     $emptyPanel = true;
