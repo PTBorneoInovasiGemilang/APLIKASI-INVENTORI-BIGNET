@@ -163,10 +163,12 @@ class SubmissionController {
                         }
                         $itemStmt->execute([$submission_id, 'STOCK', $wh_id, $item_id, null, null, null, $qty, 0, $line_note]);
                         $nm = $pdo->query("SELECT nama FROM master_items WHERE id = " . (int)$item_id)->fetchColumn();
+                        $nm = preg_replace('/\\s*\\(\\s*\\)/u', '', (string)$nm);
                         if ($nm) $summaryParts[] = $qty . ' ' . $nm;
                     }
                 } else if ($type === 'MANUAL') {
                     $name = trim($manual_names[$index] ?? '');
+                    $name = preg_replace('/\\s*\\(\\s*\\)/u', '', $name);
                     $spec = trim($manual_specs[$index] ?? '');
                     $unit = trim($manual_units[$index] ?? '');
                     if (!empty($name)) {
