@@ -752,6 +752,6 @@ function renderHeader($label, $sidebarGroupText) {
 
   setTimeout(() => { document.querySelectorAll('.toast').forEach(t => t.remove()); }, 5000);
   </script>
-  <script src="<?= url('/assets/js/app-feedback.js') ?>"></script>
+  <script src="<?= url('/assets/js/app-feedback.js') ?>?v=20261001-2"></script>
 </body>
 </html>
