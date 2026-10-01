@@ -33,6 +33,40 @@
 (function (window, document) {
     'use strict';
 
+    /* ===================== Empty UI parentheses guard ===================== */
+    function cleanEmptyUiParentheses(root) {
+        if (!root) return;
+        var skip = { SCRIPT: true, STYLE: true, NOSCRIPT: true, TEXTAREA: true, INPUT: true };
+        function walk(node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                var parent = node.parentElement;
+                if (parent && !skip[parent.tagName]) {
+                    node.nodeValue = (node.nodeValue || '').replace(/\s*\(\s*\)/g, '');
+                }
+                return;
+            }
+            if (node.nodeType !== Node.ELEMENT_NODE || skip[node.tagName]) return;
+            Array.prototype.slice.call(node.childNodes).forEach(walk);
+        }
+        walk(root);
+    }
+
+    function installEmptyUiParenthesesGuard() {
+        cleanEmptyUiParentheses(document.body);
+        var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                Array.prototype.slice.call(mutation.addedNodes).forEach(cleanEmptyUiParentheses);
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', installEmptyUiParenthesesGuard);
+    } else {
+        installEmptyUiParenthesesGuard();
+    }
+
     /* ===================== AppToast ===================== */
     var TOAST_STYLES = {
         success: { icon: 'fa-circle-check', wrap: 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/80 dark:border-green-700 dark:text-green-200', iconCls: 'text-green-500' },
