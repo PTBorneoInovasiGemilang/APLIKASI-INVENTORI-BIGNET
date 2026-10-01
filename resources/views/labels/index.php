@@ -59,7 +59,6 @@ ob_start();
 
 <style>
 .labels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-.qr-box svg { max-width: 84px; height: auto; }
 @media print {
  body * { visibility: hidden; }
  .labels-grid, .labels-grid * { visibility: visible; }
