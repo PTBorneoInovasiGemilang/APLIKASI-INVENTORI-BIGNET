@@ -677,39 +677,42 @@ function renderHeader($label, $sidebarGroupText) {
       document.addEventListener('click', function(e) { if (!dropdownMenu.contains(e.target) && !dropdownBtn.contains(e.target)) dropdownMenu.classList.add('hidden'); });
     }
 
-    function sanitizeEmptyParentheses(root) {
-      const skip = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT']);
-      const walker = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT);
-      const nodes = [];
-      let node;
-      while ((node = walker.nextNode())) {
-        const parent = node.parentElement;
-        if (!parent || skip.has(parent.tagName)) continue;
-        if (/\(\s*\)/.test(node.nodeValue || '')) nodes.push(node);
-      }
-      nodes.forEach(node => {
-        node.nodeValue = (node.nodeValue || '').replace(/\s*\(\s*\)/g, '');
-      });
+    function sanitizeUiEmptyParentheses(root) {
+      if (!root) return;
+      const skipTags = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT']);
+      const cleanNode = function(node) {
+        if (node.nodeType === 3) {
+          const parent = node.parentElement;
+          if (parent && !skipTags.has(parent.tagName)) {
+            node.nodeValue = (node.nodeValue || '').replace(/\\s*\\(\\s*\\)/g, '');
+          }
+          return;
+        }
+        if (node.nodeType !== 1) return;
+        if (skipTags.has(node.tagName)) return;
+        Array.from(node.childNodes).forEach(cleanNode);
+      };
+      cleanNode(root);
     }
 
-    initSidebarScroll();
-    initPageHeadingIcons();
-    sanitizeEmptyParentheses(document.body);
+    sanitizeUiEmptyParentheses(document.body);
 
-    const emptyParenthesesObserver = new MutationObserver(function(mutations) {
+    const emptyUiParenthesesObserver = new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
         mutation.addedNodes.forEach(function(node) {
-          if (node.nodeType === Node.TEXT_NODE) {
-            if (/\(\s*\)/.test(node.nodeValue || '')) {
-              node.nodeValue = (node.nodeValue || '').replace(/\s*\(\s*\)/g, '');
-            }
-          } else if (node.nodeType === Node.ELEMENT_NODE) {
-            sanitizeEmptyParentheses(node);
-          }
+          sanitizeUiEmptyParentheses(node);
         });
       });
     });
-    emptyParenthesesObserver.observe(document.body, { childList: true, subtree: true });
+    emptyUiParenthesesObserver.observe(document.body, { childList: true, subtree: true });
+
+    // Jalankan ulang setelah seluruh asset/script halaman selesai agar UI dinamis ikut bersih.
+    window.addEventListener('load', function() {
+      sanitizeUiEmptyParentheses(document.body);
+    });
+    setTimeout(function() {
+      sanitizeUiEmptyParentheses(document.body);
+    }, 0);
 
     document.querySelectorAll('a[href*="/dashboard"]').forEach(function(link) {
       link.addEventListener('click', function() {
