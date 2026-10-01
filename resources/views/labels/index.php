@@ -5,14 +5,14 @@ ob_start();
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="mb-6 fade-in flex flex-wrap items-center justify-between gap-3 no-print">
     <div>
-      <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Cetak Label Barcode / QR</h1>
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Cetak Label Barcode</h1>
       <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-        <?= count($serials) ?> label — kode barang & nomor seri (Code 128 + QR).
+        <?= count($serials) ?> label — kode barang & nomor seri (Code 128).
       </p>
     </div>
     <div class="flex gap-2">
       <a href="<?= url('/scan') ?>" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
-        <i class="fas fa-qrcode"></i> Scan
+        <i class="fas fa-barcode"></i> Scan
       </a>
       <button onclick="window.print()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
         <i class="fas fa-print"></i> Cetak
@@ -56,22 +56,6 @@ ob_start();
     </div>
   <?php endif; ?>
 </div>
-
-<script src="<?= url('/assets/js/qrcode.min.js') ?>"></script>
-<script>
-(function () {
- document.querySelectorAll('.qr-box').forEach(function (box) {
-  try {
-   var qr = qrcode(0, 'M');
-   qr.addData(box.getAttribute('data-qr'));
-   qr.make();
-   box.innerHTML = qr.createSvgTag({ cellSize: 3, margin: 1 });
-  } catch (e) {
-   box.innerHTML = '<span class="text-[10px] text-gray-400">QR error</span>';
-  }
- });
-})();
-</script>
 
 <style>
 .labels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
