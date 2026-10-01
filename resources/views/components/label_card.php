@@ -33,7 +33,7 @@ $faviconUrl = setting('favicon_path') ? url('/file?path=' . urlencode(setting('f
 
   <!-- Barcode -->
   <div class="flex justify-center w-full mb-2 overflow-hidden px-2">
-    <?php echo \App\Helpers\BarcodeHelper::code128($bcText, 28, 1.5); ?>
+    <?php echo \App\Helpers\BarcodeHelper::code128($bcText, 24, 2); ?>
   </div>
 
   <!-- QR -->
