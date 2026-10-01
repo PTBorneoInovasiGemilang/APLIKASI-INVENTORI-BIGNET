@@ -607,6 +607,20 @@ class ReportController {
         $metadata['Periode/Filter'] = empty($filters) ? 'Semua Data' : implode(', ', $filters);
         $metadata['Total Data'] = count($data) . ' baris';
 
+        // Position-stock reports carry their owner-facing totals into the PDF header.
+        if (!empty($config['summary_columns']) && !empty($config['summary_cards'])) {
+            foreach ($config['summary_cards'] as $card) {
+                $key = $card['key'] ?? '';
+                $column = $config['summary_columns'][$key] ?? '';
+                if ($key === '' || $column === '') continue;
+                $total = 0.0;
+                foreach ($data as $row) {
+                    $total += (float)($row[$column] ?? 0);
+                }
+                $metadata[$card['label']] = number_format($total, 0, ',', '.');
+            }
+        }
+
         $pdf = \App\Helpers\PdfHelper::tableReport($title, $headers, $data, $metadata, $columns);
 
         $filename = strtolower(str_replace(' ', '_', $title)) . '_' . date('Ymd_His') . '.pdf';
