@@ -9,6 +9,16 @@ ob_start();
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
   
+  <a href="<?php echo url('/reports/stock-position'); ?>" class="block bg-white dark:bg-gray-800 shadow rounded-lg p-6 hover:shadow-lg hover:scale-[1.01] transition-all border-t-4 border-emerald-500">
+    <div class="flex items-center mb-4">
+      <div class="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 mr-4">
+        <i class="fas fa-boxes-stacked text-xl"></i>
+      </div>
+      <h3 class="text-lg font-bold text-gray-850 dark:text-white">Laporan Posisi Stok</h3>
+    </div>
+    <p class="text-gray-600 dark:text-gray-400 text-sm">Melihat stok fisik saat ini per gudang, jumlah tersedia, dipinjam, dan dalam pengiriman.</p>
+  </a>
+
   <a href="<?php echo url('/reports/ledger'); ?>" class="block bg-white dark:bg-gray-800 shadow rounded-lg p-6 hover:shadow-lg hover:scale-[1.01] transition-all border-t-4 border-blue-500">
     <div class="flex items-center mb-4">
       <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mr-4">
