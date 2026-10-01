@@ -153,12 +153,28 @@ if (!function_exists('iconClass')) {
 
 $roleLabel = \App\Helpers\UIHelper::roleLabel($userRole);
 
-function renderMenu($label, $icon, $path, $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) {
+$adminPendingSubmissionCount = 0;
+$adminPendingLoanCount = 0;
+if ($userRole === 'ADMIN') {
+  try {
+    $sidebarPdo = \App\Core\Database::getInstance()->getConnection();
+    $adminPendingSubmissionCount = (int)$sidebarPdo->query("SELECT COUNT(*) FROM submissions WHERE status = 'PENDING'")->fetchColumn();
+    $adminPendingLoanCount = (int)$sidebarPdo->query("SELECT COUNT(*) FROM loans WHERE status = 'PENDING_APPROVAL'")->fetchColumn();
+  } catch (\Throwable $sidebarCountError) {
+    error_log('[BIGNET] Sidebar pending count gagal: ' . $sidebarCountError->getMessage());
+  }
+}
+
+function renderMenu($label, $icon, $path, $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon, $badgeCount = 0) {
   $isActive = isActive($path, $currentPath);
   $cls = menuClass($path, $currentPath, $sidebarActive, $sidebarHover);
   $iCls = iconClass($path, $currentPath, $primaryText, $sidebarIcon);
   $url = url($path);
-  return"<a href=\"{$url}\" class=\"sidebar-link flex items-center px-3 py-2.5 min-h-[44px] rounded-lg text-sm {$cls}\">\n        <i class=\"{$icon} w-5 text-center text-sm {$iCls}\"></i>\n        <span class=\"ml-3\">{$label}</span>\n      </a>";
+  $badge = '';
+  if ((int)$badgeCount > 0) {
+    $badge = '<span class="ml-auto inline-flex min-w-[20px] h-5 px-1.5 items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none shadow-sm">'.(int)$badgeCount.'</span>';
+  }
+  return"<a href=\"{$url}\" class=\"sidebar-link flex items-center px-3 py-2.5 min-h-[44px] rounded-lg text-sm {$cls}\">\n        <i class=\"{$icon} w-5 text-center text-sm {$iCls}\"></i>\n        <span class=\"ml-3\">{$label}</span>{$badge}\n      </a>";
 }
 
 function renderHeader($label, $sidebarGroupText) {
@@ -404,11 +420,11 @@ function renderHeader($label, $sidebarGroupText) {
         <?= renderMenu('Nomor Seri', 'fas fa-barcode', '/serials', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Cetak Label Massal', 'fas fa-print', '/labels/create', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderHeader('Transaksi Monitoring', $sidebarGroupText) ?>
-        <?= renderMenu('Pengajuan Barang', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
+        <?= renderMenu('Pengajuan Barang', 'fas fa-clipboard-list', '/submissions', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon, $adminPendingSubmissionCount) ?>
         <?= renderMenu('Barang Masuk', 'fas fa-arrow-down', '/incoming', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Barang Keluar', 'fas fa-arrow-up', '/outgoing', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Transfer Gudang', 'fas fa-exchange-alt', '/transfers', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
-        <?= renderMenu('Peminjaman', 'fas fa-hand-holding', '/loans', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
+        <?= renderMenu('Peminjaman', 'fas fa-hand-holding', '/loans', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon, $adminPendingLoanCount) ?>
         <?= renderMenu('Pengembalian', 'fas fa-undo', '/returns', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Instalasi', 'fas fa-tools', '/installations', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
         <?= renderMenu('Penyesuaian Stok', 'fas fa-sliders-h', '/adjustments', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
