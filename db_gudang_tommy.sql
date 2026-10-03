@@ -878,6 +878,9 @@ CREATE TABLE `users` (
   `rejection_reason` text DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `last_login_at` timestamp NULL DEFAULT NULL,
+  `active_session_token_hash` varchar(64) DEFAULT NULL,
+  `active_session_started_at` datetime DEFAULT NULL,
+  `active_session_last_seen_at` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -886,7 +889,7 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `role`, `account_status`, `phone`, `photo_path`, `rejection_reason`, `is_active`, `last_login_at`, `created_at`, `updated_at`) VALUES
+INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `role`, `account_status`, `phone`, `photo_path`, `rejection_reason`, `is_active`, `last_login_at`, `active_session_token_hash`, `active_session_started_at`, `active_session_last_seen_at`, `created_at`, `updated_at`) VALUES
 (1, 'Super Admin', 'superadmin@ptbig.com', '$2y$10$SpNVJGcdsfjB1TaTbn7r.uV3Kl3FNc/9XquLsLbcGMY77q2C/vz/W', 'SUPERADMIN', 'APPROVED', 'superadmin@ptbig.com', 'profiles/profile_1_6aa7592283f32.jpg', NULL, 1, '2026-09-18 05:19:49', '2026-08-15 05:13:46', '2026-09-18 05:19:49'),
 (3382, 'AISYAH', 'mariatsa035@gmail.com', '$2y$10$.FS8Zrrftb8r4wxErBaUEuKuEvumDxAgn0ZpUUx52puLY7aKw1qru', 'ADMIN', 'APPROVED', '', 'profiles/profile_3382_1787284966.jpg', NULL, 1, '2026-09-18 05:08:47', '2026-08-17 12:13:26', '2026-09-18 05:08:47'),
 (3646, 'TOMMY RYAN DWIPUTRA', 'kontol@gmail.com', '$2y$10$RIYig5nUW4PnbFaRKpO1rOWvjtIBG7t7eCuChf8T6sP8tHfmYcpjG', 'TEKNISI_NOC', 'APPROVED', '', NULL, NULL, 1, '2026-08-19 19:14:15', '2026-08-17 13:16:04', '2026-08-19 19:14:15'),
