@@ -362,6 +362,12 @@ function renderHeader($label, $sidebarGroupText) {
     @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
     @media (max-width: 640px) {
+      .mobile-card-table {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+      }
       .mobile-card-table thead { display: none; }
       .mobile-card-table,
       .mobile-card-table tbody,
