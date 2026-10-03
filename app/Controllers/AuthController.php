@@ -168,6 +168,20 @@ class AuthController {
                 $activeToken = bin2hex(random_bytes(32));
                 $activeTokenHash = hash('sha256', $activeToken);
 
+                // Pastikan schema single-device tersedia pada instalasi lama yang belum menjalankan migration 016.
+                $userColumns = $pdo->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN, 0);
+                if (!in_array('active_session_token_hash', $userColumns, true)) {
+                    $pdo->exec("ALTER TABLE users ADD COLUMN active_session_token_hash VARCHAR(64) NULL AFTER last_login_at");
+                }
+                if (!in_array('active_session_started_at', $userColumns, true)) {
+                    $pdo->exec("ALTER TABLE users ADD COLUMN active_session_started_at DATETIME NULL AFTER active_session_token_hash");
+                }
+                if (!in_array('active_session_last_seen_at', $userColumns, true)) {
+                    $pdo->exec("ALTER TABLE users ADD COLUMN active_session_last_seen_at DATETIME NULL AFTER active_session_started_at");
+                }
+
+                $activeCutoff = date('Y-m-d H:i:s', time() - ($sessionTimeoutMinutes * 60));
+
                 $claimStmt = $pdo->prepare("UPDATE users
                     SET active_session_token_hash = ?,
                         active_session_started_at = NOW(),
@@ -177,9 +191,9 @@ class AuthController {
                       AND (
                         active_session_token_hash IS NULL
                         OR active_session_last_seen_at IS NULL
-                        OR active_session_last_seen_at < DATE_SUB(NOW(), INTERVAL ? MINUTE)
+                        OR active_session_last_seen_at < ?
                       )");
-                $claimStmt->execute([$activeTokenHash, (int)$user['id'], $sessionTimeoutMinutes]);
+                $claimStmt->execute([$activeTokenHash, (int)$user['id'], $activeCutoff]);
 
                 if ($claimStmt->rowCount() !== 1) {
                     $_SESSION['error'] = "Akun ini sedang digunakan di perangkat lain. Silakan logout dari perangkat sebelumnya terlebih dahulu.";
