@@ -268,17 +268,18 @@ if (empty($_SESSION['csrf_token'])) {
     card.className = 'item-card bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-4';
     card.id = 'row_' + id;
     card.innerHTML = `
-      <div class="flex items-start justify-between gap-3">
+      <div class="flex items-center justify-between gap-3">
         <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2">
-            <span class="item-title text-sm font-bold text-gray-900 dark:text-white">Barang ${id + 1}</span>
-            <span class="item-summary-name truncate text-xs text-gray-500 dark:text-gray-400"></span>
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="item-title whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">Barang ${id + 1}</span>
             <span class="item-summary-qty shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-semibold">Qty -</span>
           </div>
+          <p class="item-summary-name mt-1 text-sm font-medium text-gray-600 dark:text-gray-300 truncate">Barang belum dipilih</p>
         </div>
+
         <div class="flex items-center gap-1 shrink-0">
-          <button type="button" onclick="toggleItemCard(this.closest('.item-card'))" class="item-collapse-btn inline-flex items-center gap-1.5 min-h-[40px] px-2.5 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 transition-colors text-xs font-semibold" aria-expanded="true">
-            <span class="collapse-label">Sembunyikan</span>
+          <button type="button" onclick="toggleItemCard(this.closest('.item-card'))" class="item-collapse-btn inline-flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 transition-colors" aria-expanded="true" title="Sembunyikan detail">
+            <span class="sr-only collapse-label">Sembunyikan detail</span>
             <i class="fas fa-chevron-up collapse-icon text-xs"></i>
           </button>
           <button type="button" onclick="removeItemRow(this)" title="Hapus barang" aria-label="Hapus barang" class="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-trash"></i></button>
