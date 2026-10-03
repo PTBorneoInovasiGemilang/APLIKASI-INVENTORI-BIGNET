@@ -95,7 +95,7 @@ if (empty($_SESSION['csrf_token'])) {
     }
 
     return {
-      name: name || 'Barang belum dipilih',
+      name: name || 'Belum dipilih',
       qty: Number.isFinite(qty) && qty > 0 ? qty : 0
     };
   }
@@ -268,13 +268,12 @@ if (empty($_SESSION['csrf_token'])) {
     card.className = 'item-card bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-4';
     card.id = 'row_' + id;
     card.innerHTML = `
-      <div class="flex items-center justify-between gap-3">
+      <div class="flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2 min-w-0">
             <span class="item-title whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">Barang ${id + 1}</span>
             <span class="item-summary-qty shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-semibold">Qty -</span>
           </div>
-          <p class="item-summary-name mt-1 text-sm font-medium text-gray-600 dark:text-gray-300 truncate">Barang belum dipilih</p>
         </div>
 
         <div class="flex items-center gap-1 shrink-0">
@@ -285,6 +284,8 @@ if (empty($_SESSION['csrf_token'])) {
           <button type="button" onclick="removeItemRow(this)" title="Hapus barang" aria-label="Hapus barang" class="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-trash"></i></button>
         </div>
       </div>
+
+      <p class="item-summary-name mt-2 text-sm font-medium text-gray-600 dark:text-gray-300 break-words leading-5">Belum dipilih</p>
 
       <div class="item-body space-y-4">
         <div class="flex items-center gap-2 flex-wrap">
