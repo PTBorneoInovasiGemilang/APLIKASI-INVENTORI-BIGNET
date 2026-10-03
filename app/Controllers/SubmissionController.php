@@ -70,8 +70,21 @@ class SubmissionController {
         AuthHelper::requireRole(['TEKNISI_NOC']);
         // Any user can create a submission, but usually TEKNISI_NOC
         $pdo = Database::getInstance()->getConnection();
-        $items = $pdo->query("SELECT id, kode_barang, nama, is_serialized FROM master_items WHERE is_active = 1")->fetchAll();
+        $items = $pdo->query("SELECT id, kode_barang, nama, is_serialized FROM master_items WHERE is_active = 1 ORDER BY nama")->fetchAll();
         $warehouses = $pdo->query("SELECT id, name FROM warehouses WHERE is_active = 1 ORDER BY name")->fetchAll();
+
+        // Availability per gudang: hanya item dengan stok fisik > 0 yang boleh dipilih Teknisi.
+        // Identity stok = master_item_id + warehouse_id.
+        $stockRows = $pdo->query("SELECT master_item_id, warehouse_id, quantity FROM stocks WHERE quantity > 0")->fetchAll(PDO::FETCH_ASSOC);
+        $stockAvailability = [];
+        foreach ($stockRows as $row) {
+            $whId = (int)$row['warehouse_id'];
+            $itemId = (int)$row['master_item_id'];
+            if (!isset($stockAvailability[$whId])) {
+                $stockAvailability[$whId] = [];
+            }
+            $stockAvailability[$whId][$itemId] = (int)$row['quantity'];
+        }
 
         require __DIR__ . '/../../resources/views/transactions/submissions/create.php';
     }
@@ -129,6 +142,10 @@ class SubmissionController {
         // Validasi gudang pemenuhan: hanya gudang aktif yang boleh dipilih.
         $activeWarehouseIds = array_map('intval', $pdo->query("SELECT id FROM warehouses WHERE is_active = 1")->fetchAll(PDO::FETCH_COLUMN));
 
+        // Guard server-side: item STOCK wajib benar-benar tersedia (> 0) pada gudang pemenuhan.
+        // Jangan bergantung pada filter JavaScript karena request dapat dimanipulasi.
+        $stockAvailabilityStmt = $pdo->prepare("SELECT quantity FROM stocks WHERE master_item_id = ? AND warehouse_id = ?");
+
         $submission_type = 'MIXED';
         if ($hasStock && !$hasManual) $submission_type = 'STOCK';
         if (!$hasStock && $hasManual) $submission_type = 'MANUAL';
@@ -161,6 +178,13 @@ class SubmissionController {
                         if (!in_array($wh_id, $activeWarehouseIds, true)) {
                             throw new \Exception("Gudang pemenuhan tidak valid atau nonaktif (ID: $wh_id).");
                         }
+
+                        $stockAvailabilityStmt->execute([(int)$item_id, $wh_id]);
+                        $availableStock = (int)$stockAvailabilityStmt->fetchColumn();
+                        if ($availableStock <= 0) {
+                            throw new \Exception("Barang yang dipilih tidak tersedia di gudang pemenuhan tersebut. Silakan pilih barang lain atau gudang lain yang memiliki stok.");
+                        }
+
                         $itemStmt->execute([$submission_id, 'STOCK', $wh_id, $item_id, null, null, null, $qty, 0, $line_note]);
                         $nm = $pdo->query("SELECT nama FROM master_items WHERE id = " . (int)$item_id)->fetchColumn();
                         $nm = preg_replace('/\\s*\\(\\s*\\)/u', '', (string)$nm);
