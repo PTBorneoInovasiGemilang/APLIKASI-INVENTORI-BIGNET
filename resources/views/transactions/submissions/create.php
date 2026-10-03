@@ -279,7 +279,7 @@ if (empty($_SESSION['csrf_token'])) {
 
         <div class="flex items-center gap-1 shrink-0">
           <button type="button" onclick="toggleItemCard(this.closest('.item-card'))" class="item-collapse-btn inline-flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 transition-colors" aria-expanded="true" title="Sembunyikan detail">
-            <span class="sr-only collapse-label">Sembunyikan detail</span>
+            <span class="collapse-label hidden sm:inline text-xs font-semibold">Sembunyikan</span>
             <i class="fas fa-chevron-up collapse-icon text-xs"></i>
           </button>
           <button type="button" onclick="removeItemRow(this)" title="Hapus barang" aria-label="Hapus barang" class="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-trash"></i></button>
