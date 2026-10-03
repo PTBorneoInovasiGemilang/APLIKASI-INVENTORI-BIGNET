@@ -725,6 +725,17 @@ function renderHeader($label, $sidebarGroupText) {
 
     document.querySelectorAll('#sidebar .sidebar-link').forEach(function(link) {
       link.addEventListener('click', function() {
+        // Simpan posisi terakhir tepat sebelum navigasi agar halaman tujuan
+        // dapat mengembalikan sidebar ke titik scroll sebelumnya.
+        if (!isDashboardPage) {
+          try {
+            const sidebarScrollArea = document.getElementById('sidebarScrollArea');
+            if (sidebarScrollArea) {
+              localStorage.setItem('sidebar_scroll_top', String(sidebarScrollArea.scrollTop));
+            }
+          } catch (e) {}
+        }
+
         if (window.innerWidth < 1024) {
           const sidebar = document.getElementById('sidebar');
           const overlay = document.getElementById('sidebarOverlay');
@@ -737,6 +748,15 @@ function renderHeader($label, $sidebarGroupText) {
         }
       });
     });
+
+    // Pulihkan posisi sidebar setelah struktur DOM + layout selesai dihitung.
+    initSidebarScroll();
+    requestAnimationFrame(function() {
+      initSidebarScroll();
+    });
+    setTimeout(function() {
+      initSidebarScroll();
+    }, 0);
   });
 
   window.addEventListener("load", function() {
@@ -748,6 +768,11 @@ function renderHeader($label, $sidebarGroupText) {
   window.addEventListener("pageshow", function(event) {
     if (isDashboardPage) {
       resetSidebarScroll();
+    } else {
+      initSidebarScroll();
+      requestAnimationFrame(function() {
+        initSidebarScroll();
+      });
     }
   });
 
