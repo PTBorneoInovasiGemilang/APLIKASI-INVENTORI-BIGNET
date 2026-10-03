@@ -1,6 +1,7 @@
 <?php
-$title = 'Buat Pengajuan Barang';
-$pageTitle = 'Buat Pengajuan Barang';
+$editMode = !empty($editMode);
+$title = $editMode ? 'Edit Pengajuan Barang' : 'Buat Pengajuan Barang';
+$pageTitle = $editMode ? 'Edit Pengajuan Barang' : 'Buat Pengajuan Barang';
 
 ob_start();
 
@@ -26,15 +27,16 @@ if (empty($_SESSION['csrf_token'])) {
 </div>
 
 <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
-  <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-5">Ajukan Kebutuhan Barang</h2>
+  <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-5"><?php echo $editMode ? "Edit Pengajuan Barang" : "Ajukan Kebutuhan Barang"; ?></h2>
 
-  <form action="<?php echo url('/submissions/store'); ?>" method="POST" id="submissionForm">
+  <form action="<?php echo url($editMode ? '/submissions/update' : '/submissions/store'); ?>" method="POST" id="submissionForm">
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+    <?php if ($editMode): ?><input type="hidden" name="submission_id" value="<?php echo (int)$submission['id']; ?>"><?php endif; ?>
 
     <!-- Keperluan Pengajuan -->
     <div class="mb-6">
       <label for="header_note" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Keperluan Pengajuan <span class="text-gray-400 dark:text-gray-500 font-normal">(Opsional)</span></label>
-      <textarea id="header_note" name="header_note" rows="2" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-3 text-gray-700 dark:text-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Contoh: Permintaan material untuk project X..."></textarea>
+      <textarea id="header_note" name="header_note" rows="2" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-3 text-gray-700 dark:text-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Contoh: Permintaan material untuk project X..."><?php echo htmlspecialchars($submission['notes'] ?? ''); ?></textarea>
     </div>
 
     <!-- Daftar Barang yang Diminta -->
@@ -63,7 +65,7 @@ if (empty($_SESSION['csrf_token'])) {
         Batal
       </a>
       <button type="submit" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition-colors w-full sm:w-auto min-h-[44px]">
-        <i class="fas fa-paper-plane"></i> Kirim Pengajuan
+        <i class="fas fa-paper-plane"></i> <?php echo $editMode ? "Simpan Perubahan" : "Kirim Pengajuan"; ?>
       </button>
     </div>
   </form>
@@ -73,6 +75,7 @@ if (empty($_SESSION['csrf_token'])) {
   const masterItems = <?php echo json_encode($items); ?>;
   const warehouses = <?php echo json_encode($warehouses); ?>;
   const stockAvailability = <?php echo json_encode($stockAvailability, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+  const existingItems = <?php echo json_encode($existingItems ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
   let warehouseOptions = '<option value="">Pilih Gudang...</option>';
   warehouses.forEach(wh => {
     warehouseOptions += '<option value="' + wh.id + '">' + wh.name + '</option>';
@@ -399,8 +402,54 @@ if (empty($_SESSION['csrf_token'])) {
     });
   }
 
-  // Baris pertama otomatis tersedia
-  addItemRow();
+  function fillRowFromExisting(card, item) {
+    const source = item.source_type || 'STOCK';
+    const sourceBtn = card.querySelector('[data-src="' + source + '"]');
+    if (sourceBtn) setRowSource(sourceBtn, Number(card.id.replace('row_', '')));
+
+    const sourceSelect = card.querySelector('select[name="source_types[]"]');
+    const warehouseInput = card.querySelector('select[name="warehouse_ids[]"]');
+    const itemInput = card.querySelector('select[name="item_ids[]"]');
+    const qtyInput = card.querySelector('input[name="quantities[]"]');
+    const noteInput = card.querySelector('textarea[name="notes[]"]');
+    const manualInput = card.querySelector('input[name="manual_names[]"]');
+    const manualSpec = card.querySelector('input[name="manual_specs[]"]');
+    const manualUnit = card.querySelector('input[name="manual_units[]"]');
+
+    sourceSelect.value = source;
+
+    if (source === 'MANUAL') {
+      setRowSource(card.querySelector('[data-src="MANUAL"]'), Number(card.id.replace('row_', '')));
+      if (manualInput) manualInput.value = item.manual_name || '';
+      if (manualSpec) manualSpec.value = item.manual_spec || '';
+      if (manualUnit) manualUnit.value = item.manual_unit || '';
+    } else {
+      const wh = String(item.warehouse_id || '');
+      if (warehouseInput) {
+        warehouseInput.value = wh;
+        refreshStockOptions(card, wh, String(item.master_item_id || ''));
+      }
+      if (itemInput) itemInput.value = String(item.master_item_id || '');
+    }
+
+    if (qtyInput) qtyInput.value = item.requested_quantity || 1;
+    if (noteInput) noteInput.value = item.notes || '';
+    updateItemCardMeta(card);
+  }
+
+  if (existingItems.length > 0) {
+    const first = document.querySelector('#itemsList .item-card');
+    if (first) {
+      fillRowFromExisting(first, existingItems[0]);
+      for (let i = 1; i < existingItems.length; i++) {
+        addItemRow();
+        const cards = document.querySelectorAll('#itemsList .item-card');
+        fillRowFromExisting(cards[cards.length - 1], existingItems[i]);
+      }
+    }
+  } else {
+    addItemRow();
+  }
 </script>
 
 <?php
