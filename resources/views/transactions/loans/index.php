@@ -72,9 +72,9 @@ $labels = [
         ?>
           <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
             <td data-label="No" class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
-            <td data-label="Tanggal" data-label="Gudang" class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300"><?= date('d M Y', strtotime($ln['loan_date'])) ?></td>
+            <td data-label="Tanggal" class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300"><?= date('d M Y', strtotime($ln['loan_date'])) ?></td>
             <td data-label="Peminjam" class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($ln['borrower_name']) ?></td>
-            <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300"><?= htmlspecialchars($ln['warehouse_name']) ?></td>
+            <td data-label="Gudang" class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300"><?= htmlspecialchars($ln['warehouse_name']) ?></td>
             <td data-label="Jatuh Tempo" class="px-4 py-4 text-sm <?= $isOverdue ? 'text-red-600 font-bold' : 'text-gray-600 dark:text-gray-300' ?>">
               <?php if (!empty($ln['due_date'])): ?>
                 <?= date('d M Y', strtotime($ln['due_date'])) ?>
@@ -82,12 +82,12 @@ $labels = [
               <?php else: ?>-
               <?php endif; ?>
             </td>
-            <td data-label="Status" data-label="Aksi" class="px-4 py-4">
+            <td data-label="Status" class="px-4 py-4">
               <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-<?= $statusMeta[1] ?>-100 text-<?= $statusMeta[1] ?>-800">
                 <?= htmlspecialchars($statusMeta[0]) ?>
               </span>
             </td>
-            <td class="px-4 py-4">
+            <td data-label="Aksi" class="px-4 py-4">
               <div class="flex flex-wrap gap-2 justify-center">
                 <a href="<?= url('/loans/show?id=' . (int)$ln['id']) ?>" class="inline-flex items-center px-3 py-2 rounded-lg border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 text-sm font-semibold">
                   <i class="fas fa-eye mr-1"></i>Lihat
