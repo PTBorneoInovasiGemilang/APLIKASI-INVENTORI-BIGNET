@@ -68,31 +68,18 @@ use App\Helpers\AuthHelper;
       </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-      <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-2">
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 border-b dark:border-gray-700 pb-3">
         <div>
           <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Daftar Barang yang Dipinjam</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Bisa mengambil dari stok atau mencatat barang manual/custom.</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Setiap barang dapat dibuka atau disembunyikan. Pilih dari stok atau catat barang manual/custom.</p>
         </div>
-        <button type="button" onclick="addItemRow()" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm font-medium">
+        <button type="button" onclick="addItemRow()" class="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 px-4 rounded-lg shadow transition-colors w-full sm:w-auto min-h-[44px]">
           <i class="fas fa-plus"></i> Tambah Barang
         </button>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="itemsTable">
-          <thead>
-            <tr>
-              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Sumber Barang</th>
-              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Barang</th>
-              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-28">Kuantitas</th>
-              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Serial Number (Jika Berlaku)</th>
-              <th class="px-4 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-16">Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="itemsBody" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
-        </table>
-      </div>
+      <div id="itemsBody" class="space-y-3"></div>
     </div>
 
     <div class="flex justify-end gap-4">
@@ -110,80 +97,197 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 
+function getRowSummary(index) {
+  const row = document.querySelector(`.loan-item-card[data-index="${index}"]`);
+  if (!row) return { name: 'Barang belum dipilih', qty: 0 };
+
+  const source = row.querySelector('.source-type')?.value || 'STOCK';
+  const qty = parseInt(row.querySelector('.qty-input')?.value || '0', 10);
+  let name = '';
+
+  if (source === 'STOCK') {
+    const select = row.querySelector('.item-select');
+    if (select && select.value) {
+      name = select.options[select.selectedIndex]?.textContent?.trim() || '';
+    }
+  } else {
+    name = row.querySelector('.manual-input')?.value?.trim() || '';
+  }
+
+  return {
+    name: name || 'Barang belum dipilih',
+    qty: Number.isFinite(qty) && qty > 0 ? qty : 0
+  };
+}
+
+function updateRowMeta(index) {
+  const row = document.querySelector(`.loan-item-card[data-index="${index}"]`);
+  if (!row) return;
+
+  const rows = Array.from(document.querySelectorAll('#itemsBody .loan-item-card'));
+  const position = rows.indexOf(row) + 1;
+  const title = row.querySelector('.item-title');
+  const name = row.querySelector('.item-summary-name');
+  const qty = row.querySelector('.item-summary-qty');
+  const body = row.querySelector('.item-body');
+  const toggle = row.querySelector('.item-collapse-btn');
+
+  if (title) title.textContent = 'Barang ' + position;
+
+  const summary = getRowSummary(index);
+  if (name) name.textContent = summary.name;
+  if (qty) qty.textContent = summary.qty > 0 ? 'Qty ' + summary.qty : 'Qty -';
+
+  if (toggle && body) {
+    const collapsed = body.classList.contains('hidden');
+    toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    toggle.setAttribute('title', collapsed ? 'Buka detail barang' : 'Sembunyikan detail barang');
+    const icon = toggle.querySelector('.collapse-icon');
+    if (icon) icon.className = 'fas ' + (collapsed ? 'fa-chevron-down' : 'fa-chevron-up') + ' collapse-icon text-xs';
+  }
+}
+
+function renumberRows() {
+  document.querySelectorAll('#itemsBody .loan-item-card').forEach((row, idx) => updateRowMeta(Number(row.dataset.index)));
+}
+
+function toggleItemCard(index) {
+  const row = document.querySelector(`.loan-item-card[data-index="${index}"]`);
+  if (!row) return;
+  const body = row.querySelector('.item-body');
+  if (!body) return;
+
+  const collapse = !body.classList.contains('hidden');
+  body.classList.toggle('hidden', collapse);
+  row.classList.toggle('item-collapsed', collapse);
+  updateRowMeta(index);
+}
+
+function removeItemRow(index) {
+  const row = document.querySelector(`.loan-item-card[data-index="${index}"]`);
+  if (row) row.remove();
+  renumberRows();
+}
+
 function addItemRow() {
-  const tbody = document.getElementById('itemsBody');
+  const container = document.getElementById('itemsBody');
   const index = rowCount++;
-  const tr = document.createElement('tr');
-  tr.dataset.index = index;
 
-  const options = itemsData.map(item => `<option value="${item.id}" data-serialized="${item.is_serialized}">${escapeHtml(item.nama)}</option>`).join('');
+  const options = itemsData.map(item =>
+    `<option value="${item.id}" data-serialized="${item.is_serialized}">${escapeHtml(item.nama)}</option>`
+  ).join('');
 
-  tr.innerHTML = `
-    <td class="px-4 py-3 align-top">
-      <select name="source_types[]" class="source-type block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" onchange="handleSourceChange(${index})">
-        <option value="STOCK">Dari Stok</option>
-        <option value="MANUAL">Manual / Custom</option>
-      </select>
-    </td>
-    <td class="px-4 py-3 align-top">
+  const card = document.createElement('div');
+  card.className = 'loan-item-card bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-4';
+  card.dataset.index = index;
+
+  card.innerHTML = `
+    <div class="flex items-center justify-between gap-3">
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="item-title whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">Barang ${index + 1}</span>
+          <span class="item-summary-qty shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-semibold">Qty -</span>
+        </div>
+        <p class="item-summary-name mt-1 text-sm font-medium text-gray-600 dark:text-gray-300 truncate">Barang belum dipilih</p>
+      </div>
+
+      <div class="flex items-center gap-1 shrink-0">
+        <button type="button" onclick="toggleItemCard(${index})" class="item-collapse-btn inline-flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 transition-colors" aria-expanded="true" title="Sembunyikan detail barang">
+          <i class="fas fa-chevron-up collapse-icon text-xs"></i>
+        </button>
+        <button type="button" onclick="removeItemRow(${index})" title="Hapus barang" aria-label="Hapus barang" class="inline-flex items-center justify-center w-10 h-10 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="item-body space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Sumber Barang</label>
+        <select name="source_types[]" class="source-type block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
+          <option value="STOCK">Dari Stok</option>
+          <option value="MANUAL">Manual / Custom</option>
+        </select>
+      </div>
+
       <div id="stock-fields-${index}">
-        <select name="item_ids[]" required class="item-select block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" onchange="handleItemChange(${index})">
+        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Barang</label>
+        <select name="item_ids[]" required class="item-select block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
           <option value="">Pilih Barang</option>
           ${options}
         </select>
       </div>
-      <div id="manual-fields-${index}" class="hidden">
-        <input type="text" name="manual_names[]" placeholder="Nama barang custom" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
-      </div>
-    </td>
-    <td class="px-4 py-3 align-top">
-      <input type="number" name="quantities[]" min="1" value="1" required class="qty-input block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm text-center">
-    </td>
-    <td class="px-4 py-3 align-top">
-      <div id="sn-container-${index}" class="hidden">
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Pilih SN yang tersedia di gudang asal.</p>
-        <select name="sn_list[${index}][]" id="sn-input-${index}" multiple size="4" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"></select>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih sesuai jumlah yang dipinjam.</p>
-      </div>
-      <div id="sn-disabled-${index}" class="text-sm text-gray-500 dark:text-gray-400 italic py-2">Barang non-serial.</div>
-    </td>
-    <td class="px-4 py-3 text-center align-top">
-      <button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700 mt-1"><i class="fas fa-trash"></i></button>
-    </td>`;
 
-  tbody.appendChild(tr);
+      <div id="manual-fields-${index}" class="hidden">
+        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Nama Barang Custom</label>
+        <input type="text" name="manual_names[]" placeholder="Nama barang custom" class="manual-input block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Kuantitas</label>
+        <input type="number" name="quantities[]" min="1" value="1" required class="qty-input block w-32 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm text-center">
+      </div>
+
+      <div id="sn-fields-${index}">
+        <div id="sn-container-${index}" class="hidden">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Serial Number (Jika Berlaku)</label>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Pilih SN yang tersedia di gudang asal.</p>
+          <select name="sn_list[${index}][]" id="sn-input-${index}" multiple size="4" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"></select>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih sesuai jumlah yang dipinjam.</p>
+        </div>
+        <div id="sn-disabled-${index}" class="text-sm text-gray-500 dark:text-gray-400 italic py-2">Pilih barang terlebih dahulu.</div>
+      </div>
+    </div>
+  `;
+
+  container.appendChild(card);
+
+  const sourceSelect = card.querySelector('.source-type');
+  const itemSelect = card.querySelector('.item-select');
+  const qtyInput = card.querySelector('.qty-input');
+  const manualInput = card.querySelector('.manual-input');
+
+  sourceSelect.addEventListener('change', () => handleSourceChange(index));
+  itemSelect.addEventListener('change', () => {
+    handleItemChange(index);
+    updateRowMeta(index);
+  });
+  qtyInput.addEventListener('input', () => updateRowMeta(index));
+  manualInput.addEventListener('input', () => updateRowMeta(index));
+
   handleSourceChange(index);
+  updateRowMeta(index);
 }
 
 function handleSourceChange(index) {
-  const tr = document.querySelector(`tr[data-index="${index}"]`);
-  if (!tr) return;
-  const source = tr.querySelector('.source-type').value;
+  const row = document.querySelector(`.loan-item-card[data-index="${index}"]`);
+  if (!row) return;
+  const source = row.querySelector('.source-type').value;
   const stockFields = document.getElementById(`stock-fields-${index}`);
   const manualFields = document.getElementById(`manual-fields-${index}`);
-  const itemSelect = tr.querySelector('.item-select');
-  const snContainer = document.getElementById(`sn-container-${index}`);
-  const snDisabled = document.getElementById(`sn-disabled-${index}`);
+  const itemSelect = row.querySelector('.item-select');
 
   if (source === 'MANUAL') {
     stockFields.classList.add('hidden');
     manualFields.classList.remove('hidden');
     itemSelect.removeAttribute('required');
-    snContainer.classList.add('hidden');
-    snDisabled.textContent = 'Barang manual tidak terkait stok / serial.';
+    document.getElementById(`sn-container-${index}`).classList.add('hidden');
+    document.getElementById(`sn-disabled-${index}`).textContent = 'Barang manual tidak terkait stok / serial.';
   } else {
     stockFields.classList.remove('hidden');
     manualFields.classList.add('hidden');
     itemSelect.setAttribute('required', 'required');
-    snDisabled.textContent = 'Barang non-serial.';
+    document.getElementById(`sn-disabled-${index}`).textContent = 'Pilih barang terlebih dahulu.';
     handleItemChange(index);
   }
+
+  updateRowMeta(index);
 }
 
 function handleItemChange(index) {
-  const tr = document.querySelector(`tr[data-index="${index}"]`);
-  if (!tr) return;
-  const select = tr.querySelector('.item-select');
+  const row = document.querySelector(`.loan-item-card[data-index="${index}"]`);
+  if (!row) return;
+  const select = row.querySelector('.item-select');
   const option = select.options[select.selectedIndex];
   const isSerialized = option && option.dataset.serialized === '1';
   const snContainer = document.getElementById(`sn-container-${index}`);
@@ -203,9 +307,9 @@ function handleItemChange(index) {
 }
 
 async function loadSerials(index) {
-  const tr = document.querySelector(`tr[data-index="${index}"]`);
+  const row = document.querySelector(`.loan-item-card[data-index="${index}"]`);
   const warehouse = document.querySelector('[name="warehouse_id"]').value;
-  const itemId = tr?.querySelector('.item-select')?.value;
+  const itemId = row?.querySelector('.item-select')?.value;
   const snSelect = document.getElementById(`sn-input-${index}`);
   if (!warehouse || !itemId || !snSelect) return;
 
@@ -220,11 +324,11 @@ async function loadSerials(index) {
 }
 
 document.querySelector('[name="warehouse_id"]').addEventListener('change', () => {
-  document.querySelectorAll('tr[data-index]').forEach(tr => handleItemChange(Number(tr.dataset.index)));
+  document.querySelectorAll('#itemsBody .loan-item-card').forEach(row => handleItemChange(Number(row.dataset.index)));
 });
 
 addItemRow();
-</script>
+</script>>
 
 <?php
 $content = ob_get_clean();
