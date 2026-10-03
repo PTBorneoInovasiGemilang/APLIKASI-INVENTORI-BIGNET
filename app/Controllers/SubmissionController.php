@@ -311,6 +311,204 @@ class SubmissionController {
         require __DIR__ . '/../../resources/views/transactions/submissions/show.php';
     }
 
+    public function edit() {
+        AuthHelper::requireRole(['TEKNISI_NOC']);
+        $id = (int)($_GET['id'] ?? 0);
+        $pdo = Database::getInstance()->getConnection();
+        $user = AuthHelper::user();
+
+        $stmt = $pdo->prepare("SELECT s.*, u.name as submitter_name
+                               FROM submissions s
+                               JOIN users u ON s.submitted_by = u.id
+                               WHERE s.id = ? AND s.submitted_by = ?");
+        $stmt->execute([$id, (int)$user['id']]);
+        $submission = $stmt->fetch();
+
+        if (!$submission) {
+            $_SESSION['error'] = "Pengajuan tidak ditemukan atau bukan milik Anda.";
+            header("Location: " . url('/submissions'));
+            exit;
+        }
+
+        if ($submission['status'] !== 'PENDING') {
+            $_SESSION['error'] = "Pengajuan hanya bisa diedit sebelum disetujui Admin.";
+            header("Location: " . url('/submissions/show?id=' . $id));
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT si.*, m.kode_barang, m.nama, m.is_serialized
+                               FROM submission_items si
+                               LEFT JOIN master_items m ON si.master_item_id = m.id
+                               WHERE si.submission_id = ?
+                               ORDER BY si.id");
+        $stmt->execute([$id]);
+        $existingItems = $stmt->fetchAll();
+
+        $items = $pdo->query("SELECT id, kode_barang, nama, is_serialized FROM master_items WHERE is_active = 1 ORDER BY nama")->fetchAll();
+        $warehouses = $pdo->query("SELECT id, name FROM warehouses WHERE is_active = 1 ORDER BY name")->fetchAll();
+
+        $stockRows = $pdo->query("SELECT master_item_id, warehouse_id, quantity FROM stocks WHERE quantity > 0")->fetchAll(PDO::FETCH_ASSOC);
+        $stockAvailability = [];
+        foreach ($stockRows as $row) {
+            $whId = (int)$row['warehouse_id'];
+            $itemId = (int)$row['master_item_id'];
+            if (!isset($stockAvailability[$whId])) $stockAvailability[$whId] = [];
+            $stockAvailability[$whId][$itemId] = (int)$row['quantity'];
+        }
+
+        $editMode = true;
+        require __DIR__ . '/../../resources/views/transactions/submissions/create.php';
+    }
+
+    public function update() {
+        AuthHelper::requireRole(['TEKNISI_NOC']);
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
+            $_SESSION['error'] = "CSRF token validation failed.";
+            header("Location: " . url('/submissions'));
+            exit;
+        }
+
+        $id = (int)($_POST['submission_id'] ?? 0);
+        $pdo = Database::getInstance()->getConnection();
+        $user = AuthHelper::user();
+
+        $subStmt = $pdo->prepare("SELECT * FROM submissions WHERE id = ? AND submitted_by = ? FOR UPDATE");
+        $subStmt->execute([$id, (int)$user['id']]);
+        $submission = $subStmt->fetch();
+
+        if (!$submission) {
+            $_SESSION['error'] = "Pengajuan tidak ditemukan atau bukan milik Anda.";
+            header("Location: " . url('/submissions'));
+            exit;
+        }
+        if ($submission['status'] !== 'PENDING') {
+            $_SESSION['error'] = "Pengajuan tidak bisa diedit karena sudah diproses Admin.";
+            header("Location: " . url('/submissions/show?id=' . $id));
+            exit;
+        }
+
+        $source_types = $_POST['source_types'] ?? [];
+        $item_ids = $_POST['item_ids'] ?? [];
+        $quantities = $_POST['quantities'] ?? [];
+        $warehouse_ids = $_POST['warehouse_ids'] ?? [];
+        $manual_names = $_POST['manual_names'] ?? [];
+        $manual_specs = $_POST['manual_specs'] ?? [];
+        $manual_units = $_POST['manual_units'] ?? [];
+        $notes_list = $_POST['notes'] ?? [];
+        $header_note = trim($_POST['header_note'] ?? '');
+
+        $activeWarehouseIds = array_map('intval', $pdo->query("SELECT id FROM warehouses WHERE is_active = 1")->fetchAll(PDO::FETCH_COLUMN));
+        $stockAvailabilityStmt = $pdo->prepare("SELECT quantity FROM stocks WHERE master_item_id = ? AND warehouse_id = ?");
+
+        $hasStock = false;
+        $hasManual = false;
+        $validLines = 0;
+        foreach ($source_types as $index => $type) {
+            $qty = (int)($quantities[$index] ?? 0);
+            if ($qty <= 0) continue;
+
+            if ($type === 'STOCK') {
+                $itemId = (int)($item_ids[$index] ?? 0);
+                $whId = (int)($warehouse_ids[$index] ?? 0);
+                if ($itemId <= 0 || $whId <= 0) {
+                    throw new \Exception("Barang dari stok dan Gudang Pemenuhan wajib dipilih.");
+                }
+                if (!in_array($whId, $activeWarehouseIds, true)) {
+                    throw new \Exception("Gudang pemenuhan tidak valid atau nonaktif.");
+                }
+                $stockAvailabilityStmt->execute([$itemId, $whId]);
+                $availableStock = (int)$stockAvailabilityStmt->fetchColumn();
+                if ($availableStock <= 0) {
+                    $itemNameStmt = $pdo->prepare("SELECT nama FROM master_items WHERE id = ?");
+                    $itemNameStmt->execute([$itemId]);
+                    $itemName = $itemNameStmt->fetchColumn() ?: 'Barang';
+                    throw new \Exception("{$itemName} tidak tersedia di gudang pemenuhan yang dipilih.");
+                }
+                $hasStock = true;
+                $validLines++;
+            } elseif ($type === 'MANUAL') {
+                $name = trim($manual_names[$index] ?? '');
+                if ($name === '') {
+                    throw new \Exception("Nama barang manual wajib diisi.");
+                }
+                $hasManual = true;
+                $validLines++;
+            }
+        }
+
+        if ($validLines === 0) {
+            $_SESSION['error'] = "Pengajuan harus memiliki minimal 1 barang yang valid.";
+            header("Location: " . url('/submissions/edit?id=' . $id));
+            exit;
+        }
+
+        $submissionType = 'MIXED';
+        if ($hasStock && !$hasManual) $submissionType = 'STOCK';
+        if (!$hasStock && $hasManual) $submissionType = 'MANUAL';
+
+        try {
+            $pdo->beginTransaction();
+
+            $updateSubmission = $pdo->prepare("UPDATE submissions SET notes = ?, submission_type = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'PENDING' AND submitted_by = ?");
+            $updateSubmission->execute([$header_note, $submissionType, $id, (int)$user['id']]);
+
+            $pdo->prepare("DELETE FROM submission_items WHERE submission_id = ?")->execute([$id]);
+
+            $itemStmt = $pdo->prepare("INSERT INTO submission_items (submission_id, source_type, warehouse_id, master_item_id, manual_name, manual_spec, manual_unit, requested_quantity, approved_quantity, fulfilled_quantity, remaining_quantity, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 'PENDING', ?)");
+            $summaryParts = [];
+
+            foreach ($source_types as $index => $type) {
+                $qty = (int)($quantities[$index] ?? 0);
+                if ($qty <= 0) continue;
+                $lineNote = trim($notes_list[$index] ?? '');
+
+                if ($type === 'STOCK') {
+                    $itemId = (int)($item_ids[$index] ?? 0);
+                    $whId = (int)($warehouse_ids[$index] ?? 0);
+                    $itemStmt->execute([$id, 'STOCK', $whId, $itemId, null, null, null, $qty, $lineNote]);
+                    $nmStmt = $pdo->prepare("SELECT nama FROM master_items WHERE id = ?");
+                    $nmStmt->execute([$itemId]);
+                    $nm = $nmStmt->fetchColumn();
+                    if ($nm) $summaryParts[] = $qty . ' ' . $nm;
+                } else {
+                    $name = trim($manual_names[$index] ?? '');
+                    $spec = trim($manual_specs[$index] ?? '');
+                    $unit = trim($manual_units[$index] ?? '');
+                    $itemStmt->execute([$id, 'MANUAL', null, null, $name, $spec, $unit, $qty, $lineNote]);
+                    $summaryParts[] = $qty . ' ' . $name;
+                }
+            }
+
+            $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'UPDATE', 'submissions', ?)");
+            $auditStmt->execute([(int)$user['id'], $id]);
+
+            $pdo->commit();
+            $_SESSION['success'] = "Pengajuan berhasil diperbarui.";
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $_SESSION['error'] = "Gagal memperbarui pengajuan: " . $e->getMessage();
+            header("Location: " . url('/submissions/edit?id=' . $id));
+            exit;
+        }
+
+        // Admin tetap menerima notifikasi agar perubahan pada pengajuan pending terlihat.
+        try {
+            $summary = implode(', ', $summaryParts);
+            \App\Helpers\NotificationHelper::createForRoleOnce(
+                'ADMIN',
+                'Pengajuan Barang Diperbarui',
+                $user['name'] . ' memperbarui pengajuan ' . $submission['submission_code'] . ($summary ? ': ' . $summary : '.'),
+                'info',
+                '/submissions/show?id=' . $id
+            );
+        } catch (\Throwable $notifEx) {
+            error_log('[BIGNET] Notification gagal (submission update #' . $id . '): ' . $notifEx->getMessage());
+        }
+
+        header("Location: " . url('/submissions/show?id=' . $id));
+        exit;
+    }
+
     public function approve() {
         AuthHelper::requireRole(['ADMIN']);
         if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
