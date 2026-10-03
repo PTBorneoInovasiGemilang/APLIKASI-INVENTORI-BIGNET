@@ -161,6 +161,33 @@ class AuthController {
                     exit;
                 }
 
+                // Single-device login:
+                // satu akun hanya boleh memiliki satu sesi aktif dalam jangka waktu timeout.
+                // Jika masih ada sesi aktif di perangkat lain, login kedua ditolak.
+                $sessionTimeoutMinutes = max(5, (int)(\App\Helpers\SettingsHelper::get('session_timeout_minutes', '30')));
+                $activeToken = bin2hex(random_bytes(32));
+                $activeTokenHash = hash('sha256', $activeToken);
+
+                $claimStmt = $pdo->prepare("UPDATE users
+                    SET active_session_token_hash = ?,
+                        active_session_started_at = NOW(),
+                        active_session_last_seen_at = NOW(),
+                        last_login_at = NOW()
+                    WHERE id = ?
+                      AND (
+                        active_session_token_hash IS NULL
+                        OR active_session_last_seen_at IS NULL
+                        OR active_session_last_seen_at < DATE_SUB(NOW(), INTERVAL ? MINUTE)
+                      )");
+                $claimStmt->execute([$activeTokenHash, (int)$user['id'], $sessionTimeoutMinutes]);
+
+                if ($claimStmt->rowCount() !== 1) {
+                    $_SESSION['error'] = "Akun ini sedang digunakan di perangkat lain. Silakan logout dari perangkat sebelumnya terlebih dahulu.";
+                    $_SESSION['old_email'] = $email;
+                    header("Location: " . url('/login'));
+                    exit;
+                }
+
                 session_regenerate_id(true);
 
                 $_SESSION['user_id'] = $user['id'];
@@ -168,13 +195,9 @@ class AuthController {
                 $_SESSION['user_email'] = $user['email'];
                 $_SESSION['role'] = $user['role'];
                 $_SESSION['authenticated'] = true;
+                $_SESSION['active_session_token'] = $activeToken;
+                $_SESSION['session_last_seen_sync'] = time();
                 $_SESSION['last_activity'] = time();
-
-                // Update last login
-                $updateStmt = $pdo->prepare("UPDATE users SET last_login_at = NOW() WHERE id = ?");
-                $updateStmt->execute([$user['id']]);
-
-
 
                 header("Location: " . url('/dashboard'));
                 exit;
@@ -193,7 +216,24 @@ class AuthController {
     }
 
     public function logout() {
+        try {
+            $userId = (int)($_SESSION['user_id'] ?? 0);
+            $activeToken = (string)($_SESSION['active_session_token'] ?? '');
 
+            if ($userId > 0 && $activeToken !== '') {
+                $pdo = Database::getInstance()->getConnection();
+                $hash = hash('sha256', $activeToken);
+                // Jangan menghapus sesi baru milik perangkat lain jika sesi lama melakukan logout.
+                $stmt = $pdo->prepare("UPDATE users
+                    SET active_session_token_hash = NULL,
+                        active_session_started_at = NULL,
+                        active_session_last_seen_at = NULL
+                    WHERE id = ? AND active_session_token_hash = ?");
+                $stmt->execute([$userId, $hash]);
+            }
+        } catch (\Throwable $e) {
+            error_log("Logout session cleanup failed: " . $e->getMessage());
+        }
 
         session_unset();
         session_destroy();
