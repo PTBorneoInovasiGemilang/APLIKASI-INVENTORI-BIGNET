@@ -19,6 +19,11 @@ ob_start();
     </div>
     <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3">
       <?php echo \App\Helpers\UIHelper::statusBadge($submission['status'], 'px-3 py-1 text-sm'); ?>
+      <?php if ($submission['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole('TEKNISI_NOC') && (int)$submission['submitted_by'] === (int)\App\Helpers\AuthHelper::user()['id']): ?>
+        <a href="<?php echo url('/submissions/edit?id=' . (int)$submission['id']); ?>" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold py-2 px-4 rounded shadow transition-colors">
+          <i class="fas fa-edit"></i> Edit Pengajuan
+        </a>
+      <?php endif; ?>
       <?php if (in_array($submission['status'], ['APPROVED', 'PARTIAL_APPROVED']) && \App\Helpers\AuthHelper::hasRole('ADMIN')): ?>
         <a href="<?php echo url('/outgoing/create?submission_id=' . (int)$submission['id']); ?>" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded shadow transition-colors">
           <i class="fas fa-truck-loading"></i> Proses Barang Keluar
