@@ -72,6 +72,7 @@ if (empty($_SESSION['csrf_token'])) {
 <script>
   const masterItems = <?php echo json_encode($items); ?>;
   const warehouses = <?php echo json_encode($warehouses); ?>;
+  const stockAvailability = <?php echo json_encode($stockAvailability, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
   let warehouseOptions = '<option value="">Pilih Gudang...</option>';
   warehouses.forEach(wh => {
     warehouseOptions += '<option value="' + wh.id + '">' + wh.name + '</option>';
@@ -114,6 +115,7 @@ if (empty($_SESSION['csrf_token'])) {
       stockInput.required = true;
       whInput.required = true;
       manualInput.required = false;
+      refreshStockOptions(card, whInput.value, stockInput.value);
     } else {
       stockBlock.classList.add('hidden');
       manualBlock.classList.remove('hidden');
@@ -144,6 +146,49 @@ if (empty($_SESSION['csrf_token'])) {
   function displayItemName(item) {
     // UI hanya menampilkan nama barang. Identifier/kode tetap dikirim via value ke backend.
     return escapeHtml(item.nama);
+  }
+
+  function refreshStockOptions(card, warehouseId, preferredItemId) {
+    const stockInput = card.querySelector('select[name="item_ids[]"]');
+    if (!stockInput) return;
+
+    const availability = stockAvailability[String(warehouseId)] || stockAvailability[warehouseId] || {};
+    const previousValue = preferredItemId !== undefined ? String(preferredItemId || '') : String(stockInput.value || '');
+    stockInput.innerHTML = '';
+
+    if (!warehouseId) {
+      stockInput.innerHTML = '<option value="">Pilih Gudang terlebih dahulu...</option>';
+      stockInput.value = '';
+      stockInput.disabled = true;
+      return;
+    }
+
+    const availableItems = masterItems.filter(item => Number(availability[String(item.id)] ?? availability[item.id] ?? 0) > 0);
+
+    if (availableItems.length === 0) {
+      stockInput.innerHTML = '<option value="">Tidak ada stok tersedia di gudang ini</option>';
+      stockInput.value = '';
+      stockInput.disabled = true;
+      return;
+    }
+
+    stockInput.innerHTML = '<option value="">Pilih Barang...</option>';
+    availableItems.forEach(item => {
+      stockInput.innerHTML += '<option value="' + item.id + '">' + displayItemName(item) + '</option>';
+    });
+
+    stockInput.disabled = false;
+    if (previousValue && availableItems.some(item => String(item.id) === previousValue)) {
+      stockInput.value = previousValue;
+    } else {
+      stockInput.value = '';
+    }
+  }
+
+  function isStockAvailable(warehouseId, itemId) {
+    if (!warehouseId || !itemId) return false;
+    const availability = stockAvailability[String(warehouseId)] || stockAvailability[warehouseId] || {};
+    return Number(availability[String(itemId)] ?? availability[itemId] ?? 0) > 0;
   }
 
   function addItemRow() {
@@ -205,8 +250,54 @@ if (empty($_SESSION['csrf_token'])) {
       </div>
     `;
     list.appendChild(card);
+
+    const warehouseInput = card.querySelector('select[name="warehouse_ids[]"]');
+    const itemInput = card.querySelector('select[name="item_ids[]"]');
+
+    if (warehouseInput) {
+      warehouseInput.addEventListener('change', function () {
+        refreshStockOptions(card, this.value, '');
+      });
+      refreshStockOptions(card, warehouseInput.value, itemInput ? itemInput.value : '');
+    }
+
     rowCount++;
     updateSummary();
+  }
+
+  // Pastikan pengajuan STOCK tidak dapat dikirim jika barang tidak tersedia
+  // pada gudang pemenuhan yang dipilih. Backend tetap menjadi guard terakhir.
+  const submissionForm = document.getElementById('submissionForm');
+  if (submissionForm) {
+    submissionForm.addEventListener('submit', function (event) {
+      const cards = document.querySelectorAll('#itemsList .item-card');
+      for (const card of cards) {
+        const source = card.querySelector('select[name="source_types[]"]')?.value;
+        if (source !== 'STOCK') continue;
+
+        const warehouseId = card.querySelector('select[name="warehouse_ids[]"]')?.value;
+        const itemId = card.querySelector('select[name="item_ids[]"]')?.value;
+        const qty = parseInt(card.querySelector('input[name="quantities[]"]')?.value || '0', 10);
+
+        if (!warehouseId || !itemId) {
+          event.preventDefault();
+          AppToast.warning('Untuk pengajuan dari stok, Gudang Pemenuhan dan Barang wajib dipilih.');
+          return;
+        }
+
+        if (!isStockAvailable(warehouseId, itemId)) {
+          event.preventDefault();
+          AppToast.warning('Barang tersebut tidak tersedia di Gudang Pemenuhan yang dipilih. Silakan pilih barang lain atau gudang lain.');
+          return;
+        }
+
+        if (!Number.isInteger(qty) || qty <= 0) {
+          event.preventDefault();
+          AppToast.warning('Jumlah barang harus lebih dari 0.');
+          return;
+        }
+      }
+    });
   }
 
   // Baris pertama otomatis tersedia
