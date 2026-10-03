@@ -372,16 +372,26 @@ class SubmissionController {
         $pdo = Database::getInstance()->getConnection();
         $user = AuthHelper::user();
 
+        if ($id <= 0) {
+            $_SESSION['error'] = "Pengajuan tidak valid.";
+            header("Location: " . url('/submissions'));
+            exit;
+        }
+
+        // Lock status + ownership check in one transaction so an approval cannot race an edit.
+        $pdo->beginTransaction();
         $subStmt = $pdo->prepare("SELECT * FROM submissions WHERE id = ? AND submitted_by = ? FOR UPDATE");
         $subStmt->execute([$id, (int)$user['id']]);
         $submission = $subStmt->fetch();
 
         if (!$submission) {
+            $pdo->rollBack();
             $_SESSION['error'] = "Pengajuan tidak ditemukan atau bukan milik Anda.";
             header("Location: " . url('/submissions'));
             exit;
         }
         if ($submission['status'] !== 'PENDING') {
+            $pdo->rollBack();
             $_SESSION['error'] = "Pengajuan tidak bisa diedit karena sudah diproses Admin.";
             header("Location: " . url('/submissions/show?id=' . $id));
             exit;
@@ -437,6 +447,7 @@ class SubmissionController {
         }
 
         if ($validLines === 0) {
+            $pdo->rollBack();
             $_SESSION['error'] = "Pengajuan harus memiliki minimal 1 barang yang valid.";
             header("Location: " . url('/submissions/edit?id=' . $id));
             exit;
