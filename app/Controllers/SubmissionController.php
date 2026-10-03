@@ -379,8 +379,9 @@ class SubmissionController {
         }
 
         // Lock status + ownership check in one transaction so an approval cannot race an edit.
-        $pdo->beginTransaction();
-        $subStmt = $pdo->prepare("SELECT * FROM submissions WHERE id = ? AND submitted_by = ? FOR UPDATE");
+        try {
+            $pdo->beginTransaction();
+            $subStmt = $pdo->prepare("SELECT * FROM submissions WHERE id = ? AND submitted_by = ? FOR UPDATE");
         $subStmt->execute([$id, (int)$user['id']]);
         $submission = $subStmt->fetch();
 
@@ -457,7 +458,6 @@ class SubmissionController {
         if ($hasStock && !$hasManual) $submissionType = 'STOCK';
         if (!$hasStock && $hasManual) $submissionType = 'MANUAL';
 
-        try {
             $updateSubmission = $pdo->prepare("UPDATE submissions SET notes = ?, submission_type = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'PENDING' AND submitted_by = ?");
             $updateSubmission->execute([$header_note, $submissionType, $id, (int)$user['id']]);
 
