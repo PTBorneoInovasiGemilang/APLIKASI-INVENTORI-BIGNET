@@ -80,12 +80,74 @@ if (empty($_SESSION['csrf_token'])) {
 
   let rowCount = 0;
 
+  function getCardSummary(card) {
+    const source = card.querySelector('select[name="source_types[]"]')?.value;
+    const qty = parseInt(card.querySelector('[name="quantities[]"]')?.value || '0', 10);
+    let name = '';
+
+    if (source === 'STOCK') {
+      const itemInput = card.querySelector('select[name="item_ids[]"]');
+      if (itemInput && itemInput.value) {
+        name = itemInput.options[itemInput.selectedIndex]?.textContent?.trim() || '';
+      }
+    } else {
+      name = card.querySelector('input[name="manual_names[]"]')?.value?.trim() || '';
+    }
+
+    return {
+      name: name || 'Barang belum dipilih',
+      qty: Number.isFinite(qty) && qty > 0 ? qty : 0
+    };
+  }
+
+  function updateItemCardMeta(card) {
+    if (!card) return;
+
+    const index = Array.from(document.querySelectorAll('#itemsList .item-card')).indexOf(card) + 1;
+    const title = card.querySelector('.item-title');
+    const summaryName = card.querySelector('.item-summary-name');
+    const summaryQty = card.querySelector('.item-summary-qty');
+    const collapseBtn = card.querySelector('.item-collapse-btn');
+    const body = card.querySelector('.item-body');
+
+    if (title) title.textContent = 'Barang ' + Math.max(index, 1);
+
+    const summary = getCardSummary(card);
+    if (summaryName) summaryName.textContent = summary.name;
+    if (summaryQty) summaryQty.textContent = summary.qty > 0 ? 'Qty ' + summary.qty : 'Qty -';
+
+    if (collapseBtn && body) {
+      collapseBtn.setAttribute('aria-expanded', body.classList.contains('hidden') ? 'false' : 'true');
+      collapseBtn.querySelector('.collapse-label').textContent = body.classList.contains('hidden') ? 'Buka' : 'Sembunyikan';
+      const icon = collapseBtn.querySelector('.collapse-icon');
+      if (icon) icon.className = 'fas ' + (body.classList.contains('hidden') ? 'fa-chevron-down' : 'fa-chevron-up') + ' collapse-icon text-xs';
+    }
+  }
+
+  function renumberItemCards() {
+    document.querySelectorAll('#itemsList .item-card').forEach(updateItemCardMeta);
+  }
+
+  function toggleItemCard(card, forceCollapsed) {
+    const body = card?.querySelector('.item-body');
+    if (!body) return;
+
+    const shouldCollapse = typeof forceCollapsed === 'boolean'
+      ? forceCollapsed
+      : !body.classList.contains('hidden');
+
+    body.classList.toggle('hidden', shouldCollapse);
+    card.classList.toggle('item-collapsed', shouldCollapse);
+    updateItemCardMeta(card);
+  }
+
   function updateSummary() {
     const cards = document.querySelectorAll('#itemsList .item-card');
     let total = 0;
     cards.forEach(card => {
       const q = parseInt(card.querySelector('[name="quantities[]"]').value, 10);
       if (!isNaN(q) && q > 0) total += q;
+      updateItemCardMeta(card);
     });
     document.getElementById('sumTypes').textContent = cards.length;
     document.getElementById('sumQty').textContent = total;
@@ -131,6 +193,7 @@ if (empty($_SESSION['csrf_token'])) {
   function removeItemRow(btn) {
     const card = btn.closest('.item-card');
     if (card) card.remove();
+    renumberItemCards();
     updateSummary();
   }
 
@@ -206,6 +269,23 @@ if (empty($_SESSION['csrf_token'])) {
     card.id = 'row_' + id;
     card.innerHTML = `
       <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <span class="item-title text-sm font-bold text-gray-900 dark:text-white">Barang ${id + 1}</span>
+            <span class="item-summary-name truncate text-xs text-gray-500 dark:text-gray-400"></span>
+            <span class="item-summary-qty shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-semibold">Qty -</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1 shrink-0">
+          <button type="button" onclick="toggleItemCard(this.closest('.item-card'))" class="item-collapse-btn inline-flex items-center gap-1.5 min-h-[40px] px-2.5 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 transition-colors text-xs font-semibold" aria-expanded="true">
+            <span class="collapse-label">Sembunyikan</span>
+            <i class="fas fa-chevron-up collapse-icon text-xs"></i>
+          </button>
+          <button type="button" onclick="removeItemRow(this)" title="Hapus barang" aria-label="Hapus barang" class="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+
+      <div class="item-body space-y-4">
         <div class="flex items-center gap-2 flex-wrap">
           <button type="button" data-src="STOCK" onclick="setRowSource(this, ${id})" class="src-btn inline-flex items-center gap-1.5 text-xs font-semibold border rounded-lg px-3 py-2 min-h-[44px] transition-colors bg-blue-600 text-white border-blue-600"><i class="fas fa-box"></i> Dari Stok</button>
           <button type="button" data-src="MANUAL" onclick="setRowSource(this, ${id})" class="src-btn inline-flex items-center gap-1.5 text-xs font-semibold border rounded-lg px-3 py-2 min-h-[44px] transition-colors bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"><i class="fas fa-pen"></i> Manual</button>
@@ -214,10 +294,8 @@ if (empty($_SESSION['csrf_token'])) {
             <option value="MANUAL">MANUAL</option>
           </select>
         </div>
-        <button type="button" onclick="removeItemRow(this)" title="Hapus baris" aria-label="Hapus baris" class="inline-flex items-center justify-center w-11 h-11 shrink-0 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-trash"></i></button>
-      </div>
 
-      <div class="stock-block">
+        <div class="stock-block">
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Gudang Pemenuhan <span class="text-red-500">*</span> <span class="font-normal text-gray-400 dark:text-gray-500">(pilih gudang terlebih dahulu untuk melihat barang yang tersedia)</span></label>
           <select name="warehouse_ids[]" class="wh-input w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-3 text-gray-700 dark:text-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]">
@@ -251,6 +329,7 @@ if (empty($_SESSION['csrf_token'])) {
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Catatan Item <span class="text-gray-400 dark:text-gray-500 font-normal">(Opsional)</span></label>
         <textarea name="notes[]" rows="2" placeholder="Contoh: Untuk pemasangan pelanggan A" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
       </div>
+      </div>
     `;
     list.appendChild(card);
 
@@ -260,11 +339,26 @@ if (empty($_SESSION['csrf_token'])) {
     if (warehouseInput) {
       warehouseInput.addEventListener('change', function () {
         refreshStockOptions(card, this.value, '');
+        updateItemCardMeta(card);
       });
       refreshStockOptions(card, warehouseInput.value, itemInput ? itemInput.value : '');
     }
 
+    if (itemInput) {
+      itemInput.addEventListener('change', function () {
+        updateItemCardMeta(card);
+      });
+    }
+
+    const manualNameInput = card.querySelector('input[name="manual_names[]"]');
+    if (manualNameInput) {
+      manualNameInput.addEventListener('input', function () {
+        updateItemCardMeta(card);
+      });
+    }
+
     rowCount++;
+    renumberItemCards();
     updateSummary();
   }
 
