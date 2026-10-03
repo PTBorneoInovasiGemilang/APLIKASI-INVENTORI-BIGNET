@@ -3,6 +3,29 @@ $pageTitle = 'Laporan Posisi Stok';
 ob_start();
 ?>
 
+<?php
+$reportLogo = \App\Helpers\SettingsHelper::get('logo_path', '');
+$reportLogoUrl = $reportLogo ? url('/file?path=' . urlencode($reportLogo)) : '';
+$reportCompany = \App\Helpers\SettingsHelper::get('company_name', 'PT. BIG');
+$reportAppName = \App\Helpers\SettingsHelper::get('app_name', 'Sistem Gudang');
+?>
+<div class="report-print-header">
+  <?php if ($reportLogoUrl): ?>
+    <img class="report-print-logo" src="<?= htmlspecialchars($reportLogoUrl) ?>" alt="Logo Aplikasi">
+  <?php endif; ?>
+  <div>
+    <div class="report-print-company"><?= htmlspecialchars($reportCompany) ?></div>
+    <div class="report-print-system"><?= htmlspecialchars($reportAppName) ?></div>
+    <div class="report-print-title"><?= htmlspecialchars($pageTitle) ?></div>
+    <div style="font-size:10px;color:#374151;margin-top:3px;">
+      Gudang: <?= $warehouseId > 0 ? htmlspecialchars(($warehouses[array_search($warehouseId, array_column($warehouses, 'id'))]['name'] ?? 'Dipilih')) : 'Semua Gudang' ?>
+    </div>
+    <div style="font-size:10px;color:#374151;margin-top:2px;">
+      <?= $search !== '' ? 'Pencarian: ' . htmlspecialchars($search) . ' | ' : '' ?>Dicetak: <?= date('d/m/Y H:i') ?>
+    </div>
+  </div>
+</div>
+
 <div class="mb-6 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
   <div>
     <div class="flex items-center gap-3">
@@ -130,8 +153,49 @@ foreach($cards as $card):
 </div>
 
 <style>
+.report-print-header {
+  display: none;
+}
+
 @media print {
   .print\:hidden, nav, aside, header { display:none !important; }
+
+  .report-print-header {
+    display: flex !important;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid #9ca3af;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+  }
+
+  .report-print-header .report-print-logo {
+    width: 64px;
+    height: 48px;
+    object-fit: contain;
+    object-position: left center;
+  }
+
+  .report-print-header .report-print-company {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.15;
+  }
+
+  .report-print-header .report-print-system {
+    font-size: 10px;
+    color: #4b5563;
+    margin-top: 2px;
+  }
+
+  .report-print-header .report-print-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    margin-top: 8px;
+  }
+
   body { background:#fff !important; }
   .dark body { background:#fff !important; color:#111827 !important; }
 }
