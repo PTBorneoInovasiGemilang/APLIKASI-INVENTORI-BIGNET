@@ -53,7 +53,7 @@ $labels = [
 
   <div class="bg-white dark:bg-gray-800 shadow rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[800px] lg:min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <table class="w-full min-w-[800px] lg:min-w-full mobile-card-table divide-y divide-gray-200 dark:divide-gray-700">
         <thead class="bg-gray-50 dark:bg-gray-700">
           <tr>
             <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">No</th>
@@ -71,18 +71,18 @@ $labels = [
           $isOverdue = !empty($ln['due_date']) && time() > strtotime($ln['due_date']) && !in_array($ln['status'], ['RETURNED','REJECTED'], true);
         ?>
           <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
-            <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
-            <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300"><?= date('d M Y', strtotime($ln['loan_date'])) ?></td>
-            <td class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($ln['borrower_name']) ?></td>
+            <td data-label="No" class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
+            <td data-label="Tanggal" data-label="Gudang" class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300"><?= date('d M Y', strtotime($ln['loan_date'])) ?></td>
+            <td data-label="Peminjam" class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($ln['borrower_name']) ?></td>
             <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300"><?= htmlspecialchars($ln['warehouse_name']) ?></td>
-            <td class="px-4 py-4 text-sm <?= $isOverdue ? 'text-red-600 font-bold' : 'text-gray-600 dark:text-gray-300' ?>">
+            <td data-label="Jatuh Tempo" class="px-4 py-4 text-sm <?= $isOverdue ? 'text-red-600 font-bold' : 'text-gray-600 dark:text-gray-300' ?>">
               <?php if (!empty($ln['due_date'])): ?>
                 <?= date('d M Y', strtotime($ln['due_date'])) ?>
                 <?php if ($isOverdue): ?><div class="text-xs mt-1">Terlambat</div><?php endif; ?>
               <?php else: ?>-
               <?php endif; ?>
             </td>
-            <td class="px-4 py-4">
+            <td data-label="Status" data-label="Aksi" class="px-4 py-4">
               <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-<?= $statusMeta[1] ?>-100 text-<?= $statusMeta[1] ?>-800">
                 <?= htmlspecialchars($statusMeta[0]) ?>
               </span>
