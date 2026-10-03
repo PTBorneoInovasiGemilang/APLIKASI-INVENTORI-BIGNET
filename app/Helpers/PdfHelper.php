@@ -34,8 +34,43 @@ class PdfHelper
 
     private static function loadLogoImage(): ?array
     {
-        $path = __DIR__ . '/../../Big-Color Logo.png';
+        // Prefer the logo configured in Pengaturan Sistem.
+        // Settings stores the uploaded filename under storage/private_uploads/.
+        $configuredLogo = basename(self::getSetting('logo_path', ''));
+        $configuredPath = $configuredLogo !== ''
+            ? __DIR__ . '/../../storage/private_uploads/' . $configuredLogo
+            : '';
+
+        $defaultPath = __DIR__ . '/../../Big-Color Logo.png';
+        $path = ($configuredPath !== '' && is_file($configuredPath)) ? $configuredPath : $defaultPath;
         if (!is_file($path)) return null;
+
+        // SVG: convert when Imagick is available; otherwise fall back to the built-in PNG logo.
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if ($ext === 'svg' && class_exists('Imagick')) {
+            try {
+                $im = new \Imagick();
+                $im->setBackgroundColor(new \ImagickPixel('white'));
+                $im->readImage($path);
+                $im->setImageFormat('jpeg');
+                $im->setImageCompressionQuality(92);
+                $jpeg = $im->getImagesBlob();
+                $width = $im->getImageWidth();
+                $height = $im->getImageHeight();
+                $im->clear();
+                $im->destroy();
+                if ($jpeg !== false && $jpeg !== '') {
+                    return ['data' => $jpeg, 'width' => $width, 'height' => $height, 'filter' => 'DCTDecode'];
+                }
+            } catch (\Throwable $e) {
+                // Continue to the normal image loaders/fallback.
+            }
+            if ($path !== $defaultPath && is_file($defaultPath)) {
+                $path = $defaultPath;
+            } else {
+                return null;
+            }
+        }
 
         // Use GD when available.
         if (function_exists('imagecreatefrompng') && function_exists('imagejpeg')) {
