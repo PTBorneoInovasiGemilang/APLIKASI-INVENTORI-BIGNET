@@ -12,6 +12,110 @@ $labels = [
   'REJECTED' => ['Ditolak', 'red'],
 ];
 ?>
+<style>
+  /* Peminjaman: pada HP tampil sebagai kartu transaksi, desktop tetap tabel. */
+  @media (max-width: 640px) {
+    .loan-mobile-table {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      display: block !important;
+      table-layout: auto !important;
+    }
+
+    .loan-mobile-table thead {
+      display: none !important;
+    }
+
+    .loan-mobile-table tbody {
+      display: block !important;
+      width: 100% !important;
+    }
+
+    .loan-mobile-table tbody tr {
+      display: block !important;
+      width: 100% !important;
+      margin: 0 0 12px !important;
+      padding: 8px 14px !important;
+      box-sizing: border-box !important;
+      border: 1px solid #e5e7eb !important;
+      border-radius: 14px !important;
+      overflow: hidden !important;
+      background: #fff !important;
+    }
+
+    .dark .loan-mobile-table tbody tr {
+      border-color: #374151 !important;
+      background: #1f2937 !important;
+    }
+
+    .loan-mobile-table tbody td {
+      display: flex !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      align-items: flex-start !important;
+      justify-content: space-between !important;
+      gap: 12px !important;
+      padding: 10px 0 !important;
+      margin: 0 !important;
+      border: 0 !important;
+      border-bottom: 1px dashed #e5e7eb !important;
+      text-align: right !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere !important;
+      word-break: break-word !important;
+    }
+
+    .dark .loan-mobile-table tbody td {
+      border-bottom-color: #374151 !important;
+    }
+
+    .loan-mobile-table tbody td:last-child {
+      border-bottom: 0 !important;
+    }
+
+    .loan-mobile-table tbody td::before {
+      content: attr(data-label) !important;
+      display: block !important;
+      flex: 0 0 36% !important;
+      max-width: 36% !important;
+      color: #6b7280 !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      line-height: 1.3 !important;
+      text-align: left !important;
+    }
+
+    .dark .loan-mobile-table tbody td::before {
+      color: #9ca3af !important;
+    }
+
+    .loan-mobile-table tbody td > * {
+      min-width: 0 !important;
+      max-width: 64% !important;
+    }
+
+    .loan-mobile-table tbody td[data-label="No"] {
+      display: none !important;
+    }
+
+    .loan-mobile-table tbody td[data-label="Aksi"] {
+      justify-content: flex-end !important;
+      gap: 8px !important;
+      padding-top: 12px !important;
+      padding-bottom: 4px !important;
+    }
+
+    .loan-mobile-table tbody td[data-label="Aksi"] > div {
+      width: 100% !important;
+      justify-content: flex-end !important;
+      flex-wrap: wrap !important;
+    }
+  }
+</style>
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
     <div>
@@ -53,7 +157,7 @@ $labels = [
 
   <div class="bg-white dark:bg-gray-800 shadow rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[800px] lg:min-w-full mobile-card-table divide-y divide-gray-200 dark:divide-gray-700">
+      <table class="loan-mobile-table w-full min-w-[800px] lg:min-w-full mobile-card-table divide-y divide-gray-200 dark:divide-gray-700">
         <thead class="bg-gray-50 dark:bg-gray-700">
           <tr>
             <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">No</th>
