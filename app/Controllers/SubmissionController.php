@@ -458,8 +458,6 @@ class SubmissionController {
         if (!$hasStock && $hasManual) $submissionType = 'MANUAL';
 
         try {
-            $pdo->beginTransaction();
-
             $updateSubmission = $pdo->prepare("UPDATE submissions SET notes = ?, submission_type = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'PENDING' AND submitted_by = ?");
             $updateSubmission->execute([$header_note, $submissionType, $id, (int)$user['id']]);
 
