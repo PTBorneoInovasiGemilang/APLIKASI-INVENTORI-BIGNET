@@ -44,7 +44,46 @@ ob_start();
   line-height: 1.35;
 }
 
+.report-print-header {
+  display: none;
+}
+
 @media print {
+  .report-print-header {
+    display: flex !important;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid #9ca3af;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+  }
+
+  .report-print-header .report-print-logo {
+    width: 64px;
+    height: 48px;
+    object-fit: contain;
+    object-position: left center;
+  }
+
+  .report-print-header .report-print-company {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.15;
+  }
+
+  .report-print-header .report-print-system {
+    font-size: 10px;
+    color: #4b5563;
+    margin-top: 2px;
+  }
+
+  .report-print-header .report-print-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    margin-top: 8px;
+  }
   .report-data-wrap {
     overflow: visible !important;
   }
@@ -91,16 +130,38 @@ ob_start();
     </div>
   </div>
 
-  <!-- Print-only header: judul + periode + filter + timestamp (Dedicated Print Layout) -->
-  <div class="print-header">
-    <h1 style="font-size:18px;font-weight:700;margin:0 0 4px;"><?= htmlspecialchars($pageTitle) ?></h1>
-    <div style="font-size:11px;color:#374151;margin-bottom:2px;">
-      Periode: <?= htmlspecialchars(($_GET['start_date'] ?? '') ?: 'Awal') ?> s/d <?= htmlspecialchars(($_GET['end_date'] ?? '') ?: 'Sekarang') ?><?= !empty($_GET['warehouse_id']) ? ' | Gudang: ' . htmlspecialchars($_GET['warehouse_id']) : '' ?>
+  <?php
+    $reportLogo = \App\Helpers\SettingsHelper::get('logo_path', '');
+    $reportLogoUrl = $reportLogo ? url('/file?path=' . urlencode($reportLogo)) : '';
+    $reportCompany = \App\Helpers\SettingsHelper::get('company_name', 'PT. BIG');
+    $reportAppName = \App\Helpers\SettingsHelper::get('app_name', 'Sistem Gudang');
+    $reportWarehouseLabel = 'Semua Gudang';
+    if (!empty($_GET['warehouse_id'])) {
+      foreach (($warehouses ?? []) as $rw) {
+        if ((string)$rw['id'] === (string)$_GET['warehouse_id']) {
+          $reportWarehouseLabel = $rw['name'];
+          break;
+        }
+      }
+    }
+  ?>
+  <!-- Print-only header: same application branding as the live application -->
+  <div class="report-print-header">
+    <?php if ($reportLogoUrl): ?>
+      <img class="report-print-logo" src="<?= htmlspecialchars($reportLogoUrl) ?>" alt="Logo Aplikasi">
+    <?php endif; ?>
+    <div>
+      <div class="report-print-company"><?= htmlspecialchars($reportCompany) ?></div>
+      <div class="report-print-system"><?= htmlspecialchars($reportAppName) ?></div>
+      <div class="report-print-title"><?= htmlspecialchars($pageTitle) ?></div>
+      <div style="font-size:10px;color:#374151;margin-top:3px;">
+        Periode: <?= htmlspecialchars(($_GET['start_date'] ?? '') ?: 'Awal') ?> s/d <?= htmlspecialchars(($_GET['end_date'] ?? '') ?: 'Sekarang') ?>
+        <?php if (!empty($_GET['warehouse_id'])): ?> | Gudang: <?= htmlspecialchars($reportWarehouseLabel) ?><?php endif; ?>
+      </div>
+      <div style="font-size:10px;color:#374151;margin-top:2px;">
+        <?php if (!empty($_GET['search'])): ?>Pencarian: <?= htmlspecialchars($_GET['search']) ?> | <?php endif; ?>Dicetak: <?= date('d/m/Y H:i') ?>
+      </div>
     </div>
-    <div style="font-size:11px;color:#374151;margin-bottom:10px;">
-      <?= !empty($_GET['search']) ? 'Pencarian: ' . htmlspecialchars($_GET['search']) . ' | ' : '' ?>Dicetak: <?= date('d/m/Y H:i') ?>
-    </div>
-    <hr style="border:0;border-top:1px solid #9ca3af;margin-bottom:10px;">
   </div>
 
   <!-- Print-only footer: timestamp + halaman -->
