@@ -35,7 +35,7 @@ $status = trim($_GET['status'] ?? '');
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
       <div>
         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Pencarian</label>
-        <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Kode, nama, serial..." class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Kode barang, nama barang, atau serial..." class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kategori</label>
