@@ -33,7 +33,7 @@ class DashboardController {
             $stats['total_items'] = (int)$pdo->query("SELECT COUNT(*) FROM master_items WHERE is_active = 1")->fetchColumn();
             $stats['total_stock'] = (int)$pdo->query("SELECT COALESCE(SUM(quantity), 0) FROM stocks")->fetchColumn();
             $stats['low_stock'] = (int)$pdo->query("SELECT COUNT(DISTINCT s.master_item_id) FROM stocks s JOIN master_items m ON s.master_item_id = m.id WHERE s.quantity <= m.stok_minimum")->fetchColumn();
-            $stats['active_submissions'] = (int)$pdo->query("SELECT COUNT(*) FROM submissions WHERE status IN ('PENDING', 'PARTIAL_APPROVED')")->fetchColumn();
+            $stats['active_submissions'] = (int)$pdo->query("SELECT COUNT(*) FROM submissions WHERE status = 'PENDING'")->fetchColumn();
             $stats['active_loans'] = (int)$pdo->query("SELECT COUNT(*) FROM loans WHERE status = 'BORROWED'")->fetchColumn();
             $stats['incoming_today'] = (int)$pdo->query("SELECT COUNT(*) FROM incoming WHERE DATE(created_at) = '$today'")->fetchColumn();
             $stats['outgoing_today'] = (int)$pdo->query("SELECT COUNT(*) FROM outgoing WHERE DATE(created_at) = '$today'")->fetchColumn();
@@ -76,7 +76,7 @@ class DashboardController {
                 SELECT s.id, s.submission_code, s.status, s.created_at, u.name as submitter_name
                 FROM submissions s
                 JOIN users u ON s.submitted_by = u.id
-                WHERE s.status IN ('PENDING', 'PARTIAL_APPROVED')
+                WHERE s.status = 'PENDING'
                 ORDER BY s.created_at DESC
                 LIMIT 8
             ")->fetchAll(PDO::FETCH_ASSOC);
