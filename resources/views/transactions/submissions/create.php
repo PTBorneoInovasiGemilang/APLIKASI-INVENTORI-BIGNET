@@ -218,13 +218,16 @@ if (empty($_SESSION['csrf_token'])) {
       </div>
 
       <div class="stock-block">
-        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Pilih Barang</label>
-        ${stockSelect}
-        <div class="mt-3">
-          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Gudang Pemenuhan <span class="text-red-500">*</span> <span class="font-normal text-gray-400 dark:text-gray-500">(stok dicek dari gudang ini saat persetujuan & pemenuhan)</span></label>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Gudang Pemenuhan <span class="text-red-500">*</span> <span class="font-normal text-gray-400 dark:text-gray-500">(pilih gudang terlebih dahulu untuk melihat barang yang tersedia)</span></label>
           <select name="warehouse_ids[]" class="wh-input w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-3 text-gray-700 dark:text-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]">
             ${warehouseOptions}
           </select>
+        </div>
+
+        <div class="mt-3">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Pilih Barang</label>
+          ${stockSelect}
         </div>
       </div>
 
