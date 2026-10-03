@@ -77,15 +77,15 @@ if (empty($_SESSION['csrf_token'])) {
       <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
         <?php $no = $offset + 1; foreach ($returns as $ret): ?>
           <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-            <td class="px-4 py-4 text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
-            <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap"><?= date('d M Y', strtotime($ret['created_at'])) ?></td>
-            <td class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <td data-label="No" class="px-4 py-4 text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
+            <td data-label="Tanggal" class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap"><?= date('d M Y', strtotime($ret['created_at'])) ?></td>
+            <td data-label="Teknisi" class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100">
               <?= htmlspecialchars($ret['technician_name'] ?? '-') ?>
             </td>
-            <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+            <td data-label="Gudang Pengembalian" class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
               <?= htmlspecialchars($ret['warehouse_name'] ?? '-') ?>
             </td>
-            <td class="px-4 py-4">
+            <td data-label="Status" class="px-4 py-4">
               <?php if ($ret['status'] === 'PENDING'): ?>
                 <?= \App\Helpers\UIHelper::badge('Menunggu Pemeriksaan', 'WARNING') ?>
                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Barang belum dinyatakan diterima.</div>
@@ -96,7 +96,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?= \App\Helpers\UIHelper::badge($ret['status'], 'NEUTRAL') ?>
               <?php endif; ?>
             </td>
-            <td class="px-4 py-4 text-center">
+            <td data-label="Aksi" class="px-4 py-4 text-center">
               <?php
               $isPending = ($ret['status'] ?? '') === 'PENDING';
               $rowActions = [[
