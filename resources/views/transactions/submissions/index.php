@@ -92,6 +92,9 @@ require __DIR__ . '/../../components/table/toolbar.php';
             </td>
             <?php
             $rowActions = [['type' => 'view', 'url' => url('/submissions/show?id=' . (int)$sub['id']), 'label' => 'Lihat', 'icon' => 'fa-eye']];
+            if (\App\Helpers\AuthHelper::hasRole('TEKNISI_NOC') && $sub['status'] === 'PENDING') {
+              $rowActions[] = ['type' => 'link', 'url' => url('/submissions/edit?id=' . (int)$sub['id']), 'label' => 'Edit', 'icon' => 'fa-edit'];
+            }
             require __DIR__ . '/../../components/table/row_actions.php';
             ?>
           </tr>
