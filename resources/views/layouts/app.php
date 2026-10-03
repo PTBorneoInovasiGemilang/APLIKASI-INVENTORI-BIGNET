@@ -373,13 +373,14 @@ function renderHeader($label, $sidebarGroupText) {
       .mobile-card-table tbody,
       .mobile-card-table tr,
       .mobile-card-table td { display: block; width: 100%; box-sizing: border-box; }
-      .mobile-card-table tr { border: 1px solid #e5e7eb; border-radius: 0.75rem; margin-bottom: 0.75rem; padding: 0.25rem 0.75rem; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+      .mobile-card-table tr { border: 1px solid #e5e7eb; border-radius: 0.75rem; margin-bottom: 0.75rem; padding: 0.35rem 0.75rem; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.04); overflow: hidden; }
       .dark .mobile-card-table tr { border-color: #374151; background: #1f2937; }
-      .mobile-card-table td { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.5rem 0; border: none; white-space: normal; text-align: right; border-bottom: 1px dashed #e5e7eb; min-height: 2.5rem; }
+      .mobile-card-table td { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; padding: 0.65rem 0; border: none; white-space: normal !important; text-align: right; border-bottom: 1px dashed #e5e7eb; min-height: 2.5rem; overflow-wrap: anywhere; word-break: break-word; }
       .dark .mobile-card-table td { border-bottom-color: #374151; }
       .mobile-card-table td:last-child { border-bottom: none; }
-      .mobile-card-table td::before { content: attr(data-label); font-weight: 600; color: #6b7280; text-align: left; flex-shrink: 0; }
+      .mobile-card-table td::before { content: attr(data-label); font-weight: 700; font-size: 0.72rem; color: #6b7280; text-align: left; flex: 0 0 38%; max-width: 38%; line-height: 1.25; }
       .dark .mobile-card-table td::before { color: #9ca3af; }
+      .mobile-card-table td > * { min-width: 0; max-width: 100%; }
       .mobile-card-table td { position: static !important; left: auto !important; right: auto !important; }
       .mobile-card-table td:first-child,
       .mobile-card-table td:last-child { background-color: transparent !important; }
