@@ -15,7 +15,7 @@ ob_start();
 
 <?php
 $toolbarAction = url('/incoming');
-$searchPlaceholder ="Cari Kode / Pemasok...";
+$searchPlaceholder ="Cari Kode Transaksi...";
 ob_start();
 ?>
 <div>
@@ -43,7 +43,6 @@ require __DIR__ . '/../../components/table/toolbar.php';
         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Gudang Tujuan</th>
         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Penerima</th>
-        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pemasok</th>
         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">Aksi</th>
       </tr>
     </thead>
@@ -82,7 +81,6 @@ require __DIR__ . '/../../components/table/toolbar.php';
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo date('Y-m-d H:i', strtotime($inc['created_at'])); ?></td>
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($inc['warehouse_name']); ?></td>
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($inc['receiver_name']); ?></td>
-        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($inc['supplier_info']); ?></td>
         <td class="px-4 py-3 text-center text-sm">
           <a href="<?php echo url('/incoming/show?id=' . $inc['id']); ?>" class="inline-flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 font-semibold">
             <i class="fas fa-eye mr-1 text-xs"></i>Lihat
@@ -92,7 +90,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
       <?php endforeach; ?>
       <?php if (empty($incomings)): ?>
         <?php 
-        $colspan = 8;
+        $colspan = 7;
         $emptyMessage ="Belum ada transaksi barang masuk.";
         require __DIR__ . '/../../components/table/empty_state.php';
         ?>
