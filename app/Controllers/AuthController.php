@@ -164,7 +164,8 @@ class AuthController {
                 // Single-device login:
                 // satu akun hanya boleh memiliki satu sesi aktif dalam jangka waktu timeout.
                 // Jika masih ada sesi aktif di perangkat lain, login kedua ditolak.
-                $sessionTimeoutMinutes = max(5, (int)(\App\Helpers\SettingsHelper::get('session_timeout_minutes', '30')));
+                // Single-device takeover window: 1 menit tanpa aktivitas = sesi dianggap idle.
+                $singleDeviceIdleSeconds = 60;
                 $activeToken = bin2hex(random_bytes(32));
                 $activeTokenHash = hash('sha256', $activeToken);
 
@@ -180,7 +181,7 @@ class AuthController {
                     $pdo->exec("ALTER TABLE users ADD COLUMN active_session_last_seen_at DATETIME NULL AFTER active_session_started_at");
                 }
 
-                $activeCutoff = date('Y-m-d H:i:s', time() - ($sessionTimeoutMinutes * 60));
+                $activeCutoff = date('Y-m-d H:i:s', time() - $singleDeviceIdleSeconds);
 
                 $claimStmt = $pdo->prepare("UPDATE users
                     SET active_session_token_hash = ?,
