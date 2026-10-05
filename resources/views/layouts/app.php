@@ -186,6 +186,7 @@ function renderHeader($label, $sidebarGroupText) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
   <title><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?> — <?= htmlspecialchars($appName) ?></title>
   <?php if ($favicon): ?>
     <link rel="icon" href="<?= $favicon ?>">
@@ -785,6 +786,89 @@ function renderHeader($label, $sidebarGroupText) {
 
   setTimeout(() => { document.querySelectorAll('.toast').forEach(t => t.remove()); }, 5000);
   </script>
-  <script src="<?= url('/assets/js/app-feedback.js') ?>?v=20261001-2"></script>
+  <script>
+  (function () {
+    const sessionCheckUrl = <?= json_encode(url('/session/check')) ?>;
+    const sessionTouchUrl = <?= json_encode(url('/session/touch')) ?>;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    let lastUserActivity = Date.now();
+    let lastTouchSent = 0;
+    let loggingOut = false;
+
+    function redirectToLogin(message) {
+      if (loggingOut) return;
+      loggingOut = true;
+      if (message) {
+        try { sessionStorage.setItem('bignet_session_message', message); } catch (e) {}
+      }
+      window.location.href = <?= json_encode(url('/login')) ?>;
+    }
+
+    async function touchSession(force = false) {
+      if (document.hidden && !force) return;
+      const now = Date.now();
+      if (!force && now - lastUserActivity > 30000) return;
+      if (!force && now - lastTouchSent < 10000) return;
+
+      lastTouchSent = now;
+      try {
+        const body = new URLSearchParams();
+        body.set('csrf_token', csrfToken);
+        const response = await fetch(sessionTouchUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+          body: body.toString(),
+          credentials: 'same-origin',
+          cache: 'no-store',
+          keepalive: true
+        });
+        if (response.status === 401) {
+          const data = await response.json().catch(() => ({}));
+          redirectToLogin(data.message || 'Akun ini telah login di perangkat lain. Sesi Anda telah berakhir.');
+        }
+      } catch (e) {}
+    }
+
+    async function checkSession() {
+      if (loggingOut) return;
+      try {
+        const response = await fetch(sessionCheckUrl, {
+          method: 'GET',
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+        if (response.status === 401) {
+          const data = await response.json().catch(() => ({}));
+          redirectToLogin(data.message || 'Sesi Anda telah berakhir.');
+        }
+      } catch (e) {}
+    }
+
+    const markActivity = function () {
+      lastUserActivity = Date.now();
+    };
+
+    ['pointerdown', 'keydown', 'touchstart', 'wheel', 'scroll'].forEach(function (eventName) {
+      window.addEventListener(eventName, markActivity, { passive: true });
+    });
+
+    setInterval(function () {
+      if (Date.now() - lastUserActivity <= 30000) {
+        touchSession();
+      }
+    }, 10000);
+
+    setInterval(checkSession, 15000);
+
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) {
+        lastUserActivity = Date.now();
+        touchSession(true);
+        checkSession();
+      }
+    });
+  })();
+  </script>
+<script src="<?= url('/assets/js/app-feedback.js') ?>?v=20261001-2"></script>
 </body>
 </html>
