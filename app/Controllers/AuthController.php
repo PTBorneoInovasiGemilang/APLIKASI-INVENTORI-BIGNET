@@ -164,8 +164,8 @@ class AuthController {
                 // Single-device login:
                 // satu akun hanya boleh memiliki satu sesi aktif dalam jangka waktu timeout.
                 // Jika masih ada sesi aktif di perangkat lain, login kedua ditolak.
-                // Single-device takeover window: 1 menit tanpa aktivitas = sesi dianggap idle.
-                $singleDeviceIdleSeconds = 60;
+                // Single-device takeover window: 30 detik tanpa aktivitas = sesi dianggap idle.
+                $singleDeviceIdleSeconds = 30;
                 $activeToken = bin2hex(random_bytes(32));
                 $activeTokenHash = hash('sha256', $activeToken);
 
