@@ -181,8 +181,8 @@ class AuthController {
                     $pdo->exec("ALTER TABLE users ADD COLUMN active_session_last_seen_at DATETIME NULL AFTER active_session_started_at");
                 }
 
-                $activeCutoff = date('Y-m-d H:i:s', time() - $singleDeviceIdleSeconds);
-
+                // Gunakan waktu server database sendiri agar PHP timezone dan DB timezone tidak bisa
+                // membuat sesi lama terlihat masih aktif padahal sudah idle.
                 $claimStmt = $pdo->prepare("UPDATE users
                     SET active_session_token_hash = ?,
                         active_session_started_at = NOW(),
@@ -192,9 +192,9 @@ class AuthController {
                       AND (
                         active_session_token_hash IS NULL
                         OR active_session_last_seen_at IS NULL
-                        OR active_session_last_seen_at < ?
+                        OR TIMESTAMPDIFF(SECOND, active_session_last_seen_at, NOW()) > 30
                       )");
-                $claimStmt->execute([$activeTokenHash, (int)$user['id'], $activeCutoff]);
+                $claimStmt->execute([$activeTokenHash, (int)$user['id']]);
 
                 if ($claimStmt->rowCount() !== 1) {
                     $_SESSION['error'] = "Akun ini sedang digunakan di perangkat lain. Silakan logout dari perangkat sebelumnya terlebih dahulu.";
