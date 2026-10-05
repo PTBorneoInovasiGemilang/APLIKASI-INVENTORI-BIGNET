@@ -870,6 +870,6 @@ function renderHeader($label, $sidebarGroupText) {
     });
   })();
   </script>
-<script src="<?= url('/assets/js/app-feedback.js') ?>?v=20261001-2"></script>
+<script src="<?= url('/assets/js/app-feedback.js') ?>?v=20261005-1"></script>
 </body>
 </html>
