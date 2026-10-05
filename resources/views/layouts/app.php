@@ -848,7 +848,9 @@ function renderHeader($label, $sidebarGroupText) {
       lastUserActivity = Date.now();
     };
 
-    ['pointerdown', 'keydown', 'touchstart', 'wheel', 'scroll'].forEach(function (eventName) {
+    // Hanya interaksi nyata pengguna yang dianggap aktivitas.
+    // Event "scroll" sengaja tidak dipakai karena script UI dapat memicu scroll programatis.
+    ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach(function (eventName) {
       window.addEventListener(eventName, markActivity, { passive: true });
     });
 
@@ -862,8 +864,7 @@ function renderHeader($label, $sidebarGroupText) {
 
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden) {
-        lastUserActivity = Date.now();
-        touchSession(true);
+        // Kembali ke tab bukan berarti ada aktivitas. Cek status saja.
         checkSession();
       }
     });
