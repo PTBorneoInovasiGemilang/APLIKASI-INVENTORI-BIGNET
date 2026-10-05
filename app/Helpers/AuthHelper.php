@@ -10,7 +10,7 @@ class AuthHelper {
 
         try {
             $pdo = \App\Core\Database::getInstance()->getConnection();
-            $stmt = $pdo->prepare("SELECT active_session_token_hash, active_session_last_seen_at, is_active, account_status
+            $stmt = $pdo->prepare("SELECT active_session_token_hash, is_active, account_status
                                    FROM users WHERE id = ? LIMIT 1");
             $stmt->execute([(int)$_SESSION['user_id']]);
             $account = $stmt->fetch();
@@ -22,29 +22,43 @@ class AuthHelper {
 
             $currentHash = hash('sha256', (string)$_SESSION['active_session_token']);
             if (empty($account['active_session_token_hash']) || !hash_equals((string)$account['active_session_token_hash'], $currentHash)) {
-                self::invalidateSession('Akun ini sedang digunakan di perangkat lain. Sesi di perangkat ini telah berakhir.');
+                self::invalidateSession('Akun ini telah login di perangkat lain. Sesi pada perangkat ini telah berakhir.');
                 return false;
-            }
-
-            // Keep the server-side activity timestamp fresh, but avoid a DB write on every request.
-            $lastSync = (int)($_SESSION['session_last_seen_sync'] ?? 0);
-            if (time() - $lastSync >= 60) {
-                $update = $pdo->prepare("UPDATE users
-                                         SET active_session_last_seen_at = NOW()
-                                         WHERE id = ? AND active_session_token_hash = ?");
-                $update->execute([(int)$_SESSION['user_id'], $currentHash]);
-                $_SESSION['session_last_seen_sync'] = time();
             }
 
             return true;
         } catch (\Throwable $e) {
-            // Do not silently allow an unauthorised session when the session cannot be verified.
             error_log('[BIGNET] Active session verification failed: ' . $e->getMessage());
             return false;
         }
     }
 
-    private static function invalidateSession(string $message = ''): void {
+    /**
+     * Perbarui waktu aktivitas sesi aktif.
+     * Endpoint ini hanya dipanggil ketika pengguna benar-benar berinteraksi,
+     * sehingga polling/check tidak membuat sesi tetap aktif.
+     */
+    public static function touchActiveSession(): bool {
+        if (!isset($_SESSION['user_id']) || ($_SESSION['authenticated'] ?? false) !== true || empty($_SESSION['active_session_token'])) {
+            return false;
+        }
+
+        try {
+            $pdo = \App\Core\Database::getInstance()->getConnection();
+            $hash = hash('sha256', (string)$_SESSION['active_session_token']);
+            $stmt = $pdo->prepare("UPDATE users
+                                   SET active_session_last_seen_at = NOW()
+                                   WHERE id = ?
+                                     AND active_session_token_hash = ?
+                                     AND is_active = 1
+                                     AND account_status = 'APPROVED'");
+            $stmt->execute([(int)$_SESSION['user_id'], $hash]);
+            return $stmt->rowCount() === 1;
+        } catch (\Throwable $e) {
+            error_log('[BIGNET] Active session touch failed: ' . $e->getMessage());
+            return false;
+        }
+    }    private static function invalidateSession(string $message = ''): void {
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
