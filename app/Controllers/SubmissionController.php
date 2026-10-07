@@ -302,6 +302,53 @@ class SubmissionController {
         $stmt->execute([$id]);
         $timeline = $stmt->fetchAll();
 
+        // Dokumentasi untuk Admin: foto barang + detail persetujuan/pemenuhan.
+        $itemPhotos = [];
+        $itemPhotoStmt = $pdo->prepare("SELECT id, master_item_id, file_path, original_name, mime_type, created_at
+                                        FROM master_item_attachments
+                                        WHERE master_item_id = ?
+                                        ORDER BY id ASC");
+        foreach ($items as &$detailItem) {
+            $detailItem['_photos'] = [];
+            $masterId = (int)($detailItem['master_item_id'] ?? 0);
+            if ($masterId > 0) {
+                $itemPhotoStmt->execute([$masterId]);
+                $detailItem['_photos'] = $itemPhotoStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+        unset($detailItem);
+
+        // Semua transaksi Barang Keluar yang berasal dari pengajuan ini.
+        $fulfillmentStmt = $pdo->prepare("
+            SELECT o.id, o.transaction_code, o.created_at, o.processed_by,
+                   u.name AS processor_name, w.name AS warehouse_name
+            FROM outgoing o
+            LEFT JOIN users u ON u.id = o.processed_by
+            LEFT JOIN warehouses w ON w.id = o.warehouse_id
+            WHERE o.submission_id = ?
+            ORDER BY o.created_at ASC, o.id ASC
+        ");
+        $fulfillmentStmt->execute([$id]);
+        $fulfillments = $fulfillmentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $fulfillmentItems = [];
+        $fulfillmentPhotos = [];
+        $fulfillmentItemStmt = $pdo->prepare("
+            SELECT oi.outgoing_id, oi.quantity, oi.submission_item_id,
+                   m.nama, m.kode_barang
+            FROM outgoing_items oi
+            LEFT JOIN master_items m ON m.id = oi.master_item_id
+            WHERE oi.outgoing_id = ?
+            ORDER BY oi.id ASC
+        ");
+        foreach ($fulfillments as &$fulfillment) {
+            $outId = (int)$fulfillment['id'];
+            $fulfillmentItemStmt->execute([$outId]);
+            $fulfillmentItems[$outId] = $fulfillmentItemStmt->fetchAll(PDO::FETCH_ASSOC);
+            $fulfillmentPhotos[$outId] = \App\Helpers\AttachmentHelper::forReference('OUTGOING', $outId);
+        }
+        unset($fulfillment);
+
         // Fetch Master Items for manual mapping
         $master_items = [];
         if ($submission['submission_type'] === 'MANUAL' && $submission['status'] === 'PENDING') {
