@@ -96,9 +96,9 @@ if (!function_exists('dashboardBadge')) {
     <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
       <div>
         <h3 class="text-base font-semibold text-gray-800 dark:text-white">
-          <i class="fas fa-trophy mr-2 text-yellow-500"></i> Top Teknisi Pengaju
+          <i class="fas fa-trophy mr-2 text-yellow-500"></i> Top Teknisi yang Paling Sering Mengajukan
         </h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Teknisi/NOC dengan jumlah pengajuan terbanyak.</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Teknisi/NOC dengan jumlah pengajuan barang terbanyak.</p>
       </div>
       <a href="<?= url('/submissions') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat pengajuan →</a>
     </div>
