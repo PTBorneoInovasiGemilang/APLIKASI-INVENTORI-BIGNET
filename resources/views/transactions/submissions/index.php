@@ -94,6 +94,23 @@ require __DIR__ . '/../../components/table/toolbar.php';
             $rowActions = [['type' => 'view', 'url' => url('/submissions/show?id=' . (int)$sub['id']), 'label' => 'Lihat', 'icon' => 'fa-eye']];
             if (\App\Helpers\AuthHelper::hasRole('TEKNISI_NOC') && $sub['status'] === 'PENDING') {
               $rowActions[] = ['type' => 'link', 'url' => url('/submissions/edit?id=' . (int)$sub['id']), 'label' => 'Edit', 'icon' => 'fa-edit'];
+              $rowActions[] = [
+                'type' => 'form',
+                'action' => url('/submissions/delete'),
+                'fields' => ['csrf_token' => $_SESSION['csrf_token'] ?? '', 'id' => (int)$sub['id']],
+                'label' => 'Hapus',
+                'icon' => 'fa-trash',
+                'danger' => true,
+                'confirm' => [
+                  'title' => 'Hapus Pengajuan?',
+                  'message' => 'Pengajuan ini akan dihapus permanen karena belum diproses Admin.',
+                  'description' => 'Pengajuan yang sudah disetujui sebagian, disetujui, atau ditolak tidak dapat dihapus.',
+                  'type' => 'danger',
+                  'icon' => 'fa-trash',
+                  'confirm' => 'Hapus',
+                  'loading' => 'Menghapus...'
+                ]
+              ];
             }
             require __DIR__ . '/../../components/table/row_actions.php';
             ?>
