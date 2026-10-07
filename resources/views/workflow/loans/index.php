@@ -90,6 +90,15 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
          <a href="<?=$returnUrl?>" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold"><i class="fas fa-undo mr-1.5"></i>Kembalikan</a>
         <?php elseif($role==='ADMIN'&&in_array($ln['status'],['BORROWED','PARTIAL_RETURNED'],true)): ?>
          <a href="<?=$detail?>#admin-return" class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-emerald-200 text-emerald-700 bg-emerald-50 text-xs font-semibold"><i class="fas fa-clipboard-check mr-1.5"></i>Konfirmasi Kembali</a>
+        <?php elseif($role==='TEKNISI_NOC'&&$ln['status']==='PENDING_APPROVAL'): ?>
+         <div class="flex items-center justify-center gap-2">
+          <a href="<?=$detail?>" class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-blue-200 text-blue-700 bg-blue-50 text-xs font-semibold"><i class="fas fa-eye mr-1.5"></i>Lihat</a>
+          <form method="POST" action="<?=url('/loans/delete')?>" class="inline-block" data-confirm="Peminjaman ini akan dihapus permanen karena belum diproses Admin." data-confirm-title="Hapus Peminjaman?" data-confirm-type="danger" data-confirm-icon="fa-trash" data-confirm-confirm="Hapus" data-confirm-loading="Menghapus...">
+           <input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>">
+           <input type="hidden" name="id" value="<?=$loanId?>">
+           <button type="submit" class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-red-600 hover:bg-red-50" title="Hapus" aria-label="Hapus"><i class="fas fa-trash"></i></button>
+          </form>
+         </div>
         <?php else: ?>
          <a href="<?=$detail?>" class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-blue-200 text-blue-700 bg-blue-50 text-xs font-semibold"><i class="fas fa-eye mr-1.5"></i>Lihat</a>
         <?php endif; ?>
