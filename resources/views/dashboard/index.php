@@ -207,64 +207,88 @@ if (!function_exists('dashboardBadge')) {
   </div>
 
   <!-- Prediksi Stok & Rekomendasi Restock -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 mb-6">
-    <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-      <div>
-        <h3 class="text-base font-semibold text-gray-800 dark:text-white">
-          <i class="fas fa-chart-line mr-2 text-indigo-500"></i> Prediksi Stok & Rekomendasi Restock
-        </h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Prediksi berdasarkan pemakaian Barang Keluar 30 hari terakhir.
-        </p>
+  <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 mb-6">
+    <div class="px-4 sm:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="flex items-start gap-3 min-w-0">
+          <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300">
+            <i class="fas fa-chart-line"></i>
+          </span>
+          <div class="min-w-0">
+            <h3 class="text-base font-bold text-gray-900 dark:text-white">Prediksi Stok & Rekomendasi Restock</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Berdasarkan pemakaian Barang Keluar selama 30 hari terakhir.</p>
+          </div>
+        </div>
+        <a href="<?= url('/stocks') ?>" class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 shrink-0">
+          Lihat stok <i class="fas fa-arrow-right text-[9px]"></i>
+        </a>
       </div>
-      <a href="<?= url('/stocks') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat stok →</a>
     </div>
 
     <?php if (!empty($restockRecommendations)): ?>
-      <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+      <div class="divide-y divide-gray-100 dark:divide-gray-700/70">
         <?php foreach ($restockRecommendations as $rec): ?>
           <?php
             $critical = !empty($rec['critical']);
             $days = $rec['days_until_empty'];
             $daysText = $days === null ? 'Belum ada pola pemakaian' : ($days <= 0 ? 'Diperkirakan habis hari ini' : 'Diperkirakan habis dalam ' . number_format($days) . ' hari');
-            $statusClass = $critical
-              ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-              : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
+            $statusTone = $critical
+              ? 'border-red-400 bg-red-50/70 dark:border-red-500 dark:bg-red-900/10'
+              : 'border-amber-400 bg-amber-50/40 dark:border-amber-500 dark:bg-amber-900/10';
+            $predictionTone = $critical
+              ? 'text-red-600 dark:text-red-400'
+              : 'text-amber-600 dark:text-amber-400';
+            $recommendation = $rec['recommended_qty'] > 0
+              ? 'Pesan ' . number_format($rec['recommended_qty']) . ' ' . htmlspecialchars($rec['unit_name'])
+              : 'Pantau stok';
           ?>
-          <div class="px-4 sm:px-6 py-4">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div class="flex-1 min-w-0">
-                <div class="flex flex-wrap items-center gap-2">
-                  <p class="text-sm font-bold text-gray-800 dark:text-gray-100 break-words"><?= htmlspecialchars($rec['item_name']) ?></p>
-                  <?= dashboardBadge($critical ? 'Kritis' : 'Perlu Restock', $critical ? 'danger' : 'warning') ?>
+          <div class="px-3 sm:px-5 py-4 sm:py-5">
+            <div class="border-l-4 <?= $statusTone ?> rounded-r-xl p-3 sm:p-4">
+              <div class="grid grid-cols-1 lg:grid-cols-[minmax(230px,1.45fr)_repeat(3,minmax(120px,0.8fr))_minmax(190px,1fr)] gap-3 lg:gap-4 items-stretch">
+                <!-- Barang -->
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <p class="text-sm font-bold text-gray-900 dark:text-gray-100 break-words"><?= htmlspecialchars($rec['item_name']) ?></p>
+                    <?= dashboardBadge($critical ? 'Kritis' : 'Perlu Restock', $critical ? 'danger' : 'warning') ?>
+                  </div>
+                  <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-gray-500 dark:text-gray-400">
+                    <span class="font-medium text-gray-600 dark:text-gray-300"><?= htmlspecialchars($rec['kode_barang'] ?? '-') ?></span>
+                    <span class="text-gray-300 dark:text-gray-600">•</span>
+                    <span><?= htmlspecialchars($rec['warehouse_name']) ?></span>
+                  </div>
                 </div>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  <?= htmlspecialchars($rec['warehouse_name']) ?> · <?= htmlspecialchars($rec['kode_barang'] ?? '-') ?>
-                </p>
-              </div>
 
-              <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-5">
-                <div>
-                  <p class="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Stok saat ini</p>
-                  <p class="text-sm font-bold text-gray-800 dark:text-white"><?= number_format($rec['physical']) ?> <?= htmlspecialchars($rec['unit_name']) ?></p>
-                </div>
-                <div>
-                  <p class="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Keluar 30 hari</p>
-                  <p class="text-sm font-bold text-gray-800 dark:text-white"><?= number_format($rec['outgoing_30d']) ?> <?= htmlspecialchars($rec['unit_name']) ?></p>
-                </div>
-                <div>
-                  <p class="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Prediksi habis</p>
-                  <p class="text-sm font-bold <?= $critical ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400' ?>"><?= htmlspecialchars($daysText) ?></p>
-                </div>
-                <div class="sm:min-w-[130px]">
-                  <p class="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Rekomendasi</p>
-                  <p class="text-sm font-extrabold text-indigo-600 dark:text-indigo-400">
-                    <?= $rec['recommended_qty'] > 0 ? 'Pesan ' . number_format($rec['recommended_qty']) . ' ' . htmlspecialchars($rec['unit_name']) : 'Pantau stok' ?>
+                <!-- Statistik -->
+                <div class="rounded-lg bg-white/80 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 px-3 py-2.5">
+                  <p class="text-[9px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500">Stok saat ini</p>
+                  <p class="mt-1 text-base font-extrabold text-gray-900 dark:text-white leading-none">
+                    <?= number_format($rec['physical']) ?> <span class="text-[11px] font-bold text-gray-400 dark:text-gray-500"><?= htmlspecialchars($rec['unit_name']) ?></span>
                   </p>
+                </div>
+
+                <div class="rounded-lg bg-white/80 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 px-3 py-2.5">
+                  <p class="text-[9px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500">Keluar 30 hari</p>
+                  <p class="mt-1 text-base font-extrabold text-gray-900 dark:text-white leading-none">
+                    <?= number_format($rec['outgoing_30d']) ?> <span class="text-[11px] font-bold text-gray-400 dark:text-gray-500"><?= htmlspecialchars($rec['unit_name']) ?></span>
+                  </p>
+                </div>
+
+                <div class="rounded-lg bg-white/80 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 px-3 py-2.5">
+                  <p class="text-[9px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500">Prediksi habis</p>
+                  <p class="mt-1 text-sm font-extrabold <?= $predictionTone ?> leading-tight"><?= htmlspecialchars($daysText) ?></p>
+                </div>
+
+                <!-- Rekomendasi -->
+                <div class="rounded-lg border border-indigo-100 bg-indigo-50/80 dark:border-indigo-900/60 dark:bg-indigo-900/20 px-3.5 py-2.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="text-[9px] uppercase tracking-wider font-semibold text-indigo-500/80 dark:text-indigo-300/70">Rekomendasi</p>
+                    <i class="fas <?= $rec['recommended_qty'] > 0 ? 'fa-cart-plus' : 'fa-eye' ?> text-[10px] text-indigo-500 dark:text-indigo-300"></i>
+                  </div>
+                  <p class="mt-1 text-base font-extrabold text-indigo-700 dark:text-indigo-300 leading-tight"><?= $recommendation ?></p>
                   <?php if ($rec['avg_daily'] > 0): ?>
-                    <p class="text-[10px] text-gray-400 dark:text-gray-500">≈ <?= rtrim(rtrim(number_format($rec['avg_daily'], 2, '.', ''), '0'), '.') ?> / hari</p>
+                    <p class="mt-1 text-[10px] text-indigo-500/80 dark:text-indigo-300/70">≈ <?= rtrim(rtrim(number_format($rec['avg_daily'], 2, '.', ''), '0'), '.') ?> <?= htmlspecialchars($rec['unit_name']) ?>/hari</p>
                   <?php else: ?>
-                    <p class="text-[10px] text-gray-400 dark:text-gray-500">Belum ada pemakaian 30 hari</p>
+                    <p class="mt-1 text-[10px] text-gray-400 dark:text-gray-500">Belum ada pemakaian 30 hari</p>
                   <?php endif; ?>
                 </div>
               </div>
@@ -273,13 +297,15 @@ if (!function_exists('dashboardBadge')) {
         <?php endforeach; ?>
       </div>
     <?php else: ?>
-      <div class="px-6 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">
-        <i class="fas fa-shield-check text-2xl mb-2 text-green-400"></i>
-        <p>Belum ada barang yang perlu direstock.</p>
+      <div class="px-6 py-10 text-center text-gray-400 dark:text-gray-500 text-sm">
+        <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-green-500 dark:bg-green-900/20 dark:text-green-300 mb-3">
+          <i class="fas fa-shield-check text-lg"></i>
+        </span>
+        <p class="font-semibold text-gray-500 dark:text-gray-400">Belum ada barang yang perlu direstock.</p>
         <p class="text-xs mt-1">Stok masih aman berdasarkan batas minimum dan pola pemakaian 30 hari.</p>
       </div>
     <?php endif; ?>
-  </div>
+  </section>
 
   <!-- KPI Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
