@@ -244,7 +244,7 @@ ob_start();
               <?php if (!empty($photos)): ?>
                 <div class="grid grid-cols-2 gap-2">
                   <?php foreach (array_slice($photos, 0, 3) as $photo): ?>
-                    <a href="<?= url('/file?path=' . urlencode($photo['file_path'])) ?>" target="_blank"
+                    <a href="<?= url('/file?path=' . urlencode($photo['file_path'])) ?>" data-image-preview data-image-title="<?= htmlspecialchars($photo['original_name']) ?>"
                        class="block aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                       <img src="<?= url('/file?path=' . urlencode($photo['file_path'])) ?>"
                            alt="<?= htmlspecialchars($itemName) ?>"
@@ -378,7 +378,7 @@ ob_start();
                     <?php $isImage = strpos($ev['mime_type'] ?? '', 'image/') === 0; ?>
                     <?php if (!$isImage) continue; ?>
                     <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                      <a href="<?= url('/evidence/' . (int)$ev['id']) ?>" target="_blank" class="block aspect-[4/3] bg-gray-100 dark:bg-gray-900">
+                      <a href="<?= url('/evidence/' . (int)$ev['id']) ?>" data-image-preview data-image-title="<?= htmlspecialchars($ev['original_name'] ?? 'Foto bukti') ?>" class="block aspect-[4/3] bg-gray-100 dark:bg-gray-900">
                         <img src="<?= url('/evidence/' . (int)$ev['id']) ?>"
                              alt="<?= htmlspecialchars($ev['original_name'] ?? 'Foto bukti') ?>"
                              class="w-full h-full object-cover">
