@@ -204,7 +204,7 @@ ob_start();
   </div>
 
 
-<?php if (\App\Helpers\AuthHelper::hasRole('ADMIN') && in_array($submission['status'], ['APPROVED', 'PARTIAL_APPROVED'], true)): ?>
+<?php if (\App\Helpers\AuthHelper::hasRole('ADMIN') && in_array($submission['status'], ['APPROVED', 'PARTIAL_APPROVED', 'COMPLETED'], true)): ?>
 <div class="space-y-6 mb-6">
 
   <!-- Foto referensi setiap barang yang disetujui -->
