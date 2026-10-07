@@ -146,6 +146,66 @@ if (!function_exists('dashboardBadge')) {
     <?php endif; ?>
   </div>
 
+  <!-- Top Barang Paling Sering Keluar -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 mb-6">
+    <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div>
+        <h3 class="text-base font-semibold text-gray-800 dark:text-white">
+          <i class="fas fa-arrow-up mr-2 text-red-500"></i> Barang yang Paling Sering Keluar
+        </h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Barang dengan total kuantitas keluar terbanyak dari gudang.</p>
+      </div>
+      <a href="<?= url('/outgoing') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat barang keluar →</a>
+    </div>
+
+    <?php if (!empty($topOutgoingItems)): ?>
+      <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+        <?php foreach ($topOutgoingItems as $rank => $item): ?>
+          <?php
+            $rankNumber = $rank + 1;
+            $rankClass = $rankNumber === 1
+              ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+              : ($rankNumber === 2
+                ? 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+                : ($rankNumber === 3
+                  ? 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                  : 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'));
+            $qty = (int)$item['outgoing_quantity'];
+            $unit = trim((string)($item['unit_name'] ?? ''));
+          ?>
+          <div class="px-4 sm:px-6 py-3.5 flex items-center gap-3">
+            <span class="flex-shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full text-sm font-extrabold <?= $rankClass ?>">
+              #<?= $rankNumber ?>
+            </span>
+
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-800 dark:text-gray-100 break-words">
+                <?= htmlspecialchars($item['nama']) ?>
+              </p>
+              <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                <?= htmlspecialchars($item['kode_barang'] ?? '-') ?>
+                · <?= number_format((int)$item['outgoing_transactions']) ?> transaksi
+                <?php if (!empty($item['last_outgoing_at'])): ?>
+                  · terakhir <?= date('d M Y, H:i', strtotime($item['last_outgoing_at'])) ?>
+                <?php endif; ?>
+              </p>
+            </div>
+
+            <div class="flex-shrink-0 text-right">
+              <p class="text-lg font-extrabold text-red-600 dark:text-red-400 leading-none"><?= number_format($qty) ?></p>
+              <p class="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500 mt-1"><?= htmlspecialchars($unit ?: 'unit') ?> keluar</p>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    <?php else: ?>
+      <div class="px-6 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">
+        <i class="fas fa-box-open text-2xl mb-2"></i>
+        <p>Belum ada transaksi Barang Keluar.</p>
+      </div>
+    <?php endif; ?>
+  </div>
+
   <!-- KPI Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
     <?php if (!isset($teknis_view) || !$teknis_view): ?>
