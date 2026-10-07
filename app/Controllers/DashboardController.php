@@ -71,6 +71,104 @@ class DashboardController {
                 LIMIT 10
             ")->fetchAll(PDO::FETCH_ASSOC);
 
+            // ===== Prediksi stok & rekomendasi restock =====
+            // Dasar prediksi: Barang Keluar 30 hari terakhir.
+            // Tidak menghitung Peminjaman karena barang pinjaman masih dianggap bagian dari stok fisik.
+            $restockRecommendations = [];
+            $stockForecastRows = $pdo->query("
+                SELECT
+                    s.warehouse_id,
+                    w.name AS warehouse_name,
+                    m.id AS master_item_id,
+                    m.nama AS item_name,
+                    m.kode_barang,
+                    m.is_serialized,
+                    m.stok_minimum,
+                    u.name AS unit_name,
+                    s.quantity AS stock_quantity,
+                    COALESCE((
+                        SELECT SUM(oi.quantity)
+                        FROM outgoing_items oi
+                        JOIN outgoing o ON o.id = oi.outgoing_id
+                        WHERE oi.master_item_id = m.id
+                          AND o.warehouse_id = s.warehouse_id
+                          AND o.status = 'COMPLETED'
+                          AND o.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                    ), 0) AS outgoing_30d
+                FROM stocks s
+                JOIN warehouses w ON w.id = s.warehouse_id
+                JOIN master_items m ON m.id = s.master_item_id
+                LEFT JOIN units u ON u.id = m.unit_id
+                WHERE m.is_active = 1
+                ORDER BY w.name ASC, m.nama ASC
+            ")->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($stockForecastRows as $forecast) {
+                $physical = (int)$forecast['stock_quantity'];
+
+                if ((int)$forecast['is_serialized'] === 1) {
+                    $physical = (int)$pdo->query(
+                        "SELECT COUNT(*) FROM serial_numbers
+                         WHERE master_item_id = " . (int)$forecast['master_item_id'] .
+                         " AND current_warehouse_id = " . (int)$forecast['warehouse_id']
+                    )->fetchColumn();
+                } else {
+                    // Peminjaman tidak mengurangi stok fisik.
+                    $borrowed = (int)$pdo->query(
+                        "SELECT COALESCE(SUM(li.quantity - li.returned_quantity), 0)
+                         FROM loan_items li
+                         JOIN loans l ON l.id = li.loan_id
+                         WHERE li.master_item_id = " . (int)$forecast['master_item_id'] .
+                         " AND l.warehouse_id = " . (int)$forecast['warehouse_id'] .
+                         " AND l.status IN ('BORROWED','PARTIAL_RETURNED')"
+                    )->fetchColumn();
+                    $physical = max(0, $physical - $borrowed);
+                }
+
+                $outgoing30d = (int)$forecast['outgoing_30d'];
+                $avgDaily = $outgoing30d / 30;
+                $daysUntilEmpty = $avgDaily > 0 ? floor($physical / $avgDaily) : null;
+                $minimum = max(0, (int)$forecast['stok_minimum']);
+
+                // Target persediaan 30 hari; minimal tetap mengikuti batas minimum Master Barang.
+                $target30d = max($minimum, (int)ceil($avgDaily * 30));
+                $recommendedQty = max(0, $target30d - $physical);
+
+                $needsRestock = $physical <= $minimum && $minimum > 0;
+                $criticalForecast = $daysUntilEmpty !== null && $daysUntilEmpty <= 7;
+                $activeRecommendation = $needsRestock || $criticalForecast;
+
+                if (!$activeRecommendation) {
+                    continue;
+                }
+
+                $restockRecommendations[] = [
+                    'warehouse_id' => (int)$forecast['warehouse_id'],
+                    'warehouse_name' => $forecast['warehouse_name'],
+                    'master_item_id' => (int)$forecast['master_item_id'],
+                    'item_name' => $forecast['item_name'],
+                    'kode_barang' => $forecast['kode_barang'],
+                    'unit_name' => $forecast['unit_name'] ?: 'unit',
+                    'physical' => $physical,
+                    'minimum' => $minimum,
+                    'outgoing_30d' => $outgoing30d,
+                    'avg_daily' => round($avgDaily, 2),
+                    'days_until_empty' => $daysUntilEmpty,
+                    'target_30d' => $target30d,
+                    'recommended_qty' => $recommendedQty,
+                    'critical' => $criticalForecast || ($needsRestock && $physical === 0)
+                ];
+            }
+
+            usort($restockRecommendations, function ($a, $b) {
+                if ($a['critical'] !== $b['critical']) return $a['critical'] ? -1 : 1;
+                if (($a['days_until_empty'] ?? PHP_INT_MAX) !== ($b['days_until_empty'] ?? PHP_INT_MAX)) {
+                    return ($a['days_until_empty'] ?? PHP_INT_MAX) <=> ($b['days_until_empty'] ?? PHP_INT_MAX);
+                }
+                return $b['recommended_qty'] <=> $a['recommended_qty'];
+            });
+            $restockRecommendations = array_slice($restockRecommendations, 0, 8);
+
             // ===== Barang paling sering keluar =====
             // Ranking berdasarkan total kuantitas aktual pada transaksi Barang Keluar.
             $topOutgoingItems = $pdo->query("
