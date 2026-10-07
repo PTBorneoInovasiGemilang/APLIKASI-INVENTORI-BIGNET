@@ -488,6 +488,61 @@ if (!function_exists('dashboardBadge')) {
     <?php endif; ?>
   </div>
 
+  <!-- Top Teknisi: Paling Sering Mengajukan -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 mb-6">
+    <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div>
+        <h3 class="text-base font-semibold text-gray-800 dark:text-white">
+          <i class="fas fa-trophy mr-2 text-yellow-500"></i> Top Teknisi Pengaju
+        </h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Teknisi/NOC dengan jumlah pengajuan terbanyak.</p>
+      </div>
+      <a href="<?= url('/submissions') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat pengajuan →</a>
+    </div>
+
+    <?php if (!empty($topSubmitters)): ?>
+      <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+        <?php foreach ($topSubmitters as $rank => $top): ?>
+          <?php
+            $rankNumber = $rank + 1;
+            $rankClass = $rankNumber === 1
+              ? 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+              : ($rankNumber === 2
+                ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
+                : ($rankNumber === 3
+                  ? 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+                  : 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'));
+            $count = (int)$top['submission_count'];
+          ?>
+          <div class="px-4 sm:px-6 py-3.5 flex items-center gap-3">
+            <span class="flex-shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full text-sm font-extrabold <?= $rankClass ?>">
+              #<?= $rankNumber ?>
+            </span>
+
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-800 dark:text-gray-100 truncate">
+                <?= htmlspecialchars($top['name']) ?>
+              </p>
+              <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                Terakhir mengajukan: <?= !empty($top['last_submission_at']) ? date('d M Y, H:i', strtotime($top['last_submission_at'])) : '-' ?>
+              </p>
+            </div>
+
+            <div class="flex-shrink-0 text-right">
+              <p class="text-lg font-extrabold text-blue-600 dark:text-blue-400 leading-none"><?= number_format($count) ?></p>
+              <p class="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500 mt-1">pengajuan</p>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    <?php else: ?>
+      <div class="px-6 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">
+        <i class="fas fa-trophy text-2xl mb-2"></i>
+        <p>Belum ada pengajuan dari Teknisi/NOC.</p>
+      </div>
+    <?php endif; ?>
+  </div>
+
   <!-- Recent Activity -->
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
     <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
