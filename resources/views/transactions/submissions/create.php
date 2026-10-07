@@ -5,6 +5,22 @@ $pageTitle = $editMode ? 'Edit Pengajuan Barang' : 'Buat Pengajuan Barang';
 
 ob_start();
 
+<style>
+  .item-collapse-btn { flex-shrink: 0; }
+  @media (max-width: 639px) {
+    .item-collapse-btn {
+      width: 42px !important;
+      min-width: 42px !important;
+      padding-left: .5rem !important;
+      padding-right: .5rem !important;
+    }
+    .item-collapse-btn .collapse-label { display: none !important; }
+  }
+  @media (min-width: 640px) {
+    .item-collapse-btn .collapse-label { display: inline !important; }
+  }
+</style>
+
 // CSRF init wajib berada DI DALAM tag PHP — jangan pernah keluar sebagai output HTML.
 if (empty($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -272,16 +288,16 @@ if (empty($_SESSION['csrf_token'])) {
     card.id = 'row_' + id;
     card.innerHTML = `
       <div class="flex items-start justify-between gap-3">
-        <div class="min-w-0 flex-1">
+        <div class="min-w-0 flex-1 pr-2">
           <div class="flex items-center gap-2 min-w-0">
             <span class="item-title whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">Barang ${id + 1}</span>
             <span class="item-summary-qty shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-semibold">Qty -</span>
           </div>
         </div>
 
-        <div class="flex items-center gap-1 shrink-0">
-          <button type="button" onclick="toggleItemCard(this.closest('.item-card'))" class="item-collapse-btn inline-flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 transition-colors" aria-expanded="true" title="Sembunyikan detail">
-            <span class="collapse-label hidden sm:inline text-xs font-semibold">Sembunyikan</span>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" onclick="toggleItemCard(this.closest('.item-card'))" class="item-collapse-btn inline-flex items-center justify-center gap-1.5 min-w-[42px] sm:min-w-[118px] h-10 px-2.5 sm:px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 transition-colors" aria-expanded="true" title="Sembunyikan detail">
+            <span class="collapse-label text-xs font-semibold">Sembunyikan</span>
             <i class="fas fa-chevron-up collapse-icon text-xs"></i>
           </button>
           <button type="button" onclick="removeItemRow(this)" title="Hapus barang" aria-label="Hapus barang" class="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-trash"></i></button>
