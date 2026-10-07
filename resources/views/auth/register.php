@@ -107,8 +107,15 @@ $favicon = setting('favicon_path') ? url('/file?path=' . urlencode(setting('favi
         </div>
 
         <div>
-          <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Telepon (Opsional)</label>
-          <input id="phone" name="phone" type="text" class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm dark:bg-gray-700 dark:text-white mt-1">
+          <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Nomor HP <span class="text-red-500">*</span>
+          </label>
+          <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel"
+            required maxlength="15" pattern="[0-9]{10,15}"
+            placeholder="Contoh: 081234567890"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+            class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm dark:bg-gray-700 dark:text-white mt-1">
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Wajib diisi, hanya angka 10–15 digit.</p>
         </div>
 
         <div>
