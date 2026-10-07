@@ -352,6 +352,266 @@ class MasterItemController {
             unset($h);
         }
         
+        // 5. Inventory 360 Summary: satu ringkasan lintas modul untuk barang ini.
+        $inventory360 = [
+            'physical_total' => 0,
+            'available_total' => 0,
+            'borrowed_total' => 0,
+            'in_transit_total' => 0,
+            'installed_total' => 0,
+            'incoming_total' => 0,
+            'outgoing_total' => 0,
+            'loan_total' => 0,
+            'return_total' => 0,
+            'transfer_total' => 0,
+            'submission_total' => 0,
+            'adjustment_total' => 0
+        ];
+
+        if ((int)$item['is_serialized'] === 1) {
+            $st = $pdo->prepare("SELECT COUNT(*)
+                                 FROM serial_numbers
+                                 WHERE master_item_id = ?");
+            $st->execute([$id]);
+            $inventory360['physical_total'] = (int)$st->fetchColumn();
+
+            $st = $pdo->prepare("SELECT COUNT(*)
+                                 FROM serial_numbers
+                                 WHERE master_item_id = ? AND status = 'AVAILABLE'");
+            $st->execute([$id]);
+            $inventory360['available_total'] = (int)$st->fetchColumn();
+
+            $st = $pdo->prepare("SELECT COUNT(*)
+                                 FROM loan_item_serials lis
+                                 JOIN loan_items li ON li.id = lis.loan_item_id
+                                 JOIN loans l ON l.id = li.loan_id
+                                 WHERE li.master_item_id = ?
+                                   AND l.status IN ('BORROWED','PARTIAL_RETURNED')
+                                   AND lis.status = 'BORROWED'");
+            $st->execute([$id]);
+            $inventory360['borrowed_total'] = (int)$st->fetchColumn();
+
+            $st = $pdo->prepare("SELECT COUNT(*)
+                                 FROM installation_items ii
+                                 JOIN installations ins ON ins.id = ii.installation_id
+                                 WHERE ii.master_item_id = ?
+                                   AND ins.status = 'INSTALLED'");
+            $st->execute([$id]);
+            $inventory360['installed_total'] = (int)$st->fetchColumn();
+        } else {
+            $st = $pdo->prepare("SELECT COALESCE(SUM(quantity),0) FROM stocks WHERE master_item_id = ?");
+            $st->execute([$id]);
+            $inventory360['physical_total'] = (int)$st->fetchColumn();
+            $inventory360['available_total'] = $inventory360['physical_total'];
+
+            $st = $pdo->prepare("SELECT COALESCE(SUM(li.quantity - li.returned_quantity),0)
+                                 FROM loan_items li
+                                 JOIN loans l ON l.id = li.loan_id
+                                 WHERE li.master_item_id = ?
+                                   AND l.status IN ('BORROWED','PARTIAL_RETURNED')");
+            $st->execute([$id]);
+            $inventory360['borrowed_total'] = max(0, (int)$st->fetchColumn());
+
+            $st = $pdo->prepare("SELECT COALESCE(SUM(ii.quantity),0)
+                                 FROM installation_items ii
+                                 JOIN installations ins ON ins.id = ii.installation_id
+                                 WHERE ii.master_item_id = ?
+                                   AND ins.status = 'INSTALLED'");
+            $st->execute([$id]);
+            $inventory360['installed_total'] = max(0, (int)$st->fetchColumn());
+        }
+
+        $st = $pdo->prepare("SELECT COALESCE(SUM(ti.quantity_sent - ti.quantity_received),0)
+                             FROM transfer_items ti
+                             JOIN transfers t ON t.id = ti.transfer_id
+                             WHERE ti.master_item_id = ?
+                               AND t.status IN ('IN_TRANSIT','PARTIAL_RECEIVED')
+                               AND ti.quantity_sent > ti.quantity_received");
+        $st->execute([$id]);
+        $inventory360['in_transit_total'] = max(0, (int)$st->fetchColumn());
+
+        $st = $pdo->prepare("SELECT COALESCE(SUM(ii.quantity),0) FROM incoming_items ii JOIN incoming i ON i.id = ii.incoming_id WHERE ii.master_item_id = ?");
+        $st->execute([$id]);
+        $inventory360['incoming_total'] = max(0, (int)$st->fetchColumn());
+
+        $st = $pdo->prepare("SELECT COALESCE(SUM(oi.quantity),0) FROM outgoing_items oi JOIN outgoing o ON o.id = oi.outgoing_id WHERE oi.master_item_id = ? AND o.status = 'COMPLETED'");
+        $st->execute([$id]);
+        $inventory360['outgoing_total'] = max(0, (int)$st->fetchColumn());
+
+        $st = $pdo->prepare("SELECT COALESCE(SUM(li.quantity),0) FROM loan_items li JOIN loans l ON l.id = li.loan_id WHERE li.master_item_id = ? AND l.status NOT IN ('PENDING_APPROVAL','REJECTED')");
+        $st->execute([$id]);
+        $inventory360['loan_total'] = max(0, (int)$st->fetchColumn());
+
+        $st = $pdo->prepare("SELECT COALESCE(SUM(ri.quantity),0) FROM return_items ri JOIN returns r ON r.id = ri.return_id WHERE ri.master_item_id = ?");
+        $st->execute([$id]);
+        $inventory360['return_total'] = max(0, (int)$st->fetchColumn());
+
+        $st = $pdo->prepare("SELECT COALESCE(SUM(ti.quantity_sent),0) FROM transfer_items ti JOIN transfers t ON t.id = ti.transfer_id WHERE ti.master_item_id = ?");
+        $st->execute([$id]);
+        $inventory360['transfer_total'] = max(0, (int)$st->fetchColumn());
+
+        $st = $pdo->prepare("SELECT COUNT(*) FROM submission_items si WHERE si.master_item_id = ?");
+        $st->execute([$id]);
+        $inventory360['submission_total'] = max(0, (int)$st->fetchColumn());
+
+        $st = $pdo->prepare("SELECT COALESCE(SUM(ABS(sai.difference)),0)
+                             FROM stock_adjustment_items sai
+                             WHERE sai.master_item_id = ?");
+        $st->execute([$id]);
+        $inventory360['adjustment_total'] = max(0, (int)$st->fetchColumn());
+
+        // Timeline gabungan seluruh lifecycle barang.
+        $inventory360TimelineSql = "
+            SELECT event_time, event_type, reference_code, actor_name, warehouse_name,
+                   quantity_delta, description, detail_url
+            FROM (
+                SELECT i.created_at AS event_time,
+                       'INCOMING' AS event_type,
+                       i.transaction_code AS reference_code,
+                       u.name AS actor_name,
+                       w.name AS warehouse_name,
+                       ii.quantity AS quantity_delta,
+                       CONCAT('Barang masuk ', ii.quantity, ' unit') AS description,
+                       NULL AS detail_url
+                FROM incoming_items ii
+                JOIN incoming i ON i.id = ii.incoming_id
+                LEFT JOIN users u ON u.id = i.received_by
+                LEFT JOIN warehouses w ON w.id = i.warehouse_id
+                WHERE ii.master_item_id = ?
+
+                UNION ALL
+
+                SELECT o.created_at,
+                       'OUTGOING',
+                       o.transaction_code,
+                       u.name,
+                       w.name,
+                       -oi.quantity,
+                       CONCAT('Barang keluar ', oi.quantity, ' unit'),
+                       CONCAT('/outgoing/show?id=', o.id)
+                FROM outgoing_items oi
+                JOIN outgoing o ON o.id = oi.outgoing_id
+                LEFT JOIN users u ON u.id = o.processed_by
+                LEFT JOIN warehouses w ON w.id = o.warehouse_id
+                WHERE oi.master_item_id = ?
+
+                UNION ALL
+
+                SELECT t.sent_at,
+                       'TRANSFER',
+                       t.transaction_code,
+                       u.name,
+                       ws.name,
+                       -ti.quantity_sent,
+                       CONCAT('Transfer keluar ', ti.quantity_sent, ' unit → ', wd.name),
+                       CONCAT('/transfers/show?id=', t.id)
+                FROM transfer_items ti
+                JOIN transfers t ON t.id = ti.transfer_id
+                LEFT JOIN users u ON u.id = t.sent_by
+                LEFT JOIN warehouses ws ON ws.id = t.source_warehouse_id
+                LEFT JOIN warehouses wd ON wd.id = t.destination_warehouse_id
+                WHERE ti.master_item_id = ?
+
+                UNION ALL
+
+                SELECT t.received_at,
+                       'TRANSFER_RECEIVED',
+                       t.transaction_code,
+                       u.name,
+                       wd.name,
+                       ti.quantity_received,
+                       CONCAT('Transfer diterima ', ti.quantity_received, ' unit'),
+                       CONCAT('/transfers/show?id=', t.id)
+                FROM transfer_items ti
+                JOIN transfers t ON t.id = ti.transfer_id
+                LEFT JOIN users u ON u.id = t.received_by
+                LEFT JOIN warehouses wd ON wd.id = t.destination_warehouse_id
+                WHERE ti.master_item_id = ? AND t.received_at IS NOT NULL
+
+                UNION ALL
+
+                SELECT l.created_at,
+                       'LOAN',
+                       l.transaction_code,
+                       u.name,
+                       w.name,
+                       -li.quantity,
+                       CONCAT('Dipinjam ', li.quantity, ' unit'),
+                       CONCAT('/loans/show?id=', l.id)
+                FROM loan_items li
+                JOIN loans l ON l.id = li.loan_id
+                LEFT JOIN users u ON u.id = l.borrower_id
+                LEFT JOIN warehouses w ON w.id = l.warehouse_id
+                WHERE li.master_item_id = ? AND l.status NOT IN ('PENDING_APPROVAL','REJECTED')
+
+                UNION ALL
+
+                SELECT r.created_at,
+                       'RETURN',
+                       r.transaction_code,
+                       u.name,
+                       w.name,
+                       ri.quantity,
+                       CONCAT('Dikembalikan ', ri.quantity, ' unit'),
+                       CONCAT('/returns/show?id=', r.id)
+                FROM return_items ri
+                JOIN returns r ON r.id = ri.return_id
+                LEFT JOIN users u ON u.id = r.processed_by
+                LEFT JOIN warehouses w ON w.id = r.warehouse_id
+                WHERE ri.master_item_id = ?
+
+                UNION ALL
+
+                SELECT ins.installed_at,
+                       'INSTALLATION',
+                       ins.transaction_code,
+                       u.name,
+                       NULL,
+                       -ii.quantity,
+                       CONCAT('Dipakai untuk instalasi ', ii.quantity, ' unit di ', ins.customer_site),
+                       CONCAT('/installations/show?id=', ins.id)
+                FROM installation_items ii
+                JOIN installations ins ON ins.id = ii.installation_id
+                LEFT JOIN users u ON u.id = ins.technician_id
+                WHERE ii.master_item_id = ?
+
+                UNION ALL
+
+                SELECT s.created_at,
+                       'SUBMISSION',
+                       s.submission_code,
+                       u.name,
+                       NULL,
+                       si.approved_quantity,
+                       CONCAT('Pengajuan disetujui ', si.approved_quantity, ' unit'),
+                       CONCAT('/submissions/show?id=', s.id)
+                FROM submission_items si
+                JOIN submissions s ON s.id = si.submission_id
+                LEFT JOIN users u ON u.id = s.submitted_by
+                WHERE si.master_item_id = ? AND si.approved_quantity > 0
+
+                UNION ALL
+
+                SELECT sa.created_at,
+                       'ADJUSTMENT',
+                       sa.transaction_code,
+                       u.name,
+                       w.name,
+                       sai.difference,
+                       CONCAT('Penyesuaian stok ', CASE WHEN sai.difference >= 0 THEN '+' ELSE '' END, sai.difference, ' unit'),
+                       CONCAT('/adjustments/show?id=', sa.id)
+                FROM stock_adjustment_items sai
+                JOIN stock_adjustments sa ON sa.id = sai.stock_adjustment_id
+                LEFT JOIN users u ON u.id = sa.processed_by
+                LEFT JOIN warehouses w ON w.id = sa.warehouse_id
+                WHERE sai.master_item_id = ?
+            ) inventory_events
+            ORDER BY event_time DESC
+            LIMIT 100";
+        $timelineStmt = $pdo->prepare($inventory360TimelineSql);
+        $timelineStmt->execute(array_fill(0, 9, $id));
+        $inventory360Timeline = $timelineStmt->fetchAll(PDO::FETCH_ASSOC);
+
         // 5. Installations / Customer / Site
         $installations = [];
         if ($snDetail) {
