@@ -22,7 +22,15 @@ $isApproved=$loan['status']==='APPROVED';
    <h1 class="text-3xl font-bold mt-3 text-gray-900 dark:text-gray-100">Detail Peminjaman</h1>
    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Permintaan → keputusan → Barang Keluar → custody → pengembalian.</p>
   </div>
-  <span class="px-3 py-2 rounded-full text-sm font-semibold bg-<?=$badge[1]?>-100 text-<?=$badge[1]?>-800 w-fit"><?=$badge[0]?></span>
+  <div class="flex flex-wrap items-center gap-2">
+   <?php if($role==='TEKNISI_NOC'&&$isPending&&(int)$loan['borrower_id']===(int)\App\Helpers\AuthHelper::user()['id']): ?>
+    <form method="POST" action="<?=url('/loans/delete')?>" class="inline-block" data-confirm="Peminjaman ini akan dihapus permanen karena belum diproses Admin." data-confirm-title="Hapus Peminjaman?" data-confirm-type="danger" data-confirm-icon="fa-trash" data-confirm-confirm="Hapus" data-confirm-loading="Menghapus...">
+     <input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>"><input type="hidden" name="id" value="<?=$loan['id']?>">
+     <button type="submit" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-semibold"><i class="fas fa-trash"></i>Hapus</button>
+    </form>
+   <?php endif; ?>
+   <span class="px-3 py-2 rounded-full text-sm font-semibold bg-<?=$badge[1]?>-100 text-<?=$badge[1]?>-800 w-fit"><?=$badge[0]?></span>
+  </div>
  </div>
 
  <?php foreach(['success'=>'green','error'=>'red'] as $key=>$color):if(isset($_SESSION[$key])): ?>
