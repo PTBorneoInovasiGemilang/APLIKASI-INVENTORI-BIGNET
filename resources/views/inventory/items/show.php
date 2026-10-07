@@ -123,7 +123,7 @@ ob_start();
       
       <?php if (!empty($attachments)): ?>
         <div class="mb-6 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-center p-2">
-          <img src="<?= url('/file?path=' . urlencode($attachments[0]['file_path'])) ?>" alt="Foto" class="max-h-48 object-contain rounded">
+          <button type="button" data-image-preview data-image-src="<?= url('/file?path=' . urlencode($attachments[0]['file_path'])) ?>" data-image-title="Foto Barang" class="block max-w-full cursor-zoom-in"><img src="<?= url('/file?path=' . urlencode($attachments[0]['file_path'])) ?>" alt="Foto" class="max-h-48 object-contain rounded"></button>
         </div>
       <?php endif; ?>
 
