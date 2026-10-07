@@ -137,8 +137,22 @@ require __DIR__ . '/../../components/table/toolbar.php';
           'border' => 'border-cyan-200 dark:border-cyan-800'
         ],
       ];
+      // Gudang utama diberi warna identitas tetap; gudang lain mendapat warna berbeda secara konsisten.
+      $warehouseNameKey = strtoupper(trim((string)$stock['warehouse_name']));
+      $warehouseColorMap = [
+        'GUDANG 28 OKTOBER' => 'green',
+        'GUDANG NGABANG' => 'blue',
+        'GUDANG SEKADAU' => 'purple',
+        'GUDANG SINTANG' => 'orange',
+        'GUDANG SANGGAU' => 'pink',
+      ];
       $paletteKeys = array_keys($warehousePalettes);
-      $warehousePalette = $warehousePalettes[$paletteKeys[((int)$stock['warehouse_id'] - 1) % count($paletteKeys)] ?? 0];
+      if (isset($warehouseColorMap[$warehouseNameKey])) {
+        $warehousePaletteKey = $warehouseColorMap[$warehouseNameKey];
+      } else {
+        $warehousePaletteKey = $paletteKeys[max(0, ((int)$stock['warehouse_id'] - 1)) % count($paletteKeys)];
+      }
+      $warehousePalette = $warehousePalettes[$warehousePaletteKey];
     ?>
       <tr class="group transition hover:bg-gray-50 dark:hover:bg-gray-700/40">
         <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
