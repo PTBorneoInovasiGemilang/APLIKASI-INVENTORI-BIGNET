@@ -85,7 +85,7 @@ ob_start();
     <input type="hidden" name="id" value="<?php echo $submission['id']; ?>">
     
     <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="mappingTable">
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 mobile-card-table" id="mappingTable">
       <thead class="bg-gray-50 dark:bg-gray-700">
         <tr>
           <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Barang</th>
@@ -98,7 +98,7 @@ ob_start();
       <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
         <?php foreach ($items as $item): ?>
         <tr>
-          <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+          <td data-label="Barang" class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
             <?php if ($item['source_type'] === 'MANUAL'): ?>
               <div class="font-bold text-yellow-600 dark:text-yellow-400"><?= \App\Helpers\UIHelper::badge('Barang Manual', 'WARNING') ?> <?php echo htmlspecialchars($item['manual_name']); ?></div>
               <?php if ($item['manual_spec']): ?>
@@ -137,13 +137,13 @@ ob_start();
               <div class="mt-1 text-xs text-blue-600 dark:text-blue-400 italic"><i class="fas fa-info-circle mr-1"></i><?php echo htmlspecialchars($item['notes']); ?></div>
             <?php endif; ?>
           </td>
-          <td class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
+          <td data-label="Sumber" class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
             <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-semibold"><?php echo htmlspecialchars(\App\Helpers\UIHelper::statusLabel($item['source_type'])); ?></span>
           </td>
-          <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-300 text-center font-bold text-lg">
+          <td data-label="Diminta" class="px-4 py-3 text-sm text-gray-900 dark:text-gray-300 text-center font-bold text-lg">
             <?php echo $item['requested_quantity']; ?> <?php echo $item['source_type'] === 'MANUAL' ? htmlspecialchars($item['manual_unit']) : ''; ?>
           </td>
-          <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
+          <td data-label="Disetujui" class="px-4 py-3 whitespace-nowrap text-sm text-center">
             <?php if ($submission['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole(['ADMIN'])): ?>
               <input type="number" name="approved_quantities[<?php echo $item['id']; ?>]" value="<?php echo $item['requested_quantity']; ?>" max="<?php echo $item['requested_quantity']; ?>" min="0" class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-20 py-1 px-2 text-center text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
             <?php else: ?>
@@ -152,7 +152,7 @@ ob_start();
               <div class="text-xs text-gray-500 dark:text-gray-400">Sisa: <?php echo $item['remaining_quantity']; ?></div>
             <?php endif; ?>
           </td>
-          <td class="px-4 py-3 text-sm">
+          <td data-label="Status / Alasan" class="px-4 py-3 text-sm">
             <?php if ($submission['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole(['ADMIN'])): ?>
               <input type="text" name="rejection_reasons[<?php echo $item['id']; ?>]" placeholder="Alasan jika QTY=0" class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-1 px-2 text-xs text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <?php else: ?>
@@ -178,7 +178,7 @@ ob_start();
       <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Proses Persetujuan</h4>
       <textarea name="approval_notes" placeholder="Alasan jika menolak semua (Wajib jika klik Tolak Semua)" rows="2" class="shadow appearance-none border border-red-300 dark:border-red-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-red-500 mb-4"></textarea>
       
-      <div class="flex gap-4">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <button type="submit" name="action" value="APPROVE" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow transition-colors"
               data-confirm="Proses persetujuan sesuai Kuantitas Disetujui?"
               data-confirm-title="Proses Persetujuan"
@@ -210,7 +210,7 @@ ob_start();
   <!-- Foto referensi setiap barang yang disetujui -->
   <div class="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-      <div class="flex items-center justify-between gap-3">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h3 class="text-lg font-bold text-gray-800 dark:text-white">
             <i class="fas fa-box-open mr-2 text-blue-500"></i>Barang yang Diberikan
@@ -220,7 +220,7 @@ ob_start();
           </p>
         </div>
         <?php if (!empty($submission['approved_at'])): ?>
-          <span class="text-xs text-gray-500 dark:text-gray-400 text-right">
+          <span class="text-xs text-gray-500 dark:text-gray-400 text-left sm:text-right whitespace-normal">
             Persetujuan: <strong><?= date('d M Y H:i', strtotime($submission['approved_at'])) ?></strong>
           </span>
         <?php endif; ?>
