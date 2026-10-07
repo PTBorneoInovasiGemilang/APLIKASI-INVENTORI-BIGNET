@@ -35,6 +35,73 @@ ob_start();
   </div>
 </div>
 
+<!-- Ringkasan Inventory 360 -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+  <?php
+    $summaryCards = [
+      ['label' => 'Fisik', 'value' => $inventory360['physical_total'], 'icon' => 'fa-boxes', 'tone' => 'blue'],
+      ['label' => 'Available', 'value' => $inventory360['available_total'], 'icon' => 'fa-check-circle', 'tone' => 'green'],
+      ['label' => 'Dipinjam', 'value' => $inventory360['borrowed_total'], 'icon' => 'fa-hand-holding', 'tone' => 'orange'],
+      ['label' => 'Dalam Pengiriman', 'value' => $inventory360['in_transit_total'], 'icon' => 'fa-truck', 'tone' => 'purple'],
+    ];
+    $toneMap = [
+      'blue' => 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300',
+      'green' => 'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-300',
+      'orange' => 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300',
+      'purple' => 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300',
+    ];
+  ?>
+  <?php foreach ($summaryCards as $card): ?>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center <?= $toneMap[$card['tone']] ?>">
+          <i class="fas <?= $card['icon'] ?>"></i>
+        </div>
+        <div class="min-w-0">
+          <p class="text-[11px] uppercase tracking-wide font-semibold text-gray-400 dark:text-gray-500"><?= $card['label'] ?></p>
+          <p class="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white"><?= number_format((int)$card['value']) ?></p>
+        </div>
+      </div>
+    </div>
+  <?php endforeach; ?>
+</div>
+
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
+  <div class="px-4 sm:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div>
+        <h3 class="text-base font-bold text-gray-800 dark:text-white">
+          <i class="fas fa-chart-pie mr-2 text-indigo-500"></i> Ringkasan Lifecycle
+        </h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Rekap aktivitas barang di seluruh modul.</p>
+      </div>
+    </div>
+  </div>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-px bg-gray-200 dark:bg-gray-700">
+    <?php
+      $lifecycleCards = [
+        ['label'=>'Barang Masuk','value'=>$inventory360['incoming_total'],'icon'=>'fa-arrow-down','class'=>'text-green-600 dark:text-green-400'],
+        ['label'=>'Barang Keluar','value'=>$inventory360['outgoing_total'],'icon'=>'fa-arrow-up','class'=>'text-red-600 dark:text-red-400'],
+        ['label'=>'Peminjaman','value'=>$inventory360['loan_total'],'icon'=>'fa-hand-holding','class'=>'text-orange-600 dark:text-orange-400'],
+        ['label'=>'Pengembalian','value'=>$inventory360['return_total'],'icon'=>'fa-undo','class'=>'text-blue-600 dark:text-blue-400'],
+        ['label'=>'Transfer','value'=>$inventory360['transfer_total'],'icon'=>'fa-exchange-alt','class'=>'text-purple-600 dark:text-purple-400'],
+        ['label'=>'Pengajuan','value'=>$inventory360['submission_total'],'icon'=>'fa-clipboard-list','class'=>'text-indigo-600 dark:text-indigo-400'],
+        ['label'=>'Penyesuaian','value'=>$inventory360['adjustment_total'],'icon'=>'fa-sliders-h','class'=>'text-yellow-600 dark:text-yellow-400'],
+        ['label'=>'Terpasang','value'=>$inventory360['installed_total'],'icon'=>'fa-tools','class'=>'text-teal-600 dark:text-teal-400'],
+      ];
+    ?>
+    <?php foreach($lifecycleCards as $lc): ?>
+      <div class="bg-white dark:bg-gray-800 p-3 sm:p-4">
+        <div class="flex items-center gap-2">
+          <i class="fas <?= $lc['icon'] ?> <?= $lc['class'] ?> text-sm"></i>
+          <span class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400"><?= $lc['label'] ?></span>
+        </div>
+        <p class="mt-1 text-base sm:text-lg font-extrabold text-gray-900 dark:text-white"><?= number_format((int)$lc['value']) ?></p>
+      </div>
+    <?php endforeach; ?>
+  </div>
+</div>
+
 <!-- Panel Panduan -->
 <div class="bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-indigo-500 p-4 rounded-md text-sm text-indigo-700 dark:text-indigo-300 mb-6">
   <p class="font-bold mb-1"><i class="fas fa-info-circle mr-1"></i> Panduan Inventory 360</p>
@@ -220,7 +287,7 @@ ob_start();
         <div class="p-8 text-center text-gray-500 dark:text-gray-400 text-sm">Barang ini belum pernah dipasang/diinstalasi.</div>
       <?php else: ?>
         <div class="overflow-x-auto">
-          <table class="min-w-full text-left text-sm">
+          <table class="min-w-full text-left text-sm mobile-card-table">
             <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
               <tr>
                 <th class="p-4 font-medium">Tanggal</th>
@@ -232,12 +299,12 @@ ob_start();
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
               <?php foreach ($installations as $inst): ?>
               <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                <td class="p-4 text-gray-900 dark:text-gray-200"><?= date('d/m/Y H:i', strtotime($inst['installed_at'])) ?></td>
-                <td class="p-4">
+                <td data-label="Tanggal" class="p-4 text-gray-900 dark:text-gray-200"><?= date('d/m/Y H:i', strtotime($inst['installed_at'])) ?></td>
+                <td data-label="Pelanggan / Site" class="p-4">
                   <div class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($inst['customer_name']) ?></div>
                   <div class="text-xs text-gray-500 dark:text-gray-400"><?= htmlspecialchars($inst['customer_site'] ?? '-') ?></div>
                 </td>
-                <td class="p-4 font-mono text-blue-600 dark:text-blue-400">
+                <td data-label="Transaksi" class="p-4 font-mono text-blue-600 dark:text-blue-400">
                   <a href="<?= url('/installations/show?id=' . $inst['id']) ?>" class="hover:underline"><?= htmlspecialchars($inst['transaction_code']) ?></a>
                 </td>
                 <td class="p-4">
@@ -251,6 +318,68 @@ ob_start();
       <?php endif; ?>
     </div>
     <?php endif; ?>
+
+    <!-- UNIFIED LIFECYCLE TIMELINE -->
+    <div class="bg-white dark:bg-gray-800 shadow rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+        <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+          <i class="fas fa-route text-blue-500"></i> Timeline Inventory 360
+        </h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Urutan aktivitas barang dari masuk hingga digunakan/dipindahkan/dikembalikan.</p>
+      </div>
+      <?php if (empty($inventory360Timeline)): ?>
+        <div class="p-8 text-center text-gray-500 dark:text-gray-400 text-sm">Belum ada aktivitas pada barang ini.</div>
+      <?php else: ?>
+        <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+          <?php foreach($inventory360Timeline as $event): ?>
+            <?php
+              $eventMeta = [
+                'INCOMING' => ['label'=>'Barang Masuk','icon'=>'fa-arrow-down','class'=>'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-300','sign'=>1],
+                'OUTGOING' => ['label'=>'Barang Keluar','icon'=>'fa-arrow-up','class'=>'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-300','sign'=>-1],
+                'TRANSFER' => ['label'=>'Transfer Keluar','icon'=>'fa-exchange-alt','class'=>'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300','sign'=>-1],
+                'TRANSFER_RECEIVED' => ['label'=>'Transfer Diterima','icon'=>'fa-exchange-alt','class'=>'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300','sign'=>1],
+                'LOAN' => ['label'=>'Peminjaman','icon'=>'fa-hand-holding','class'=>'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300','sign'=>-1],
+                'RETURN' => ['label'=>'Pengembalian','icon'=>'fa-undo','class'=>'bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-300','sign'=>1],
+                'INSTALLATION' => ['label'=>'Instalasi','icon'=>'fa-tools','class'=>'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300','sign'=>-1],
+                'SUBMISSION' => ['label'=>'Pengajuan Disetujui','icon'=>'fa-clipboard-check','class'=>'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300','sign'=>0],
+                'ADJUSTMENT' => ['label'=>'Penyesuaian','icon'=>'fa-sliders-h','class'=>'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200','sign'=>0],
+              ];
+              $meta = $eventMeta[$event['event_type']] ?? $eventMeta['ADJUSTMENT'];
+              $delta = (int)$event['quantity_delta'];
+            ?>
+            <div class="px-4 sm:px-5 py-4 flex items-start gap-3">
+              <span class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 <?= $meta['class'] ?>">
+                <i class="fas <?= $meta['icon'] ?> text-xs"></i>
+              </span>
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
+                  <div>
+                    <p class="text-sm font-bold text-gray-800 dark:text-gray-100"><?= $meta['label'] ?></p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 break-words">
+                      <?= htmlspecialchars($event['description']) ?>
+                    </p>
+                  </div>
+                  <?php if ($event['detail_url']): ?>
+                    <a href="<?= url($event['detail_url']) ?>" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline sm:shrink-0">Lihat transaksi →</a>
+                  <?php endif; ?>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500 dark:text-gray-400">
+                  <span><i class="fas fa-calendar mr-1"></i><?= date('d M Y H:i:s', strtotime($event['event_time'])) ?></span>
+                  <?php if ($event['actor_name']): ?><span><i class="fas fa-user mr-1"></i><?= htmlspecialchars($event['actor_name']) ?></span><?php endif; ?>
+                  <?php if ($event['warehouse_name']): ?><span><i class="fas fa-warehouse mr-1"></i><?= htmlspecialchars($event['warehouse_name']) ?></span><?php endif; ?>
+                  <?php if ($event['reference_code']): ?><span class="font-mono"><?= htmlspecialchars($event['reference_code']) ?></span><?php endif; ?>
+                  <?php if ($delta !== 0 && $meta['sign'] !== 0): ?>
+                    <span class="font-bold <?= $delta > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' ?>">
+                      <?= $delta > 0 ? '+' : '' ?><?= $delta ?> <?= htmlspecialchars($item['unit_name'] ?? '') ?>
+                    </span>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </div>
 
     <!-- HISTORY (Mutasi Log) -->
     <div class="bg-white dark:bg-gray-800 shadow rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
