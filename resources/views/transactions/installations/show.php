@@ -122,7 +122,7 @@ ob_start();
         <div class="p-5">
           <?php if (!empty($installation['photo_path'])): ?>
             <?php $photoUrl = url('/file?path=' . rawurlencode($installation['photo_path'])); ?>
-            <a href="<?= htmlspecialchars($photoUrl) ?>" target="_blank" rel="noopener" class="block rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 hover:opacity-95 transition-opacity">
+            <a href="<?= htmlspecialchars($photoUrl) ?>" data-image-preview data-image-title="Foto Bukti Instalasi" class="block rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 hover:opacity-95 transition-opacity">
               <img src="<?= htmlspecialchars($photoUrl) ?>" alt="Foto Bukti Instalasi" class="w-full h-72 object-cover" loading="lazy">
             </a>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">Klik foto untuk membuka ukuran penuh</p>
