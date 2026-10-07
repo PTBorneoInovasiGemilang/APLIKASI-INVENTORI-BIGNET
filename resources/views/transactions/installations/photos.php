@@ -25,7 +25,7 @@ use App\Helpers\AuthHelper;
       <?php foreach ($photos as $photo): ?>
         <?php $photoUrl = url('/file?path=' . rawurlencode($photo['photo_path'])); ?>
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-          <a href="<?= htmlspecialchars($photoUrl) ?>" target="_blank" rel="noopener" class="block aspect-video bg-gray-100 dark:bg-gray-900 overflow-hidden group">
+          <a href="<?= htmlspecialchars($photoUrl) ?>" data-image-preview data-image-title="<?= htmlspecialchars($photo['customer_site']) ?>" class="block aspect-video bg-gray-100 dark:bg-gray-900 overflow-hidden group">
             <img src="<?= htmlspecialchars($photoUrl) ?>" alt="Foto instalasi di <?= htmlspecialchars($photo['customer_site']) ?>" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy">
           </a>
           <div class="p-4">
