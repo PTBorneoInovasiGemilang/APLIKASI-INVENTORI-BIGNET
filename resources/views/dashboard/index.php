@@ -46,6 +46,142 @@ if (!function_exists('dashboardBadge')) {
 ?>
 
 <div class="space-y-6">
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <?php if (!isset($teknis_view) || !$teknis_view): ?>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300">
+          <i class="fas fa-boxes fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Jenis Barang</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['total_items']) ?></p>
+          <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Jumlah master barang unik</p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300">
+          <i class="fas fa-cubes fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Stok Fisik</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['total_stock']) ?></p>
+          <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Total unit stok di seluruh gudang</p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700 <?= $stats['low_stock'] > 0 ? 'ring-2 ring-red-200 dark:ring-red-800' : '' ?>">
+        <div class="p-3 rounded-xl bg-red-50 text-red-600 dark:bg-red-900/50 dark:text-red-300">
+          <i class="fas fa-exclamation-triangle fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Stok Rendah</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['low_stock']) ?></p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-green-50 text-green-600 dark:bg-green-900/50 dark:text-green-300">
+          <i class="fas fa-arrow-down fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Masuk Hari Ini</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['incoming_today']) ?></p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-900/50 dark:text-amber-300">
+          <i class="fas fa-arrow-up fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Keluar Hari Ini</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['outgoing_today']) ?></p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300">
+          <i class="fas fa-truck fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Dalam Transfer</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['transfers_in_transit']) ?></p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300">
+          <i class="fas fa-clipboard-list fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Pengajuan Aktif</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_submissions']) ?></p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-900/50 dark:text-orange-300">
+          <i class="fas fa-handshake fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Peminjaman Aktif</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_loans']) ?></p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-900/50 dark:text-teal-300">
+          <i class="fas fa-tools fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Terpasang</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['installed_assets']) ?></p>
+        </div>
+      </div>
+    <?php else: ?>
+      <!-- Teknisi: KPI personal -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300">
+          <i class="fas fa-clipboard-list fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Pengajuan Aktif Saya</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_submissions']) ?></p>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300">
+          <i class="fas fa-clipboard-check fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Pengajuan</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['total_submissions'] ?? 0) ?></p>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-900/50 dark:text-orange-300">
+          <i class="fas fa-hand-holding fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Barang Dipinjam</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_loans']) ?></p>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
+        <div class="p-3 rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-900/50 dark:text-teal-300">
+          <i class="fas fa-barcode fa-lg"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Barang Dipegang</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['held_serials']) ?></p>
+        </div>
+      </div>
+    <?php endif; ?>
+  </div>
+
   <!-- Welcome Banner -->
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 flex items-center justify-between border border-gray-200 dark:border-gray-700">
     <div>
@@ -306,141 +442,6 @@ if (!function_exists('dashboardBadge')) {
       </div>
     <?php endif; ?>
   </section>
-
-  <!-- KPI Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-    <?php if (!isset($teknis_view) || !$teknis_view): ?>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300">
-          <i class="fas fa-boxes fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Jenis Barang</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['total_items']) ?></p>
-          <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Jumlah master barang unik</p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300">
-          <i class="fas fa-cubes fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Stok Fisik</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['total_stock']) ?></p>
-          <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Total unit stok di seluruh gudang</p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700 <?= $stats['low_stock'] > 0 ? 'ring-2 ring-red-200 dark:ring-red-800' : '' ?>">
-        <div class="p-3 rounded-xl bg-red-50 text-red-600 dark:bg-red-900/50 dark:text-red-300">
-          <i class="fas fa-exclamation-triangle fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Stok Rendah</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['low_stock']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-green-50 text-green-600 dark:bg-green-900/50 dark:text-green-300">
-          <i class="fas fa-arrow-down fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Masuk Hari Ini</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['incoming_today']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-900/50 dark:text-amber-300">
-          <i class="fas fa-arrow-up fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Keluar Hari Ini</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['outgoing_today']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300">
-          <i class="fas fa-truck fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Dalam Transfer</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['transfers_in_transit']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300">
-          <i class="fas fa-clipboard-list fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Pengajuan Aktif</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_submissions']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-900/50 dark:text-orange-300">
-          <i class="fas fa-handshake fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Peminjaman Aktif</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_loans']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-900/50 dark:text-teal-300">
-          <i class="fas fa-tools fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Terpasang</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['installed_assets']) ?></p>
-        </div>
-      </div>
-    <?php else: ?>
-      <!-- Teknisi: KPI personal -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300">
-          <i class="fas fa-clipboard-list fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Pengajuan Aktif Saya</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_submissions']) ?></p>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300">
-          <i class="fas fa-clipboard-check fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Pengajuan</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['total_submissions'] ?? 0) ?></p>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-900/50 dark:text-orange-300">
-          <i class="fas fa-hand-holding fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Barang Dipinjam</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_loans']) ?></p>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-900/50 dark:text-teal-300">
-          <i class="fas fa-barcode fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Barang Dipegang</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['held_serials']) ?></p>
-        </div>
-      </div>
-    <?php endif; ?>
-  </div>
 
   <!-- Quick Actions (Role-Based) -->
   <div>
