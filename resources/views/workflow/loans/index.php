@@ -96,7 +96,7 @@ $labels=['PENDING_APPROVAL'=>['Menunggu Persetujuan','yellow'],'APPROVED'=>['Sia
           <form method="POST" action="<?=url('/loans/delete')?>" class="inline-block" data-confirm="Peminjaman ini akan dihapus permanen karena belum diproses Admin." data-confirm-title="Hapus Peminjaman?" data-confirm-type="danger" data-confirm-icon="fa-trash" data-confirm-confirm="Hapus" data-confirm-loading="Menghapus...">
            <input type="hidden" name="csrf_token" value="<?=htmlspecialchars($_SESSION['csrf_token']??'')?>">
            <input type="hidden" name="id" value="<?=$loanId?>">
-           <button type="submit" class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-red-600 hover:bg-red-50" title="Hapus" aria-label="Hapus"><i class="fas fa-trash"></i></button>
+           <button type="submit" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 text-xs font-semibold" title="Hapus Peminjaman" aria-label="Hapus Peminjaman"><i class="fas fa-trash"></i> Hapus</button>
           </form>
          </div>
         <?php else: ?>
