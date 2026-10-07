@@ -524,7 +524,17 @@ function renderHeader($label, $sidebarGroupText) {
       </div>
       <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
         <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-sm"></i></button>
-        <span class="text-xs text-gray-400 dark:text-gray-500 hidden sm:block font-medium"><?= date('l, d M Y') ?></span>
+        <div class="flex items-center gap-3 ml-auto mr-3">
+          <div class="text-right leading-tight">
+            <p id="serverClockDate" class="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 font-medium hidden sm:block">
+              <?= date('l, d M Y') ?>
+            </p>
+            <p class="text-sm sm:text-base font-bold text-gray-700 dark:text-gray-200 tabular-nums" aria-label="Waktu server">
+              <i class="fas fa-clock text-blue-500 mr-1 text-xs sm:text-sm"></i>
+              <span id="serverClockTime"><?= date('H:i:s') ?></span>
+            </p>
+          </div>
+        </div>
         <?php if (isset($_SESSION['user_id'])): ?>
         <?php $unreadCount = \App\Helpers\NotificationHelper::unreadCount((int)$_SESSION['user_id']); ?>
         <a href="<?= url('/notifications') ?>" class="relative text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-800 transition-colors" aria-label="Notifikasi"><i class="fas fa-bell text-sm"></i><?php if ($unreadCount > 0): ?><span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span><?php endif; ?></a>
@@ -787,6 +797,33 @@ function renderHeader($label, $sidebarGroupText) {
   setTimeout(() => { document.querySelectorAll('.toast').forEach(t => t.remove()); }, 5000);
   </script>
   <script>
+  // Jam ditampilkan berdasarkan waktu server saat halaman dirender, lalu bergerak realtime.
+  (function () {
+    const serverEpochMs = <?= (int)round(microtime(true) * 1000) ?>;
+    const clientStartMs = Date.now();
+    const timeEl = document.getElementById('serverClockTime');
+    const dateEl = document.getElementById('serverClockDate');
+
+    function updateServerClock() {
+      if (!timeEl) return;
+
+      const nowMs = serverEpochMs + (Date.now() - clientStartMs);
+      const d = new Date(nowMs);
+
+      const pad = (n) => String(n).padStart(2, '0');
+      timeEl.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+
+      if (dateEl) {
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        dateEl.textContent = days[d.getDay()] + ', ' + pad(d.getDate()) + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+      }
+    }
+
+    updateServerClock();
+    setInterval(updateServerClock, 1000);
+  })();
+
   (function () {
     const sessionCheckUrl = <?= json_encode(url('/session/check')) ?>;
     const sessionTouchUrl = <?= json_encode(url('/session/touch')) ?>;
