@@ -49,6 +49,77 @@ class LoanWorkflowController extends LoanController
             if($lines===0)throw new \Exception('Tidak ada barang valid.');$this->audit($pdo,$uid,'CREATE',$loanId,'Peminjaman diajukan. Belum membuat Barang Keluar dan belum memutasi stok fisik.',null,['status'=>'PENDING_APPROVAL']);$pdo->commit();try{NotificationHelper::createForRoleOnce('ADMIN','Peminjaman Baru',AuthHelper::user()['name'].' mengajukan peminjaman baru.','info','/loans/show?id='.$loanId);}catch(\Throwable $ignored){}$_SESSION['success']='Peminjaman berhasil diajukan.';
         }catch(\Throwable $e){if($pdo->inTransaction())$pdo->rollBack();$_SESSION['error']='Gagal mengajukan peminjaman: '.$e->getMessage();}$this->go('/loans');
     }
+    public function delete(): void {
+        AuthHelper::requireRole(['TEKNISI_NOC']);
+        $this->csrf('/loans');
+
+        $id = (int)($_POST['id'] ?? 0);
+        $pdo = Database::getInstance()->getConnection();
+        $user = AuthHelper::user();
+
+        try {
+            $pdo->beginTransaction();
+
+            $q = $pdo->prepare("SELECT id, transaction_code, borrower_id, warehouse_id, status, notes, outgoing_id
+                                FROM loans
+                                WHERE id = ? AND borrower_id = ?
+                                FOR UPDATE");
+            $q->execute([$id, (int)$user['id']]);
+            $loan = $q->fetch(PDO::FETCH_ASSOC);
+
+            if (!$loan) {
+                throw new \Exception('Peminjaman tidak ditemukan atau bukan milik Anda.');
+            }
+
+            if ($loan['status'] !== 'PENDING_APPROVAL') {
+                throw new \Exception('Peminjaman tidak dapat dihapus karena sudah diproses Admin.');
+            }
+
+            if (!empty($loan['outgoing_id'])) {
+                throw new \Exception('Peminjaman sudah memiliki transaksi Barang Keluar sehingga tidak dapat dihapus.');
+            }
+
+            $q = $pdo->prepare("SELECT COUNT(*) FROM returns WHERE reference_type = 'LOAN' AND reference_id = ?");
+            $q->execute([$id]);
+            if ((int)$q->fetchColumn() > 0) {
+                throw new \Exception('Peminjaman sudah memiliki pengembalian sehingga tidak dapat dihapus.');
+            }
+
+            $this->audit(
+                $pdo,
+                (int)$user['id'],
+                'DELETE',
+                $id,
+                'Peminjaman pending dihapus oleh teknisi sebelum diproses Admin.',
+                $loan,
+                ['status' => 'DELETED']
+            );
+
+            // Hapus relasi anak lebih dulu agar aman pada schema produksi lama.
+            $pdo->prepare("DELETE FROM loan_item_serials WHERE loan_item_id IN (SELECT id FROM loan_items WHERE loan_id = ?)")
+                ->execute([$id]);
+            $pdo->prepare("DELETE FROM loan_item_serials WHERE loan_manual_item_id IN (SELECT id FROM loan_manual_items WHERE loan_id = ?)")
+                ->execute([$id]);
+            $pdo->prepare("DELETE FROM loan_items WHERE loan_id = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM loan_manual_items WHERE loan_id = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM loans WHERE id = ? AND borrower_id = ? AND status = 'PENDING_APPROVAL'")
+                ->execute([$id, (int)$user['id']]);
+
+            if ($pdo->rowCount() !== 1) {
+                throw new \Exception('Peminjaman gagal dihapus.');
+            }
+
+            $pdo->commit();
+            $_SESSION['success'] = 'Peminjaman berhasil dihapus.';
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $_SESSION['error'] = 'Gagal menghapus peminjaman: ' . $e->getMessage();
+        }
+
+        header('Location: ' . url('/loans'));
+        exit;
+    }
+
     public function approve(): void {
         AuthHelper::requireRole(['ADMIN']);AuthHelper::denySuperadminWrite();$this->csrf('/loans');$pdo=Database::getInstance()->getConnection();$uid=(int)AuthHelper::user()['id'];$id=(int)($_POST['id']??0);$inc=$_POST['approved_include']??[];$qty=$_POST['approved_qty']??[];$mqty=$_POST['approved_manual_qty']??[];$mapped=$_POST['mapped_master_item']??[];$sns=$_POST['approved_serials']??[];$note=trim($_POST['approval_notes']??'');
         try{$pdo->beginTransaction();$q=$pdo->prepare("SELECT * FROM loans WHERE id=? FOR UPDATE");$q->execute([$id]);$loan=$q->fetch(PDO::FETCH_ASSOC);if(!$loan||$loan['status']!=='PENDING_APPROVAL')throw new \Exception('Peminjaman sudah diproses.');$lines=0;
