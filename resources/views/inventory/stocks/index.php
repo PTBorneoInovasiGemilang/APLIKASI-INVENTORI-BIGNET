@@ -91,6 +91,54 @@ require __DIR__ . '/../../components/table/toolbar.php';
       $isLow = !empty($stock['is_low_stock']);
       $unit = $stock['unit_name'] ?: 'unit';
       $availablePercent = $physical > 0 ? min(100, round(($available / $physical) * 100)) : 0;
+
+      // Identitas warna per gudang — konsisten untuk semua item di gudang yang sama.
+      $warehousePalettes = [
+        'blue' => [
+          'accent' => 'text-blue-600 dark:text-blue-400',
+          'soft' => 'bg-blue-50 dark:bg-blue-950/30',
+          'softText' => 'text-blue-700 dark:text-blue-300',
+          'bar' => 'bg-blue-500',
+          'border' => 'border-blue-200 dark:border-blue-800'
+        ],
+        'green' => [
+          'accent' => 'text-green-600 dark:text-green-400',
+          'soft' => 'bg-green-50 dark:bg-green-950/30',
+          'softText' => 'text-green-700 dark:text-green-300',
+          'bar' => 'bg-green-500',
+          'border' => 'border-green-200 dark:border-green-800'
+        ],
+        'purple' => [
+          'accent' => 'text-purple-600 dark:text-purple-400',
+          'soft' => 'bg-purple-50 dark:bg-purple-950/30',
+          'softText' => 'text-purple-700 dark:text-purple-300',
+          'bar' => 'bg-purple-500',
+          'border' => 'border-purple-200 dark:border-purple-800'
+        ],
+        'orange' => [
+          'accent' => 'text-orange-600 dark:text-orange-400',
+          'soft' => 'bg-orange-50 dark:bg-orange-950/30',
+          'softText' => 'text-orange-700 dark:text-orange-300',
+          'bar' => 'bg-orange-500',
+          'border' => 'border-orange-200 dark:border-orange-800'
+        ],
+        'pink' => [
+          'accent' => 'text-pink-600 dark:text-pink-400',
+          'soft' => 'bg-pink-50 dark:bg-pink-950/30',
+          'softText' => 'text-pink-700 dark:text-pink-300',
+          'bar' => 'bg-pink-500',
+          'border' => 'border-pink-200 dark:border-pink-800'
+        ],
+        'cyan' => [
+          'accent' => 'text-cyan-600 dark:text-cyan-400',
+          'soft' => 'bg-cyan-50 dark:bg-cyan-950/30',
+          'softText' => 'text-cyan-700 dark:text-cyan-300',
+          'bar' => 'bg-cyan-500',
+          'border' => 'border-cyan-200 dark:border-cyan-800'
+        ],
+      ];
+      $paletteKeys = array_keys($warehousePalettes);
+      $warehousePalette = $warehousePalettes[$paletteKeys[((int)$stock['warehouse_id'] - 1) % count($paletteKeys)] ?? 0];
     ?>
       <tr class="group transition hover:bg-gray-50 dark:hover:bg-gray-700/40">
         <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
@@ -117,25 +165,25 @@ require __DIR__ . '/../../components/table/toolbar.php';
           <div class="min-w-[290px] max-w-[430px]">
             <div class="flex items-start justify-between gap-4">
               <div>
-                <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+                <div class="text-2xl font-bold <?= $warehousePalette['accent'] ?>">
                   <?= number_format($available) ?> <?= htmlspecialchars($unit) ?>
                 </div>
                 <div class="mt-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">
                   tersedia dan siap digunakan
                 </div>
               </div>
-              <div class="rounded-full bg-green-50 px-2.5 py-1 text-xs font-bold text-green-700 dark:bg-green-950/30 dark:text-green-300">
+              <div class="rounded-full <?= $warehousePalette['soft'] ?> px-2.5 py-1 text-xs font-bold <?= $warehousePalette['softText'] ?>">
                 <?= $availablePercent ?>%
               </div>
             </div>
 
             <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700" title="<?= $availablePercent ?>% dari total barang tersedia">
-              <div class="h-full rounded-full bg-green-500 transition-all" style="width: <?= $availablePercent ?>%"></div>
+              <div class="h-full rounded-full <?= $warehousePalette['bar'] ?> transition-all" style="width: <?= $availablePercent ?>%"></div>
             </div>
 
             <div class="mt-3 grid grid-cols-3 gap-2">
-              <div class="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-700 dark:bg-gray-900/40">
-                <div class="text-sm font-bold text-gray-900 dark:text-gray-100"><?= number_format($physical) ?></div>
+              <div class="rounded-xl border <?= $warehousePalette['border'] ?> <?= $warehousePalette['soft'] ?> px-3 py-2.5">
+                <div class="text-sm font-bold <?= $warehousePalette['accent'] ?>"><?= number_format($physical) ?></div>
                 <div class="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">Stok Fisik</div>
               </div>
               <div class="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5 dark:border-orange-900/30 dark:bg-orange-950/20">
