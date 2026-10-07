@@ -5,6 +5,12 @@ $pageTitle = $editMode ? 'Edit Pengajuan Barang' : 'Buat Pengajuan Barang';
 
 ob_start();
 
+// CSRF init wajib berada DI DALAM tag PHP — jangan pernah keluar sebagai output HTML.
+if (empty($_SESSION['csrf_token'])) {
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
+
 <style>
   .item-collapse-btn { flex-shrink: 0; }
   @media (max-width: 639px) {
@@ -20,12 +26,6 @@ ob_start();
     .item-collapse-btn .collapse-label { display: inline !important; }
   }
 </style>
-
-// CSRF init wajib berada DI DALAM tag PHP — jangan pernah keluar sebagai output HTML.
-if (empty($_SESSION['csrf_token'])) {
-  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-?>
 
 <div class="mb-5">
   <a href="<?php echo url('/submissions'); ?>" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline text-sm"><i class="fas fa-arrow-left mr-2"></i> Kembali ke Pengajuan</a>
