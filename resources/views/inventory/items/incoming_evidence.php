@@ -42,7 +42,7 @@ $incomingTotal = (int)$incomingCount;
     <?php else: ?>
       <div class="grid grid-cols-2 gap-3">
         <?php foreach ($masterPhotos as $photo): ?>
-          <a href="<?= url('/file?path=' . urlencode($photo['file_path'])) ?>" target="_blank" class="group block overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+          <a href="<?= url('/file?path=' . urlencode($photo['file_path'])) ?>" data-image-preview data-image-title="<?= htmlspecialchars($photo['original_name']) ?>" class="group block overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
             <img src="<?= url('/file?path=' . urlencode($photo['file_path'])) ?>" alt="<?= htmlspecialchars($photo['original_name']) ?>" class="h-32 w-full object-cover transition-transform duration-200 group-hover:scale-105">
             <div class="p-2 text-[11px] text-gray-500 dark:text-gray-400 truncate"><?= htmlspecialchars($photo['original_name']) ?></div>
           </a>
@@ -112,7 +112,7 @@ $incomingTotal = (int)$incomingCount;
               <?php $isImage = strpos($photo['mime_type'] ?? '', 'image/') === 0; ?>
               <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                 <?php if ($isImage): ?>
-                  <a href="<?= url('/evidence/' . (int)$photo['id']) ?>" target="_blank" class="block group">
+                  <a href="<?= url('/evidence/' . (int)$photo['id']) ?>" data-image-preview data-image-title="<?= htmlspecialchars($photo['original_name']) ?>" class="block group">
                     <img src="<?= url('/evidence/' . (int)$photo['id']) ?>" alt="<?= htmlspecialchars($photo['original_name']) ?>" class="h-40 w-full object-cover transition-transform duration-200 group-hover:scale-105">
                   </a>
                 <?php else: ?>
@@ -125,7 +125,7 @@ $incomingTotal = (int)$incomingCount;
                   <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
                     <?= number_format($photo['file_size'] / 1024, 1) ?> KB · <?= htmlspecialchars($photo['uploader_name'] ?? 'System') ?>
                   </div>
-                  <a href="<?= url('/evidence/' . (int)$photo['id']) ?>" target="_blank" class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                  <a href="<?= url('/evidence/' . (int)$photo['id']) ?>" data-image-preview data-image-title="<?= htmlspecialchars($photo['original_name']) ?>" class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
                     <i class="fas fa-eye"></i> Buka
                   </a>
                 </div>
