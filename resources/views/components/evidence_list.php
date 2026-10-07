@@ -81,9 +81,15 @@ $currentUser = \App\Helpers\AuthHelper::user();
               · <?= date('d M Y H:i', strtotime($ev['created_at'])) ?>
             </p>
             <div class="mt-2 flex items-center gap-3">
-              <a href="<?= url('/evidence/' . $ev['id']) ?>" data-image-preview data-image-title="<?= htmlspecialchars($ev['original_name']) ?>" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
-                <i class="fas fa-eye"></i> Buka
-              </a>
+              <?php if ($isImage): ?>
+                <a href="<?= url('/evidence/' . $ev['id']) ?>" data-image-preview data-image-title="<?= htmlspecialchars($ev['original_name']) ?>" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
+                  <i class="fas fa-eye"></i> Lihat Foto
+                </a>
+              <?php else: ?>
+                <a href="<?= url('/evidence/' . $ev['id']) ?>" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
+                  <i class="fas fa-file-arrow-up-right"></i> Buka File
+                </a>
+              <?php endif; ?>
               <?php if (\App\Helpers\AttachmentHelper::canDelete($ev, $currentUser)): ?>
                 <form action="<?= url('/evidence/delete') ?>" method="POST" class="inline"
                     data-confirm="Hapus bukti ini? Data yang dihapus tidak dapat dikembalikan."
