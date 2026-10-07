@@ -568,11 +568,105 @@ function renderHeader($label, $sidebarGroupText) {
       <?php endif; ?>
     </main>
 
+    <!-- Global Image Preview Modal -->
+    <div id="imagePreviewModal" class="fixed inset-0 z-[120] hidden" role="dialog" aria-modal="true" aria-labelledby="imagePreviewTitle">
+      <div id="imagePreviewBackdrop" class="absolute inset-0 bg-gray-950/90 backdrop-blur-sm"></div>
+      <div class="relative flex min-h-full items-center justify-center p-3 sm:p-6">
+        <div class="relative flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-gray-900 shadow-2xl">
+          <div class="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5">
+            <div class="min-w-0">
+              <p id="imagePreviewEyebrow" class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Preview Foto</p>
+              <h2 id="imagePreviewTitle" class="truncate text-sm font-semibold text-white sm:text-base">Foto</h2>
+            </div>
+            <button type="button" id="imagePreviewClose" class="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-200 transition hover:bg-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30" aria-label="Tutup preview">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="flex min-h-0 flex-1 items-center justify-center bg-black/30 p-2 sm:p-4">
+            <img id="imagePreviewImage" src="" alt="" class="max-h-[78vh] max-w-full rounded-lg object-contain shadow-lg" draggable="false">
+          </div>
+          <div class="flex items-center justify-between gap-3 border-t border-white/10 px-4 py-2.5 text-[11px] text-gray-400 sm:px-5">
+            <span><i class="fas fa-expand mr-1"></i> Klik di luar atau tekan Esc untuk menutup</span>
+            <a id="imagePreviewOriginalLink" href="#" target="_blank" rel="noopener" class="hidden flex-shrink-0 font-semibold text-blue-300 hover:text-blue-200 hover:underline">Buka file asli</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-4 py-3"><p class="text-xs text-center text-gray-400 dark:text-gray-600">© 2026 GUDANG PT.BIG - Dibuat oleh Tommy Ryan Dwiputra</p></footer>
   </div>
 
   <script>
   const isDashboardPage = <?= json_encode($isDashboardPage) ?>;
+
+  (function initGlobalImagePreview() {
+    let modal, image, title, originalLink, backdrop, closeButton;
+
+    function closePreview() {
+      if (!modal) return;
+      modal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+      if (image) {
+        image.removeAttribute('src');
+        image.alt = '';
+      }
+    }
+
+    function openPreview(src, altText) {
+      if (!src) return;
+      modal = modal || document.getElementById('imagePreviewModal');
+      image = image || document.getElementById('imagePreviewImage');
+      title = title || document.getElementById('imagePreviewTitle');
+      originalLink = originalLink || document.getElementById('imagePreviewOriginalLink');
+      backdrop = backdrop || document.getElementById('imagePreviewBackdrop');
+      closeButton = closeButton || document.getElementById('imagePreviewClose');
+      if (!modal || !image) return;
+
+      const cleanTitle = altText || 'Foto';
+      image.src = src;
+      image.alt = cleanTitle;
+      if (title) title.textContent = cleanTitle;
+      if (originalLink) {
+        originalLink.href = src;
+        originalLink.classList.remove('hidden');
+        originalLink.classList.add('inline-flex');
+      }
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+      requestAnimationFrame(function () {
+        if (closeButton) closeButton.focus();
+      });
+    }
+
+    document.addEventListener('click', function (event) {
+      const link = event.target.closest('a[data-image-preview], a.js-image-preview');
+      if (!link) return;
+
+      const src = link.getAttribute('data-image-src') || link.getAttribute('href');
+      const img = link.querySelector('img');
+      const altText = link.getAttribute('data-image-title') || (img ? img.getAttribute('alt') : '') || 'Foto';
+      if (!src || !/\/((evidence)\/|file\?path=)/i.test(src)) return;
+
+      event.preventDefault();
+      openPreview(src, altText);
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closePreview();
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      modal = document.getElementById('imagePreviewModal');
+      image = document.getElementById('imagePreviewImage');
+      backdrop = document.getElementById('imagePreviewBackdrop');
+      closeButton = document.getElementById('imagePreviewClose');
+      if (closeButton) closeButton.addEventListener('click', closePreview);
+      if (backdrop) backdrop.addEventListener('click', closePreview);
+      if (image) image.addEventListener('click', function (e) { e.stopPropagation(); });
+    });
+  })();
+
+
 
   const pageHeadingIconMap = [
     { match: '/dashboard', icon: 'fa-th-large', color: 'text-blue-500 dark:text-blue-400' },
