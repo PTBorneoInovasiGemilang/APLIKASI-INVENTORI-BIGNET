@@ -570,24 +570,26 @@ function renderHeader($label, $sidebarGroupText) {
 
     <!-- Global Image Preview Modal -->
     <div id="imagePreviewModal" class="fixed inset-0 z-[120] hidden" role="dialog" aria-modal="true" aria-labelledby="imagePreviewTitle">
-      <div id="imagePreviewBackdrop" class="absolute inset-0 bg-gray-950/90 backdrop-blur-sm"></div>
+      <div id="imagePreviewBackdrop" class="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px]"></div>
       <div class="relative flex min-h-full items-center justify-center p-3 sm:p-6">
-        <div class="relative flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-gray-900 shadow-2xl">
-          <div class="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5">
+        <div class="relative flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+          <div class="flex items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 py-3.5 sm:px-5">
             <div class="min-w-0">
-              <p id="imagePreviewEyebrow" class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Preview Foto</p>
-              <h2 id="imagePreviewTitle" class="truncate text-sm font-semibold text-white sm:text-base">Foto</h2>
+              <p id="imagePreviewEyebrow" class="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400">Preview Foto</p>
+              <h2 id="imagePreviewTitle" class="truncate text-sm font-semibold text-gray-900 sm:text-base">Foto</h2>
             </div>
-            <button type="button" id="imagePreviewClose" class="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-gray-200 transition hover:bg-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30" aria-label="Tutup preview">
+            <button type="button" id="imagePreviewClose" class="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-500 transition hover:border-gray-300 hover:bg-gray-100 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200" aria-label="Tutup preview">
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="flex min-h-0 flex-1 items-center justify-center bg-black/30 p-2 sm:p-4">
-            <img id="imagePreviewImage" src="" alt="" class="max-h-[78vh] max-w-full rounded-lg object-contain shadow-lg" draggable="false">
+          <div class="flex min-h-0 flex-1 items-center justify-center bg-gray-100 p-2 sm:p-4">
+            <div class="flex max-h-[79vh] max-w-full items-center justify-center rounded-xl border border-gray-200 bg-white p-1.5 shadow-sm sm:p-2">
+              <img id="imagePreviewImage" src="" alt="" class="max-h-[76vh] max-w-full rounded-lg object-contain" draggable="false">
+            </div>
           </div>
-          <div class="flex items-center justify-between gap-3 border-t border-white/10 px-4 py-2.5 text-[11px] text-gray-400 sm:px-5">
-            <span><i class="fas fa-expand mr-1"></i> Klik di luar atau tekan Esc untuk menutup</span>
-            <a id="imagePreviewOriginalLink" href="#" target="_blank" rel="noopener" class="hidden flex-shrink-0 font-semibold text-blue-300 hover:text-blue-200 hover:underline">Buka file asli</a>
+          <div class="flex flex-col items-center justify-between gap-2 border-t border-gray-200 bg-white px-4 py-2.5 text-[11px] text-gray-500 sm:flex-row sm:px-5">
+            <span><i class="fas fa-expand mr-1 text-gray-400"></i> Klik di luar atau tekan Esc untuk menutup</span>
+            <a id="imagePreviewOriginalLink" href="#" target="_blank" rel="noopener" class="hidden flex-shrink-0 font-semibold text-blue-600 hover:text-blue-700 hover:underline">Buka file asli</a>
           </div>
         </div>
       </div>
