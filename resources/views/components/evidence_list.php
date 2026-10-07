@@ -81,7 +81,7 @@ $currentUser = \App\Helpers\AuthHelper::user();
               · <?= date('d M Y H:i', strtotime($ev['created_at'])) ?>
             </p>
             <div class="mt-2 flex items-center gap-3">
-              <a href="<?= url('/evidence/' . $ev['id']) ?>" target="_blank" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
+              <a href="<?= url('/evidence/' . $ev['id']) ?>" data-image-preview data-image-title="<?= htmlspecialchars($ev['original_name']) ?>" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
                 <i class="fas fa-eye"></i> Buka
               </a>
               <?php if (\App\Helpers\AttachmentHelper::canDelete($ev, $currentUser)): ?>
