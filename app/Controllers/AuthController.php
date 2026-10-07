@@ -34,10 +34,18 @@ class AuthController {
 
             $name = trim(filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING));
             $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
-            $phone = trim(filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_STRING));
+            $phone = trim((string)($_POST['phone'] ?? ''));
             $role = $_POST['role'] ?? '';
             $password = $_POST['password'] ?? '';
             $password_confirmation = $_POST['password_confirmation'] ?? '';
+
+            // Nomor HP wajib: hanya angka dan 10–15 digit.
+            $phone = preg_replace('/[^0-9]/', '', $phone);
+            if ($phone === '' || !preg_match('/^[0-9]{10,15}$/', $phone)) {
+                $_SESSION['error'] = "Nomor HP wajib diisi dan harus berupa angka 10–15 digit.";
+                header("Location: " . url('/register'));
+                exit;
+            }
 
             if (empty($name) || empty($email) || empty($password) || empty($role)) {
                 $_SESSION['error'] = "Semua field wajib diisi.";
