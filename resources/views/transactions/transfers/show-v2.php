@@ -127,7 +127,7 @@ body>*{visibility:hidden!important}
       <?php else: ?>
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <?php foreach($receivePhotos as $photo): ?>
-            <a href="<?=url('/evidence/'.(int)$photo['id'])?>" data-image-preview data-image-title="<?=htmlspecialchars($photo['original_name']??'Foto pengiriman')?>" class="group block overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <a href="<?=url('/evidence/'.(int)$photo['id'])?>" data-image-preview data-image-title="<?=htmlspecialchars($photo['original_name']??'Foto penerimaan')?>" class="group block overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
               <img src="<?=url('/evidence/'.(int)$photo['id'])?>" alt="<?=htmlspecialchars($photo['original_name']??'Foto penerimaan')?>" class="h-36 w-full object-cover transition-transform duration-200 group-hover:scale-105">
               <div class="p-2">
                 <div class="truncate text-[11px] font-semibold text-gray-800 dark:text-gray-200"><?=htmlspecialchars($photo['original_name']??'Foto penerimaan')?></div>
