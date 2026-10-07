@@ -24,6 +24,15 @@ ob_start();
           <i class="fas fa-edit"></i> Edit Pengajuan
         </a>
       <?php endif; ?>
+      <?php if ($submission['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole('TEKNISI_NOC') && (int)$submission['submitted_by'] === (int)\App\Helpers\AuthHelper::user()['id']): ?>
+        <form method="POST" action="<?php echo url('/submissions/delete'); ?>" class="inline-block" data-confirm="Pengajuan ini akan dihapus permanen karena belum diproses Admin." data-confirm-title="Hapus Pengajuan?" data-confirm-type="danger" data-confirm-icon="fa-trash" data-confirm-confirm="Hapus" data-confirm-loading="Menghapus...">
+          <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+          <input type="hidden" name="id" value="<?php echo (int)$submission['id']; ?>">
+          <button type="submit" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded shadow transition-colors">
+            <i class="fas fa-trash"></i> Hapus
+          </button>
+        </form>
+      <?php endif; ?>
       <?php if (in_array($submission['status'], ['APPROVED', 'PARTIAL_APPROVED']) && \App\Helpers\AuthHelper::hasRole('ADMIN')): ?>
         <a href="<?php echo url('/outgoing/create?submission_id=' . (int)$submission['id']); ?>" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded shadow transition-colors">
           <i class="fas fa-truck-loading"></i> Proses Barang Keluar
