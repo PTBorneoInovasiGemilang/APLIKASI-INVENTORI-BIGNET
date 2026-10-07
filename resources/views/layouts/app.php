@@ -639,7 +639,7 @@ function renderHeader($label, $sidebarGroupText) {
     }
 
     document.addEventListener('click', function (event) {
-      const link = event.target.closest('a[data-image-preview], a.js-image-preview');
+      const link = event.target.closest('[data-image-preview], .js-image-preview');
       if (!link) return;
 
       const src = link.getAttribute('data-image-src') || link.getAttribute('href');
