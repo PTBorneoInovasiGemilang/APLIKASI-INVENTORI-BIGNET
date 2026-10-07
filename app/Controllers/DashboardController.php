@@ -71,6 +71,23 @@ class DashboardController {
                 LIMIT 10
             ")->fetchAll(PDO::FETCH_ASSOC);
 
+            // ===== Barang paling sering keluar =====
+            // Ranking berdasarkan total kuantitas aktual pada transaksi Barang Keluar.
+            $topOutgoingItems = $pdo->query("
+                SELECT m.id, m.nama, m.kode_barang, u.name AS unit_name,
+                       COALESCE(SUM(oi.quantity), 0) AS outgoing_quantity,
+                       COUNT(DISTINCT oi.outgoing_id) AS outgoing_transactions,
+                       MAX(o.created_at) AS last_outgoing_at
+                FROM outgoing_items oi
+                JOIN outgoing o ON o.id = oi.outgoing_id
+                JOIN master_items m ON m.id = oi.master_item_id
+                LEFT JOIN units u ON u.id = m.unit_id
+                WHERE o.status = 'COMPLETED'
+                GROUP BY m.id, m.nama, m.kode_barang, u.name
+                ORDER BY outgoing_quantity DESC, outgoing_transactions DESC, last_outgoing_at DESC, m.nama ASC
+                LIMIT 5
+            ")->fetchAll(PDO::FETCH_ASSOC);
+
             // ===== Teknisi paling sering mengajukan =====
             // Ranking berdasarkan seluruh pengajuan yang masih tersimpan, khusus akun TEKNISI_NOC.
             $topSubmitters = $pdo->query("
