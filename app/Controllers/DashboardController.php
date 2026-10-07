@@ -71,6 +71,20 @@ class DashboardController {
                 LIMIT 10
             ")->fetchAll(PDO::FETCH_ASSOC);
 
+            // ===== Teknisi paling sering mengajukan =====
+            // Ranking berdasarkan seluruh pengajuan yang masih tersimpan, khusus akun TEKNISI_NOC.
+            $topSubmitters = $pdo->query("
+                SELECT u.id, u.name,
+                       COUNT(s.id) AS submission_count,
+                       MAX(s.created_at) AS last_submission_at
+                FROM users u
+                JOIN submissions s ON s.submitted_by = u.id
+                WHERE u.role = 'TEKNISI_NOC'
+                GROUP BY u.id, u.name
+                ORDER BY submission_count DESC, last_submission_at DESC, u.name ASC
+                LIMIT 5
+            ")->fetchAll(PDO::FETCH_ASSOC);
+
             // ===== Pengajuan aktif (list) =====
             $activeSubmissions = $pdo->query("
                 SELECT s.id, s.submission_code, s.status, s.created_at, u.name as submitter_name
