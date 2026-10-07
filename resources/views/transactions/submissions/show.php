@@ -204,6 +204,208 @@ ob_start();
   </div>
 
 
+<?php if (\App\Helpers\AuthHelper::hasRole('ADMIN') && in_array($submission['status'], ['APPROVED', 'PARTIAL_APPROVED'], true)): ?>
+<div class="space-y-6 mb-6">
+
+  <!-- Foto referensi setiap barang yang disetujui -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+            <i class="fas fa-box-open mr-2 text-blue-500"></i>Barang yang Diberikan
+          </h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Foto barang dan detail jumlah yang disetujui/dipenuhi.
+          </p>
+        </div>
+        <?php if (!empty($submission['approved_at'])): ?>
+          <span class="text-xs text-gray-500 dark:text-gray-400 text-right">
+            Persetujuan: <strong><?= date('d M Y H:i', strtotime($submission['approved_at'])) ?></strong>
+          </span>
+        <?php endif; ?>
+      </div>
+    </div>
+
+    <div class="p-4 sm:p-6 space-y-4">
+      <?php foreach ($items as $it):
+        $photos = $it['_photos'] ?? [];
+        $approvedQty = (int)($it['approved_quantity'] ?? 0);
+        $fulfilledQty = (int)($it['fulfilled_quantity'] ?? 0);
+        $remainingQty = max(0, $approvedQty - $fulfilledQty);
+        $itemName = ($it['source_type'] ?? '') === 'MANUAL'
+          ? ($it['manual_name'] ?? ($it['nama'] ?? 'Barang Manual'))
+          : ($it['nama'] ?? 'Barang');
+        $itemCode = $it['kode_barang'] ?? '';
+      ?>
+        <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div class="p-4 flex flex-col lg:flex-row lg:items-start gap-4">
+            <div class="w-full lg:w-44 shrink-0">
+              <?php if (!empty($photos)): ?>
+                <div class="grid grid-cols-2 gap-2">
+                  <?php foreach (array_slice($photos, 0, 3) as $photo): ?>
+                    <a href="<?= url('/file?path=' . urlencode($photo['file_path'])) ?>" target="_blank"
+                       class="block aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                      <img src="<?= url('/file?path=' . urlencode($photo['file_path'])) ?>"
+                           alt="<?= htmlspecialchars($itemName) ?>"
+                           class="w-full h-full object-cover">
+                    </a>
+                  <?php endforeach; ?>
+                </div>
+              <?php else: ?>
+                <div class="aspect-[4/3] rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center text-center px-3">
+                  <i class="fas fa-image text-2xl text-gray-300 dark:text-gray-600"></i>
+                  <span class="text-xs text-gray-400 dark:text-gray-500 mt-2">Belum ada foto</span>
+                </div>
+              <?php endif; ?>
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                <div>
+                  <h4 class="font-bold text-gray-900 dark:text-white break-words"><?= htmlspecialchars($itemName) ?></h4>
+                  <?php if ($itemCode !== ''): ?>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5"><?= htmlspecialchars($itemCode) ?></p>
+                  <?php endif; ?>
+                  <?php if (($it['source_type'] ?? '') === 'MANUAL'): ?>
+                    <span class="inline-flex mt-2 px-2 py-1 rounded-md bg-yellow-100 text-yellow-800 text-xs font-semibold">Manual / Custom</span>
+                  <?php endif; ?>
+                </div>
+                <span class="inline-flex w-fit px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold">
+                  <?= $approvedQty ?> disetujui
+                </span>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+                <div class="rounded-lg bg-gray-50 dark:bg-gray-900/50 p-3">
+                  <div class="text-[11px] text-gray-500 dark:text-gray-400">Diminta</div>
+                  <div class="text-base font-bold text-gray-900 dark:text-white mt-0.5"><?= (int)$it['requested_quantity'] ?></div>
+                </div>
+                <div class="rounded-lg bg-gray-50 dark:bg-gray-900/50 p-3">
+                  <div class="text-[11px] text-gray-500 dark:text-gray-400">Dipenuhi</div>
+                  <div class="text-base font-bold text-green-600 dark:text-green-400 mt-0.5"><?= $fulfilledQty ?></div>
+                </div>
+                <div class="rounded-lg bg-gray-50 dark:bg-gray-900/50 p-3 col-span-2 sm:col-span-1">
+                  <div class="text-[11px] text-gray-500 dark:text-gray-400">Sisa</div>
+                  <div class="text-base font-bold text-gray-900 dark:text-white mt-0.5"><?= $remainingQty ?></div>
+                </div>
+              </div>
+
+              <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex flex-wrap gap-x-5 gap-y-1">
+                  <?php if (!empty($submission['approved_at'])): ?>
+                    <span><i class="fas fa-check-circle mr-1 text-green-500"></i>Disetujui: <strong><?= date('d M Y H:i', strtotime($submission['approved_at'])) ?></strong></span>
+                  <?php endif; ?>
+                  <?php if (!empty($photos)): ?>
+                    <span><i class="fas fa-image mr-1 text-blue-500"></i><?= count($photos) ?> foto referensi</span>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <?php endforeach; ?>
+
+      <?php if (empty($items)): ?>
+        <div class="text-center text-sm text-gray-500 dark:text-gray-400 py-6">Tidak ada item pada pengajuan.</div>
+      <?php endif; ?>
+    </div>
+  </div>
+
+  <!-- Bukti aktual saat barang dikeluarkan -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+        <i class="fas fa-camera mr-2 text-green-500"></i>Dokumentasi Barang Keluar
+      </h3>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        Foto bukti aktual saat barang diberikan oleh gudang, lengkap dengan tanggal dan jam.
+      </p>
+    </div>
+
+    <div class="p-4 sm:p-6 space-y-5">
+      <?php if (empty($fulfillments)): ?>
+        <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 px-4 py-8 text-center">
+          <i class="fas fa-clock text-xl text-gray-300 dark:text-gray-600"></i>
+          <p class="mt-2 text-sm font-semibold text-gray-500 dark:text-gray-400">Belum ada Barang Keluar</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Foto bukti akan muncul setelah Admin memproses pemenuhan pengajuan.</p>
+        </div>
+      <?php else: ?>
+        <?php foreach ($fulfillments as $fulfillment):
+          $outId = (int)$fulfillment['id'];
+          $evs = $fulfillmentPhotos[$outId] ?? [];
+          $fItems = $fulfillmentItems[$outId] ?? [];
+        ?>
+          <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="p-4 bg-gray-50 dark:bg-gray-900/50">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                <div>
+                  <div class="font-bold text-gray-900 dark:text-white"><?= htmlspecialchars($fulfillment['transaction_code']) ?></div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <i class="fas fa-calendar mr-1"></i><?= date('d M Y', strtotime($fulfillment['created_at'])) ?>
+                    <i class="fas fa-clock ml-3 mr-1"></i><strong><?= date('H:i:s', strtotime($fulfillment['created_at'])) ?></strong>
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Gudang: <strong><?= htmlspecialchars($fulfillment['warehouse_name'] ?? '-') ?></strong>
+                    · Diproses oleh: <strong><?= htmlspecialchars($fulfillment['processor_name'] ?? '-') ?></strong>
+                  </div>
+                </div>
+                <a href="<?= url('/outgoing/show?id=' . $outId) ?>" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-semibold">
+                  <i class="fas fa-external-link-alt"></i> Detail Barang Keluar
+                </a>
+              </div>
+
+              <?php if (!empty($fItems)): ?>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <?php foreach ($fItems as $fi): ?>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs text-gray-700 dark:text-gray-300">
+                      <?= htmlspecialchars($fi['nama'] ?? 'Barang') ?> × <?= (int)$fi['quantity'] ?>
+                    </span>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+            </div>
+
+            <div class="p-4">
+              <?php if (empty($evs)): ?>
+                <div class="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 px-4 py-6 text-center">
+                  <i class="fas fa-camera-slash text-gray-300 dark:text-gray-600"></i>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Belum ada foto bukti pada transaksi ini.</p>
+                </div>
+              <?php else: ?>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <?php foreach ($evs as $ev): ?>
+                    <?php $isImage = strpos($ev['mime_type'] ?? '', 'image/') === 0; ?>
+                    <?php if (!$isImage) continue; ?>
+                    <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                      <a href="<?= url('/evidence/' . (int)$ev['id']) ?>" target="_blank" class="block aspect-[4/3] bg-gray-100 dark:bg-gray-900">
+                        <img src="<?= url('/evidence/' . (int)$ev['id']) ?>"
+                             alt="<?= htmlspecialchars($ev['original_name'] ?? 'Foto bukti') ?>"
+                             class="w-full h-full object-cover">
+                      </a>
+                      <div class="p-2.5">
+                        <p class="text-xs font-semibold text-gray-800 dark:text-white break-words"><?= htmlspecialchars($ev['original_name'] ?? 'Foto') ?></p>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                          Upload: <strong><?= date('d M Y H:i:s', strtotime($ev['created_at'])) ?></strong>
+                        </p>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                          Oleh: <?= htmlspecialchars($ev['uploader_name'] ?? 'System') ?>
+                        </p>
+                      </div>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    </div>
+  </div>
+
+</div>
+<?php endif; ?>
+
 <?php require __DIR__ . '/../../components/audit_timeline.php'; ?>
 
 <?php
