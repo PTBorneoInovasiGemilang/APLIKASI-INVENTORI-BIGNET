@@ -47,6 +47,22 @@ if (!function_exists('dashboardBadge')) {
 
 <div class="space-y-6">
 
+  <!-- Welcome Banner -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 flex items-center justify-between border border-gray-200 dark:border-gray-700">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Selamat datang, <?= htmlspecialchars($user['name']) ?>!</h2>
+      <p class="text-gray-500 dark:text-gray-400 mt-1">
+        <?php if (isset($teknis_view) && $teknis_view): ?>
+          Berikut ringkasan aktivitas dan barang yang menjadi tanggung jawab Anda.
+        <?php else: ?>
+          Monitoring stok dan pergerakan operasional gudang secara real-time.
+        <?php endif; ?>
+      </p>
+    </div>
+    <div class="hidden md:block text-right">
+      <p class="text-sm font-medium text-gray-500 dark:text-gray-400"><?= date('l, d F Y') ?></p>
+    </div>
+  </div>
   <!-- KPI Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
     <?php if (!isset($teknis_view) || !$teknis_view): ?>
@@ -180,23 +196,6 @@ if (!function_exists('dashboardBadge')) {
         </div>
       </div>
     <?php endif; ?>
-  </div>
-
-  <!-- Welcome Banner -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 flex items-center justify-between border border-gray-200 dark:border-gray-700">
-    <div>
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Selamat datang, <?= htmlspecialchars($user['name']) ?>!</h2>
-      <p class="text-gray-500 dark:text-gray-400 mt-1">
-        <?php if (isset($teknis_view) && $teknis_view): ?>
-          Berikut ringkasan aktivitas dan barang yang menjadi tanggung jawab Anda.
-        <?php else: ?>
-          Monitoring stok dan pergerakan operasional gudang secara real-time.
-        <?php endif; ?>
-      </p>
-    </div>
-    <div class="hidden md:block text-right">
-      <p class="text-sm font-medium text-gray-500 dark:text-gray-400"><?= date('l, d F Y') ?></p>
-    </div>
   </div>
 
   <?php if (!empty($alerts)): ?>
