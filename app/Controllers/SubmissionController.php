@@ -570,10 +570,10 @@ class SubmissionController {
             // submission_items menggunakan ON DELETE CASCADE, tetapi delete eksplisit
             // menjaga kompatibilitas jika schema produksi memiliki constraint berbeda.
             $pdo->prepare("DELETE FROM submission_items WHERE submission_id = ?")->execute([$id]);
-            $pdo->prepare("DELETE FROM submissions WHERE id = ? AND submitted_by = ? AND status = 'PENDING'")
-                ->execute([$id, (int)$user['id']]);
+            $deleteStmt = $pdo->prepare("DELETE FROM submissions WHERE id = ? AND submitted_by = ? AND status = 'PENDING'");
+            $deleteStmt->execute([$id, (int)$user['id']]);
 
-            if ($pdo->rowCount() !== 1) {
+            if ($deleteStmt->rowCount() !== 1) {
                 throw new \Exception('Pengajuan gagal dihapus.');
             }
 
