@@ -518,6 +518,76 @@ class SubmissionController {
         exit;
     }
 
+    public function delete() {
+        AuthHelper::requireRole(['TEKNISI_NOC']);
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
+            $_SESSION['error'] = 'CSRF token validation failed.';
+            header('Location: ' . url('/submissions'));
+            exit;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $pdo = Database::getInstance()->getConnection();
+        $user = AuthHelper::user();
+
+        try {
+            $pdo->beginTransaction();
+
+            $q = $pdo->prepare("SELECT id, submission_code, status, notes
+                                FROM submissions
+                                WHERE id = ? AND submitted_by = ?
+                                FOR UPDATE");
+            $q->execute([$id, (int)$user['id']]);
+            $submission = $q->fetch(PDO::FETCH_ASSOC);
+
+            if (!$submission) {
+                throw new \Exception('Pengajuan tidak ditemukan atau bukan milik Anda.');
+            }
+
+            if ($submission['status'] !== 'PENDING') {
+                throw new \Exception('Pengajuan tidak dapat dihapus karena sudah diproses Admin.');
+            }
+
+            // Safety guard: pengajuan pending tidak boleh sudah memiliki transaksi turunan.
+            $q = $pdo->prepare("SELECT COUNT(*) FROM outgoing WHERE submission_id = ?");
+            $q->execute([$id]);
+            if ((int)$q->fetchColumn() > 0) {
+                throw new \Exception('Pengajuan sudah memiliki transaksi Barang Keluar sehingga tidak dapat dihapus.');
+            }
+
+            // Simpan audit delete sebelum record transaksi induk dihapus.
+            $audit = $pdo->prepare("INSERT INTO audit_logs
+                (user_id, action, entity, entity_id, old_data, ip_address, user_agent)
+                VALUES (?, 'DELETE', 'submissions', ?, ?, ?, ?)");
+            $audit->execute([
+                (int)$user['id'],
+                $id,
+                json_encode($submission, JSON_UNESCAPED_UNICODE),
+                $_SERVER['REMOTE_ADDR'] ?? null,
+                $_SERVER['HTTP_USER_AGENT'] ?? null
+            ]);
+
+            // submission_items menggunakan ON DELETE CASCADE, tetapi delete eksplisit
+            // menjaga kompatibilitas jika schema produksi memiliki constraint berbeda.
+            $pdo->prepare("DELETE FROM submission_items WHERE submission_id = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM submissions WHERE id = ? AND submitted_by = ? AND status = 'PENDING'")
+                ->execute([$id, (int)$user['id']]);
+
+            if ($pdo->rowCount() !== 1) {
+                throw new \Exception('Pengajuan gagal dihapus.');
+            }
+
+            $pdo->commit();
+            $_SESSION['success'] = 'Pengajuan berhasil dihapus.';
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $_SESSION['error'] = 'Gagal menghapus pengajuan: ' . $e->getMessage();
+        }
+
+        header('Location: ' . url('/submissions'));
+        exit;
+    }
+
     public function approve() {
         AuthHelper::requireRole(['ADMIN']);
         if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
