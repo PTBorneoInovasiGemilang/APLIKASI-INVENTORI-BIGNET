@@ -118,18 +118,18 @@ $currentRole = $roleMeta[$roleKey] ?? [
   </div>
 
   <!-- Segmented Tab Navigation -->
-  <div class="flex p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl gap-1">
-    <a href="?tab=general" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 <?= $activeTab === 'general' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' ?>">
-      <i class="fas fa-user-gear text-sm"></i>
-      <span>Data Diri</span>
+  <div class="flex p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl gap-1">
+    <a href="?tab=general" class="flex-1 text-center py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 <?= $activeTab === 'general' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' ?>">
+      <i class="fas fa-user-gear text-xs sm:text-sm"></i>
+      <span class="whitespace-nowrap">Data Diri</span>
     </a>
-    <a href="?tab=password" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 <?= $activeTab === 'password' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' ?>">
-      <i class="fas fa-shield-halved text-sm"></i>
-      <span>Keamanan & Password</span>
+    <a href="?tab=password" class="flex-1 text-center py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 <?= $activeTab === 'password' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' ?>">
+      <i class="fas fa-key text-xs sm:text-sm"></i>
+      <span class="whitespace-nowrap">Password</span>
     </a>
-    <a href="?tab=activity" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 <?= $activeTab === 'activity' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' ?>">
-      <i class="fas fa-clock-rotate-left text-sm"></i>
-      <span>Aktivitas</span>
+    <a href="?tab=activity" class="flex-1 text-center py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 <?= $activeTab === 'activity' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200' ?>">
+      <i class="fas fa-clock-rotate-left text-xs sm:text-sm"></i>
+      <span class="whitespace-nowrap">Aktivitas</span>
     </a>
   </div>
 
@@ -152,12 +152,7 @@ $currentRole = $roleMeta[$roleKey] ?? [
             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1.5">
               Nama Lengkap <span class="text-red-500">*</span>
             </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <i class="fas fa-user text-sm"></i>
-              </span>
-              <input type="text" name="name" value="<?= htmlspecialchars($profile['name']) ?>" required autocomplete="name" class="w-full pl-10 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Nama lengkap Anda">
-            </div>
+            <input type="text" name="name" value="<?= htmlspecialchars($profile['name']) ?>" required autocomplete="name" class="w-full px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Nama lengkap Anda">
           </div>
 
           <!-- Email (Read-Only) -->
@@ -166,12 +161,7 @@ $currentRole = $roleMeta[$roleKey] ?? [
               <span>Alamat Email</span>
               <span class="text-[10px] text-slate-400 font-normal lowercase">(tidak dapat diubah)</span>
             </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <i class="fas fa-envelope text-sm"></i>
-              </span>
-              <input type="email" value="<?= htmlspecialchars($profile['email']) ?>" disabled class="w-full pl-10 pr-3.5 py-2.5 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-500 dark:text-slate-400 cursor-not-allowed">
-            </div>
+            <input type="email" value="<?= htmlspecialchars($profile['email']) ?>" disabled class="w-full px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-500 dark:text-slate-400 cursor-not-allowed">
           </div>
 
           <!-- Nomor Telepon -->
@@ -179,12 +169,7 @@ $currentRole = $roleMeta[$roleKey] ?? [
             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1.5">
               Nomor WhatsApp / Telepon
             </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <i class="fas fa-phone text-sm"></i>
-              </span>
-              <input type="text" name="phone" value="<?= htmlspecialchars($profile['phone'] ?? '') ?>" autocomplete="tel" class="w-full pl-10 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Contoh: 081234567890">
-            </div>
+            <input type="text" name="phone" value="<?= htmlspecialchars($profile['phone'] ?? '') ?>" autocomplete="tel" class="w-full px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Contoh: 081234567890">
             <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Digunakan untuk notifikasi dan kontak tim di lapangan.</p>
           </div>
 
@@ -235,10 +220,7 @@ $currentRole = $roleMeta[$roleKey] ?? [
               Kata Sandi Saat Ini <span class="text-red-500">*</span>
             </label>
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <i class="fas fa-lock text-sm"></i>
-              </span>
-              <input type="password" id="currPassInput" name="current_password" required autocomplete="current-password" class="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Masukkan password lama Anda">
+              <input type="password" id="currPassInput" name="current_password" required autocomplete="current-password" class="w-full pl-3.5 pr-10 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Masukkan password lama Anda">
               <button type="button" onclick="togglePasswordVisibility('currPassInput', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
                 <i class="fas fa-eye text-xs"></i>
               </button>
@@ -251,10 +233,7 @@ $currentRole = $roleMeta[$roleKey] ?? [
               Kata Sandi Baru <span class="text-red-500">*</span>
             </label>
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <i class="fas fa-key text-sm"></i>
-              </span>
-              <input type="password" id="newPassInput" name="password" minlength="6" required autocomplete="new-password" class="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Minimal 6 karakter">
+              <input type="password" id="newPassInput" name="password" minlength="6" required autocomplete="new-password" class="w-full pl-3.5 pr-10 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Minimal 6 karakter">
               <button type="button" onclick="togglePasswordVisibility('newPassInput', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
                 <i class="fas fa-eye text-xs"></i>
               </button>
@@ -268,16 +247,21 @@ $currentRole = $roleMeta[$roleKey] ?? [
               Ulangi Kata Sandi Baru <span class="text-red-500">*</span>
             </label>
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <i class="fas fa-check-double text-sm"></i>
-              </span>
-              <input type="password" id="confPassInput" name="password_confirmation" minlength="6" required autocomplete="new-password" class="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Ulangi kata sandi baru">
+              <input type="password" id="confPassInput" name="password_confirmation" minlength="6" required autocomplete="new-password" class="w-full pl-3.5 pr-10 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Ulangi kata sandi baru">
               <button type="button" onclick="togglePasswordVisibility('confPassInput', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
                 <i class="fas fa-eye text-xs"></i>
               </button>
             </div>
           </div>
         </div>
+
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+          <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm text-sm transition-all">
+            <i class="fas fa-shield-alt text-xs"></i> Perbarui Kata Sandi
+          </button>
+        </div>
+      </form>
+    </div>
 
         <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
           <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm text-sm transition-all">

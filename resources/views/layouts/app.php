@@ -247,26 +247,69 @@ function renderHeader($label, $sidebarGroupText) {
     /* ========================================================
        DISAFA MODERN SAAS THEME HARMONIZATION (GLOBAL)
        ======================================================== */
-    main .bg-white.shadow,
-    main .bg-white.shadow-sm,
-    main .bg-white.rounded-lg,
-    main .bg-white.rounded-xl {
+    /* Light mode card defaults */
+    html:not(.dark) main .bg-white.shadow,
+    html:not(.dark) main .bg-white.shadow-sm,
+    html:not(.dark) main .bg-white.rounded-lg,
+    html:not(.dark) main .bg-white.rounded-xl,
+    html:not(.dark) main .bg-white.rounded-2xl {
       background-color: #ffffff !important;
       border-radius: 1rem !important; /* rounded-2xl */
       border: 1px solid rgba(226, 232, 240, 0.8) !important; /* slate-200/80 */
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
     }
-    .dark main .bg-gray-800,
-    .dark main .bg-slate-900 {
-      background-color: #0f172a !important;
-      border: 1px solid #1e293b !important;
+    html:not(.dark) main .border-gray-200,
+    html:not(.dark) main .border-slate-200 {
+      border-color: rgba(226, 232, 240, 0.8) !important;
     }
-    .dark main .border-gray-700,
-    .dark main .border-gray-800 {
+
+    /* Dark mode global harmonization */
+    html.dark main .bg-white,
+    html.dark main [class*="dark:bg-slate-900"],
+    html.dark main [class*="dark:bg-gray-800"],
+    html.dark main .bg-gray-800,
+    html.dark main .bg-slate-900 {
+      background-color: #0f172a !important; /* slate-900 */
+      border-radius: 1rem !important;
+      border: 1px solid #1e293b !important; /* slate-800 */
+      color: #f1f5f9 !important;
+    }
+
+    /* Sub-containers / inner cards in dark mode */
+    html.dark main .bg-slate-50,
+    html.dark main .bg-gray-50,
+    html.dark main [class*="dark:bg-slate-800"],
+    html.dark main [class*="dark:bg-gray-700"] {
+      background-color: #1e293b !important; /* slate-800 */
+      border-color: #334155 !important; /* slate-700 */
+    }
+
+    html.dark main .border-gray-200,
+    html.dark main .border-gray-700,
+    html.dark main .border-slate-200,
+    html.dark main [class*="dark:border-slate-800"],
+    html.dark main [class*="dark:border-gray-700"] {
       border-color: #1e293b !important;
     }
-    main .border-gray-200 {
-      border-color: rgba(226, 232, 240, 0.8) !important;
+
+    /* Dark mode text colors */
+    html.dark main .text-gray-900,
+    html.dark main .text-slate-900,
+    html.dark main .text-gray-800,
+    html.dark main .text-slate-800 {
+      color: #f8fafc !important;
+    }
+    html.dark main .text-gray-700,
+    html.dark main .text-slate-700,
+    html.dark main .text-gray-600,
+    html.dark main .text-slate-600 {
+      color: #cbd5e1 !important;
+    }
+    html.dark main .text-gray-500,
+    html.dark main .text-slate-500,
+    html.dark main .text-gray-400,
+    html.dark main .text-slate-400 {
+      color: #94a3b8 !important;
     }
 
     /* Global Table Container & Styling */

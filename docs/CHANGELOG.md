@@ -15,6 +15,26 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-09 — COMPLETE DARK MODE HARMONIZATION & MOBILE INPUT REFINEMENT
+**Task:** Penyelarasan total tema Dark Mode (eliminasi kartu putih yang silau) dan pembersihan ikon tumpang tindih pada form profil/filter mobile.
+**Goal:** Menjamin seluruh kartu dan panel di semua modul otomatis menjadi gelap pekat (`slate-900`/`slate-800`) saat Dark Mode aktif tanpa ada yang bocor putih, serta memastikan teks input nama, email, telepon, dan password di halaman profil bersih tanpa gangguan tumpang tindih ikon.
+**Changed:**
+- `resources/views/layouts/app.php`:
+  - Perbaiki selektor CSS global: jadikan aturan kartu putih eksklusif untuk `html:not(.dark)` sehingga tidak lagi menimpa kartu di mode gelap.
+  - Terapkan aturan `html.dark main` komprehensif: semua kartu, sub-kartu, modal, dan tabel otomatis berwarna `slate-900` (`#0f172a`) dan `slate-800` (`#1e293b`), dengan border `slate-800` dan teks `slate-100`/`slate-300`.
+- `resources/views/dashboard/index.php`:
+  - Tombol pill "Semua Gudang" dan "Refresh" diselaraskan ke `bg-slate-100 dark:bg-slate-800` agar tidak silau putih saat dark mode.
+- `resources/views/profile/show.php`:
+  - Hapus ikon dekoratif absolut di sisi kiri pada input Nama Lengkap, Email, dan Telepon agar teks tidak pernah tertimpa ikon.
+  - Rapikan label tab navigasi profil pada mobile ("Data Diri", "Password", "Aktivitas" dengan `whitespace-nowrap`) agar pas dan tidak patah dua baris.
+  - Bidang kata sandi hanya menggunakan tombol mata toggle di sebelah kanan.
+**Business impact:** Mode gelap sekarang 100% konsisten, elegan, dan nyaman di mata pengguna mobile maupun desktop. Form profil dan input bebas dari tumpang tindih grafis.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Code review, audit CSS specificity, verifikasi balanced braces, dan 170 routes OK.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-09 — FIX MOBILE KPI TRUNCATION & FORM INPUT ICON OVERLAP
 **Task:** Perbaikan bug tampilan kartu KPI terpotong ("TOTAL PENG...", "MENUNGGU...") dan tumpang tindih ikon form di tampilan mobile (Teknisi & All Roles).
 **Goal:** Memperbaiki layout kartu ringkasan KPI agar judul dan angka terbaca utuh tanpa terpotong elipsis di layar smartphone sempit, serta mengeliminasi tumpang tindih ikon pencarian dan dropdown status pada form filter.

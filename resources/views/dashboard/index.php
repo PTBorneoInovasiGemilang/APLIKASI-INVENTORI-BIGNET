@@ -54,11 +54,11 @@ if (!function_exists('dashboardBadge')) {
       <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Monitoring stok dan pergerakan operasional gudang secara real-time</p>
     </div>
     <div class="flex items-center gap-2 self-start sm:self-auto">
-      <div class="inline-flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm">
+      <div class="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm">
         <i class="fas fa-warehouse text-blue-500 text-xs"></i>
         <span>Semua Gudang</span>
       </div>
-      <button onclick="window.location.reload()" class="inline-flex items-center gap-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200/90 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-colors">
+      <button onclick="window.location.reload()" class="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/90 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-colors">
         <i class="fas fa-sync-alt text-slate-400 text-xs"></i>
         <span>Refresh</span>
       </button>
