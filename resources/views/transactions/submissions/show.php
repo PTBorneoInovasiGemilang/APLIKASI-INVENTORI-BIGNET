@@ -7,43 +7,51 @@ if (empty($_SESSION['csrf_token'])) {
 ob_start();
 ?>
 
-<div class="mb-6">
-  <a href="<?php echo url('/submissions'); ?>" class="text-blue-600 dark:text-blue-400 hover:underline"><i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar Pengajuan</a>
+<div class="mb-4">
+  <a href="<?= url('/submissions') ?>" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors">
+    <i class="fas fa-arrow-left text-[10px]"></i>
+    <span>Kembali ke Daftar Pengajuan</span>
+  </a>
 </div>
 
-<div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-  <div class="flex justify-between items-start mb-4">
+<div class="bg-white dark:bg-slate-900 shadow-sm rounded-2xl p-5 sm:p-6 mb-6 border border-slate-200/80 dark:border-slate-800">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
     <div>
-      <h2 class="text-xl font-bold text-gray-800 dark:text-white"><?php echo htmlspecialchars($submission['submission_code']); ?> <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(<?php echo htmlspecialchars(\App\Helpers\UIHelper::statusLabel($submission['submission_type'])); ?>)</span></h2>
-      <p class="text-sm text-gray-500 dark:text-gray-400">Dibuat pada: <?php echo date('Y-m-d H:i', strtotime($submission['created_at'])); ?> oleh <?php echo htmlspecialchars($submission['submitter_name']); ?></p>
+      <div class="flex items-center gap-2">
+        <h2 class="text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight"><?php echo htmlspecialchars($submission['submission_code']); ?></h2>
+        <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+          <?php echo htmlspecialchars(\App\Helpers\UIHelper::statusLabel($submission['submission_type'])); ?>
+        </span>
+      </div>
+      <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Dibuat pada <?= date('d M Y, H:i', strtotime($submission['created_at'])); ?> oleh <strong class="text-slate-700 dark:text-slate-300"><?php echo htmlspecialchars($submission['submitter_name']); ?></strong></p>
     </div>
-    <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3">
-      <?php echo \App\Helpers\UIHelper::statusBadge($submission['status'], 'px-3 py-1 text-sm'); ?>
+    <div class="flex flex-wrap items-center gap-2">
+      <?php echo \App\Helpers\UIHelper::statusBadge($submission['status'], 'px-3 py-1 text-xs'); ?>
       <?php if ($submission['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole('TEKNISI_NOC') && (int)$submission['submitted_by'] === (int)\App\Helpers\AuthHelper::user()['id']): ?>
-        <a href="<?php echo url('/submissions/edit?id=' . (int)$submission['id']); ?>" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold py-2 px-4 rounded shadow transition-colors">
-          <i class="fas fa-edit"></i> Edit Pengajuan
+        <a href="<?php echo url('/submissions/edit?id=' . (int)$submission['id']); ?>" class="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow-sm transition-colors">
+          <i class="fas fa-edit text-xs"></i> Edit Pengajuan
         </a>
       <?php endif; ?>
       <?php if ($submission['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole('TEKNISI_NOC') && (int)$submission['submitted_by'] === (int)\App\Helpers\AuthHelper::user()['id']): ?>
         <form method="POST" action="<?php echo url('/submissions/delete'); ?>" class="inline-block" data-confirm="Pengajuan ini akan dihapus permanen karena belum diproses Admin." data-confirm-title="Hapus Pengajuan?" data-confirm-type="danger" data-confirm-icon="fa-trash" data-confirm-confirm="Hapus" data-confirm-loading="Menghapus...">
           <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
           <input type="hidden" name="id" value="<?php echo (int)$submission['id']; ?>">
-          <button type="submit" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded shadow transition-colors">
-            <i class="fas fa-trash"></i> Hapus
+          <button type="submit" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow-sm transition-colors">
+            <i class="fas fa-trash text-xs"></i> Hapus
           </button>
         </form>
       <?php endif; ?>
       <?php if (in_array($submission['status'], ['APPROVED', 'PARTIAL_APPROVED']) && \App\Helpers\AuthHelper::hasRole('ADMIN')): ?>
-        <a href="<?php echo url('/outgoing/create?submission_id=' . (int)$submission['id']); ?>" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded shadow transition-colors">
-          <i class="fas fa-truck-loading"></i> Proses Barang Keluar
+        <a href="<?php echo url('/outgoing/create?submission_id=' . (int)$submission['id']); ?>" class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-xl shadow-sm transition-colors">
+          <i class="fas fa-truck-loading text-xs"></i> Proses Barang Keluar
         </a>
       <?php endif; ?>
     </div>
   </div>
   
   <div class="mb-4">
-    <h4 class="font-semibold text-gray-700 dark:text-gray-300">Catatan / Alasan:</h4>
-    <div class="text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-4 rounded mt-2 text-sm">
+    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Catatan / Alasan:</h4>
+    <div class="text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 text-sm">
       <?php 
         $notesData = json_decode($submission['notes'], true);
         if (is_array($notesData) && json_last_error() === JSON_ERROR_NONE) {
@@ -60,22 +68,22 @@ ob_start();
   </div>
 
   <?php if ($submission['approved_by']): ?>
-  <div class="mb-4">
-    <h4 class="font-semibold text-gray-700 dark:text-gray-300">Detail Persetujuan:</h4>
-    <p class="text-sm text-gray-600 dark:text-gray-400">Diproses oleh <?php echo htmlspecialchars($submission['approver_name']); ?> pada <?php echo date('Y-m-d H:i', strtotime($submission['approved_at'])); ?></p>
+  <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Detail Persetujuan:</h4>
+    <p class="text-xs text-slate-600 dark:text-slate-400">Diproses oleh <strong class="text-slate-800 dark:text-slate-200"><?php echo htmlspecialchars($submission['approver_name']); ?></strong> pada <?= date('d M Y, H:i', strtotime($submission['approved_at'])); ?></p>
     <?php if ($submission['approval_notes']): ?>
-      <p class="text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900 p-3 rounded mt-1"><?php echo nl2br(htmlspecialchars($submission['approval_notes'])); ?></p>
+      <p class="text-slate-700 dark:text-slate-300 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40 p-3 rounded-xl mt-2 text-sm"><?php echo nl2br(htmlspecialchars($submission['approval_notes'])); ?></p>
     <?php endif; ?>
   </div>
   <?php endif; ?>
 </div>
 
-<div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-  <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Daftar Barang</h3>
+<div class="bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 mb-6">
+  <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/40">
+    <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">Daftar Barang yang Diajukan</h3>
     <?php if ($submission['submission_type'] === 'MANUAL' && $submission['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole(['ADMIN'])): ?>
-      <button type="button" onclick="addMappingRow()" class="bg-blue-100 hover:bg-blue-200 text-blue-800 text-sm font-semibold py-1 px-3 rounded transition-colors">
-        <i class="fas fa-plus"></i> Tambah Mapping Barang
+      <button type="button" onclick="addMappingRow()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 text-xs font-semibold py-1.5 px-3 rounded-xl transition-colors">
+        <i class="fas fa-plus mr-1"></i> Tambah Mapping Barang
       </button>
     <?php endif; ?>
   </div>
@@ -174,28 +182,28 @@ ob_start();
     </div>
 
     <?php if ($submission['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole(['ADMIN'])): ?>
-    <div class="p-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-      <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Proses Persetujuan</h4>
-      <textarea name="approval_notes" placeholder="Alasan jika menolak semua (Wajib jika klik Tolak Semua)" rows="2" class="shadow appearance-none border border-red-300 dark:border-red-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-red-500 mb-4"></textarea>
+    <div class="p-5 sm:p-6 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800">
+      <h4 class="text-xs font-bold uppercase tracking-wide text-slate-700 dark:text-slate-300 mb-2">Keputusan & Catatan Persetujuan</h4>
+      <textarea name="approval_notes" placeholder="Tuliskan catatan persetujuan atau alasan penolakan..." rows="2" class="w-full py-2.5 px-3.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 transition-all"></textarea>
       
-      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <button type="submit" name="action" value="APPROVE" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow transition-colors"
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button type="submit" name="action" value="APPROVE" class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm text-sm transition-all"
               data-confirm="Proses persetujuan sesuai Kuantitas Disetujui?"
               data-confirm-title="Proses Persetujuan"
               data-confirm-type="warning"
               data-confirm-icon="fa-check"
               data-confirm-confirm="Proses Item"
               data-confirm-loading="Memproses...">
-          <i class="fas fa-check mr-2"></i> Proses Item
+          <i class="fas fa-check text-xs"></i> Setujui & Proses Item
         </button>
-        <button type="submit" name="action" value="REJECT_ALL" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow transition-colors" formnovalidate
+        <button type="submit" name="action" value="REJECT_ALL" class="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm text-sm transition-all" formnovalidate
               data-confirm="Tolak SELURUH pengajuan ini? Pastikan field Alasan terisi."
               data-confirm-title="Tolak Semua"
               data-confirm-type="danger"
               data-confirm-icon="fa-times"
               data-confirm-confirm="Tolak Semua"
               data-confirm-loading="Memproses...">
-          <i class="fas fa-times mr-2"></i> Tolak Semua
+          <i class="fas fa-times text-xs"></i> Tolak Semua
         </button>
       </div>
     </div>
@@ -208,20 +216,21 @@ ob_start();
 <div class="space-y-6 mb-6">
 
   <!-- Foto referensi setiap barang yang disetujui -->
-  <div class="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+  <div class="bg-white dark:bg-slate-900 shadow-sm rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h3 class="text-lg font-bold text-gray-800 dark:text-white">
-            <i class="fas fa-box-open mr-2 text-blue-500"></i>Barang yang Diberikan
+          <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <i class="fas fa-box-open text-blue-500 text-sm"></i>
+            <span>Barang yang Diberikan</span>
           </h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Foto barang dan detail jumlah yang disetujui/dipenuhi.
           </p>
         </div>
         <?php if (!empty($submission['approved_at'])): ?>
-          <span class="text-xs text-gray-500 dark:text-gray-400 text-left sm:text-right whitespace-normal">
-            Persetujuan: <strong><?= date('d M Y H:i', strtotime($submission['approved_at'])) ?></strong>
+          <span class="text-xs text-slate-500 dark:text-slate-400">
+            Persetujuan: <strong><?= date('d M Y, H:i', strtotime($submission['approved_at'])) ?></strong>
           </span>
         <?php endif; ?>
       </div>
@@ -313,22 +322,23 @@ ob_start();
   </div>
 
   <!-- Bukti aktual saat barang dikeluarkan -->
-  <div class="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-      <h3 class="text-lg font-bold text-gray-800 dark:text-white">
-        <i class="fas fa-camera mr-2 text-green-500"></i>Dokumentasi Barang Keluar
+  <div class="bg-white dark:bg-slate-900 shadow-sm rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40">
+      <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+        <i class="fas fa-camera text-emerald-500 text-sm"></i>
+        <span>Dokumentasi Barang Keluar</span>
       </h3>
-      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
         Foto bukti aktual saat barang diberikan oleh gudang, lengkap dengan tanggal dan jam.
       </p>
     </div>
 
     <div class="p-4 sm:p-6 space-y-5">
       <?php if (empty($fulfillments)): ?>
-        <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 px-4 py-8 text-center">
-          <i class="fas fa-clock text-xl text-gray-300 dark:text-gray-600"></i>
-          <p class="mt-2 text-sm font-semibold text-gray-500 dark:text-gray-400">Belum ada Barang Keluar</p>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Foto bukti akan muncul setelah Admin memproses pemenuhan pengajuan.</p>
+        <div class="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 px-4 py-8 text-center">
+          <i class="fas fa-clock text-xl text-slate-300 dark:text-slate-600"></i>
+          <p class="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-400">Belum ada Barang Keluar</p>
+          <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Foto bukti akan muncul setelah Admin memproses pemenuhan pengajuan.</p>
         </div>
       <?php else: ?>
         <?php foreach ($fulfillments as $fulfillment):
@@ -336,29 +346,29 @@ ob_start();
           $evs = $fulfillmentPhotos[$outId] ?? [];
           $fItems = $fulfillmentItems[$outId] ?? [];
         ?>
-          <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div class="p-4 bg-gray-50 dark:bg-gray-900/50">
+          <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+            <div class="p-4 bg-slate-50 dark:bg-slate-800/50">
               <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                 <div>
-                  <div class="font-bold text-gray-900 dark:text-white"><?= htmlspecialchars($fulfillment['transaction_code']) ?></div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <div class="font-bold text-slate-900 dark:text-white"><?= htmlspecialchars($fulfillment['transaction_code']) ?></div>
+                  <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     <i class="fas fa-calendar mr-1"></i><?= date('d M Y', strtotime($fulfillment['created_at'])) ?>
                     <i class="fas fa-clock ml-3 mr-1"></i><strong><?= date('H:i:s', strtotime($fulfillment['created_at'])) ?></strong>
                   </div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     Gudang: <strong><?= htmlspecialchars($fulfillment['warehouse_name'] ?? '-') ?></strong>
                     · Diproses oleh: <strong><?= htmlspecialchars($fulfillment['processor_name'] ?? '-') ?></strong>
                   </div>
                 </div>
-                <a href="<?= url('/outgoing/show?id=' . $outId) ?>" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-semibold">
-                  <i class="fas fa-external-link-alt"></i> Detail Barang Keluar
+                <a href="<?= url('/outgoing/show?id=' . $outId) ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 text-xs font-semibold">
+                  <i class="fas fa-external-link-alt text-[10px]"></i> Detail Barang Keluar
                 </a>
               </div>
 
               <?php if (!empty($fItems)): ?>
                 <div class="mt-3 flex flex-wrap gap-2">
                   <?php foreach ($fItems as $fi): ?>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs text-gray-700 dark:text-gray-300">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300">
                       <?= htmlspecialchars($fi['nama'] ?? 'Barang') ?> × <?= (int)$fi['quantity'] ?>
                     </span>
                   <?php endforeach; ?>
@@ -368,27 +378,27 @@ ob_start();
 
             <div class="p-4">
               <?php if (empty($evs)): ?>
-                <div class="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 px-4 py-6 text-center">
-                  <i class="fas fa-camera-slash text-gray-300 dark:text-gray-600"></i>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Belum ada foto bukti pada transaksi ini.</p>
+                <div class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 px-4 py-6 text-center">
+                  <i class="fas fa-camera-slash text-slate-300 dark:text-slate-600"></i>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Belum ada foto bukti pada transaksi ini.</p>
                 </div>
               <?php else: ?>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <?php foreach ($evs as $ev): ?>
                     <?php $isImage = strpos($ev['mime_type'] ?? '', 'image/') === 0; ?>
                     <?php if (!$isImage) continue; ?>
-                    <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                      <a href="<?= url('/evidence/' . (int)$ev['id']) ?>" data-image-preview data-image-title="<?= htmlspecialchars($ev['original_name'] ?? 'Foto bukti') ?>" class="block aspect-[4/3] bg-gray-100 dark:bg-gray-900">
+                    <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                      <a href="<?= url('/evidence/' . (int)$ev['id']) ?>" data-image-preview data-image-title="<?= htmlspecialchars($ev['original_name'] ?? 'Foto bukti') ?>" class="block aspect-[4/3] bg-slate-100 dark:bg-slate-900">
                         <img src="<?= url('/evidence/' . (int)$ev['id']) ?>"
                              alt="<?= htmlspecialchars($ev['original_name'] ?? 'Foto bukti') ?>"
                              class="w-full h-full object-cover">
                       </a>
                       <div class="p-2.5">
-                        <p class="text-xs font-semibold text-gray-800 dark:text-white break-words"><?= htmlspecialchars($ev['original_name'] ?? 'Foto') ?></p>
-                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                        <p class="text-xs font-semibold text-slate-800 dark:text-white break-words"><?= htmlspecialchars($ev['original_name'] ?? 'Foto') ?></p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                           Upload: <strong><?= date('d M Y H:i:s', strtotime($ev['created_at'])) ?></strong>
                         </p>
-                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                           Oleh: <?= htmlspecialchars($ev['uploader_name'] ?? 'System') ?>
                         </p>
                       </div>

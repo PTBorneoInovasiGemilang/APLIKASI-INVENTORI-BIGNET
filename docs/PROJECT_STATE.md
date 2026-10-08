@@ -15,6 +15,7 @@
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] Redesain Modul Pengajuan Barang (Admin & Superadmin): KPI summary widget, quick-filter segmented pills, dan peremajaan UI detail persetujuan serta dokumentasi barang keluar.
 - [x] Redesain Modul Stok Barang (Admin & Superadmin): KPI summary widget, quick-filter segmented pills, visualisasi ketersediaan stok modern, dan tabel responsif tema Disafa SaaS.
 - [x] Redesain Antarmuka Profil Pengguna (All Roles): Hero card identitas modern, segmented tabs (Data Diri, Keamanan & Password, Aktivitas), toggle intip kata sandi, dan optimasi mobile.
 - [x] Perbaikan Menyeluruh Tampilan Mobile (Fix Empty State & Header Squeeze): Hapus legacy mobile-card-table, perbaiki teks pemenggalan suku kata pada empty state, dan rapikan header serta tombol aksi mobile lintas menu.

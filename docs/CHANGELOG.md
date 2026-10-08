@@ -15,6 +15,26 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-08 — SUBMISSIONS WORKFLOW UI OVERHAUL (ADMIN & SUPERADMIN)
+**Task:** Redesain antarmuka modul Pengajuan Barang (`/submissions` & `/submissions/show`) pada role Admin dan Superadmin agar selaras dengan tema modern SaaS (Disafa style).
+**Goal:** Menghadirkan ringkasan KPI pengajuan real-time, tombol quick-filter segmented pills (Menunggu Review, Disetujui, Sebagian, Selesai, Ditolak), perbaikan tabel indeks daftar pengajuan, peremajaan tampilan detail pengajuan (`show.php`), serta form keputusan persetujuan yang bersih dan modern.
+**Changed:**
+- `app/Controllers/SubmissionController.php`: Tambahkan perhitungan cepat metrik KPI (`$stats`: total pengajuan, pending, approved, completed) yang menyesuaikan dengan scope peran pengguna.
+- `resources/views/transactions/submissions/index.php`:
+  - Header & KPI Cards: 4 kartu metrik pengajuan (Total, Menunggu Review dengan aksen amber, Disetujui, Selesai) yang dapat diklik langsung untuk filter instan.
+  - Quick Filter Pills: Bar filter cepat segmented yang dapat di-scroll horizontal di smartphone.
+  - Tabel Pengajuan Modern: Kolom kode pengajuan, avatar inisial teknisi, tipe kebutuhan, dan badge status semantik.
+- `resources/views/transactions/submissions/show.php`:
+  - Header Hero Card: Tautan kembali yang elegan, badge kode dan status, tombol aksi (Proses Barang Keluar, Edit, Hapus) yang terpusat.
+  - Form Persetujuan & Mapping: Input jumlah disetujui, mapping barang manual, dan textarea keputusan yang modern.
+  - Kartu Dokumentasi: Standardisasi kontainer kartu barang yang diberikan dan foto bukti barang keluar dengan gaya rounded-2xl dan slate border.
+**Business impact:** Admin dan Superadmin dapat meninjau, menyetujui, atau menolak pengajuan barang dengan alur yang jauh lebih jelas, cepat, dan nyaman di semua perangkat.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Code check, verifikasi balanced braces, dan 170 routes OK.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-08 — STOCKS MONITORING UI OVERHAUL (ADMIN & SUPERADMIN)
 **Task:** Redesain antarmuka modul Stok Barang (`/stocks`) pada role Admin dan Superadmin agar selaras dengan tema modern SaaS (Disafa style) dan nyaman digunakan.
 **Goal:** Menghadirkan ringkasan KPI stok real-time, tombol quick-filter segmented pills (Stok Rendah, Dipinjam, Dalam Pengiriman, Serial/Bulk), visualisasi persentase ketersediaan stok yang konsisten dan elegan, serta toolbar pencarian yang responsif.

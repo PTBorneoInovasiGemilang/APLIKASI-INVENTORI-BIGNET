@@ -62,6 +62,16 @@ class SubmissionController {
         $stmt->execute($params);
         $submissions = $stmt->fetchAll();
 
+        $userScopeSql = !AuthHelper::hasRole(['SUPERADMIN', 'ADMIN']) ? " WHERE submitted_by = " . (int)$user['id'] : "";
+        $userScopeAndSql = !AuthHelper::hasRole(['SUPERADMIN', 'ADMIN']) ? " AND submitted_by = " . (int)$user['id'] : "";
+
+        $stats = [
+            'total' => (int)$pdo->query("SELECT COUNT(*) FROM submissions" . $userScopeSql)->fetchColumn(),
+            'pending' => (int)$pdo->query("SELECT COUNT(*) FROM submissions WHERE status = 'PENDING'" . $userScopeAndSql)->fetchColumn(),
+            'approved' => (int)$pdo->query("SELECT COUNT(*) FROM submissions WHERE status IN ('APPROVED','PARTIAL_APPROVED')" . $userScopeAndSql)->fetchColumn(),
+            'completed' => (int)$pdo->query("SELECT COUNT(*) FROM submissions WHERE status = 'COMPLETED'" . $userScopeAndSql)->fetchColumn(),
+        ];
+
         require __DIR__ . '/../../resources/views/transactions/submissions/index.php';
     }
 
