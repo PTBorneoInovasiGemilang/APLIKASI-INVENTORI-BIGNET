@@ -21,8 +21,8 @@
 **Changed:**
 - `resources/views/layouts/app.php`:
   - Sidebar: Palet bersih modern (putih dengan border tipis `slate-200/90`, dark: `slate-900`), active link dengan pill background biru muda (`bg-blue-50/90 text-blue-600 rounded-xl`), icon aktif biru tajam, dan section header uppercase kecil.
-  - User Profile Footer: Sematkan profil pengguna (avatar inisial lingkaran biru, nama tebal, role, dan link ke profil) di bagian bawah sidebar tanpa tombol logout (logout terpusat di menu profil kanan atas).
-  - Header: Styling putih bersih dengan search input pill, tenant indicator pill, dark mode toggle, dan notifikasi ber-badge.
+  - Sidebar: Hapus footer profil di pojok kiri bawah agar navigasi bersih tanpa menu/tombol duplikat (profil dan logout tetap terpusat di menu avatar kanan atas).
+  - Header: Kembalikan jam server real-time (tanggal dan waktu server) di pojok kanan atas header, serta hapus tombol/pill duplikat.
   - Background Shell: `#F8FAFC` (`bg-slate-50` / dark: `bg-slate-950`).
 - `resources/views/dashboard/index.php`:
   - Header "Overview" modern dengan tombol filter gudang dan Refresh.

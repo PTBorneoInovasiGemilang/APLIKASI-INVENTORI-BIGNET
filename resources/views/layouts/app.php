@@ -634,21 +634,6 @@ function renderHeader($label, $sidebarGroupText) {
         <?= renderMenu('Lapor Kerusakan/Kehilangan', 'fas fa-exclamation-triangle', '/incidents/create', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
       <?php endif; ?>
     </div>
-    <!-- User Profile Footer at Sidebar Bottom (Navigasi ke Profil, tanpa tombol logout) -->
-    <a href="<?= url('/profile') ?>" class="p-3 border-t <?= $sidebarBorder ?> bg-white dark:bg-slate-900 flex items-center gap-2.5 shrink-0 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors group" title="Lihat Profil Saya">
-      <?php if ($photo_path): ?>
-        <img src="<?= url('/file?path='.urlencode($photo_path)) ?>" class="w-9 h-9 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700 shrink-0" alt="Foto">
-      <?php else: ?>
-        <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-slate-100 dark:ring-slate-800 shrink-0">
-          <?= strtoupper(substr($userName, 0, 2)) ?>
-        </div>
-      <?php endif; ?>
-      <div class="min-w-0 flex-1">
-        <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"><?= htmlspecialchars($userName) ?></p>
-        <p class="text-[10px] text-slate-400 dark:text-slate-500 truncate mt-0.5"><?= $roleLabel ?></p>
-      </div>
-      <i class="fas fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 group-hover:text-slate-500 transition-colors pr-1"></i>
-    </a>
   </aside>
 
   <div class="lg:ml-64 min-h-screen flex flex-col transition-all">
@@ -657,16 +642,19 @@ function renderHeader($label, $sidebarGroupText) {
         <button class="lg:hidden shrink-0 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none mr-2 sm:mr-3 p-2 rounded-lg transition-colors" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="fas fa-bars text-lg"></i></button>
         <div class="min-w-0"><h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 truncate"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h2></div>
       </div>
-      <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
-        <a href="<?= url('/search') ?>" class="hidden md:flex items-center gap-2 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/90 dark:border-slate-700 rounded-xl px-3.5 py-1.5 text-xs text-slate-400 transition-colors">
-          <i class="fas fa-search text-slate-400 text-xs"></i>
-          <span>Cari barang, user...</span>
-        </a>
-        <div class="hidden sm:inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm">
-          <i class="fas fa-building text-blue-500 text-xs"></i>
-          <span><?= htmlspecialchars($appName) ?></span>
-        </div>
+      <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
         <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 focus:outline-none p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-sm"></i></button>
+        <div class="flex items-center gap-3 ml-auto mr-3">
+          <div class="text-right leading-tight">
+            <p id="serverClockDate" class="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 font-medium hidden sm:block">
+              <?= date('l, d M Y') ?>
+            </p>
+            <p class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200 tabular-nums" aria-label="Waktu server">
+              <i class="fas fa-clock text-blue-500 mr-1 text-xs sm:text-sm"></i>
+              <span id="serverClockTime"><?= date('H:i:s') ?></span>
+            </p>
+          </div>
+        </div>
         <?php if (isset($_SESSION['user_id'])): ?>
         <?php $unreadCount = \App\Helpers\NotificationHelper::unreadCount((int)$_SESSION['user_id']); ?>
         <a href="<?= url('/notifications') ?>" class="relative text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 focus:outline-none p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Notifikasi"><i class="fas fa-bell text-sm"></i><?php if ($unreadCount > 0): ?><span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span><?php endif; ?></a>
