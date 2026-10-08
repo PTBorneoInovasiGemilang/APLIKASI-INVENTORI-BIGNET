@@ -2,39 +2,37 @@
 $pageTitle = 'Manajemen Pengguna';
 ob_start();
 ?>
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
       <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Manajemen Pengguna</h1>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelola pengguna sistem, peran, dan hak akses.</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelola akun pengguna sistem, peran hak akses, dan persetujuan pendaftaran.</p>
     </div>
-    <a href="<?= url('/users/create') ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-sm transition-all w-full sm:w-auto">
+    <a href="<?= url('/users/create') ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-xs transition-all w-full sm:w-auto">
       <i class="fas fa-plus text-xs"></i> Tambah Pengguna
     </a>
   </div>
 
   <?php if (isset($_SESSION['success'])): ?>
-    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-      <span class="block sm:inline"><?= htmlspecialchars($_SESSION['success']) ?></span>
-      <?php unset($_SESSION['success']); ?>
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200 shadow-sm">
+      <?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
     </div>
   <?php endif; ?>
   <?php if (isset($_SESSION['error'])): ?>
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-      <span class="block sm:inline"><?= htmlspecialchars($_SESSION['error']) ?></span>
-      <?php unset($_SESSION['error']); ?>
+    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200 shadow-sm">
+      <?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
     </div>
   <?php endif; ?>
 
-  <!-- Panel Panduan Approval User -->
-  <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 rounded-md text-sm text-blue-700 dark:text-blue-300 mb-6 shadow-sm">
-    <p class="font-bold mb-1"><i class="fas fa-info-circle mr-1"></i> Panduan Approval & Manajemen User</p>
-    <ul class="list-disc pl-5 space-y-1">
-      <li>User baru yang mendaftar secara publik akan berstatus <strong>Menunggu Persetujuan</strong>.</li>
+  <!-- Panel Panduan Approval User (Modern Disafa Style) -->
+  <div class="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 rounded-2xl p-4 sm:p-5 text-xs text-blue-900 dark:text-blue-200">
+    <p class="font-bold text-sm mb-2 flex items-center gap-2 text-blue-800 dark:text-blue-300">
+      <i class="fas fa-info-circle text-blue-600"></i> Panduan Approval & Manajemen Pengguna
+    </p>
+    <ul class="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+      <li>Pengguna baru yang mendaftar secara publik akan berstatus <strong>Menunggu Persetujuan</strong>.</li>
       <li>Klik tombol <strong>Tinjau</strong> untuk menyetujui (Approve) atau menolak (Reject) pendaftaran.</li>
-      <li>Jika menolak pendaftaran, Anda <strong>wajib</strong> mengisi alasan penolakan.</li>
-      <li>Hanya user dengan status <strong>Aktif</strong> dan <strong>Disetujui</strong> yang dapat login ke sistem.</li>
-      <li>Superadmin tidak bisa dibuat melalui pendaftaran publik.</li>
+      <li>Hanya pengguna dengan status <strong>Aktif</strong> dan <strong>Disetujui</strong> yang dapat masuk ke dalam sistem.</li>
     </ul>
   </div>
 
@@ -44,8 +42,8 @@ ob_start();
   ob_start();
   ?>
   <div>
-    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Status</label>
-    <select name="status" class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-44 py-2 px-3 text-sm text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Status Akun</label>
+    <select name="status" class="shadow-sm appearance-none border border-slate-300 dark:border-slate-700 rounded-xl w-44 py-2 px-3 text-sm text-slate-700 dark:text-slate-200 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
       <option value="">Semua Status</option>
       <option value="PENDING_APPROVAL" <?= (isset($_GET['status']) && $_GET['status'] === 'PENDING_APPROVAL') ? 'selected' : '' ?>><?= \App\Helpers\UIHelper::statusLabel('PENDING_APPROVAL') ?></option>
       <option value="APPROVED" <?= (isset($_GET['status']) && $_GET['status'] === 'APPROVED') ? 'selected' : '' ?>><?= \App\Helpers\UIHelper::statusLabel('APPROVED') ?></option>
@@ -58,49 +56,49 @@ ob_start();
   require __DIR__ . '/../components/table/toolbar.php';
   ?>
 
-  <div class="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+  <div class="bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800">
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead class="bg-gray-50 dark:bg-gray-700">
+      <table class="w-full min-w-[760px] lg:min-w-full divide-y divide-slate-200/80 dark:divide-slate-800">
+        <thead class="bg-slate-50 dark:bg-slate-800/60">
           <tr>
-            <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Login</th>
-            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+            <th class="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-12">No</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pengguna</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Peran</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Terakhir Masuk</th>
+            <th class="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-28">Aksi</th>
           </tr>
         </thead>
-        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
           <?php 
           $no = ($offset ?? 0) + 1;
           foreach ($users as $u): 
           ?>
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-            <td class="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
-            <td class="px-4 py-3 whitespace-nowrap">
-              <div class="flex items-center">
-                <div class="flex-shrink-0 h-10 w-10">
+          <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+            <td class="px-4 py-3.5 whitespace-nowrap text-xs text-center text-slate-400 font-semibold"><?= $no++ ?></td>
+            <td class="px-4 py-3.5 whitespace-nowrap">
+              <div class="flex items-center gap-3">
+                <div class="shrink-0 h-9 w-9">
                   <?php if ($u['photo_path']): ?>
-                    <img class="h-10 w-10 rounded-full object-cover" src="<?= url('/file?path='.urlencode($u['photo_path'])) ?>" alt="">
+                    <img class="h-9 w-9 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800" src="<?= url('/file?path='.urlencode($u['photo_path'])) ?>" alt="">
                   <?php else: ?>
-                    <div class="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold">
+                    <div class="h-9 w-9 rounded-full bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xs">
                       <?= strtoupper(substr($u['name'], 0, 1)) ?>
                     </div>
                   <?php endif; ?>
                 </div>
-                <div class="ml-4">
-                  <div class="text-sm font-medium text-gray-900 dark:text-gray-100"><?= htmlspecialchars($u['name']) ?></div>
-                  <div class="text-sm text-gray-500 dark:text-gray-400"><?= htmlspecialchars($u['email']) ?></div>
+                <div class="min-w-0">
+                  <div class="text-sm font-bold text-slate-900 dark:text-slate-100"><?= htmlspecialchars($u['name']) ?></div>
+                  <div class="text-xs text-slate-400"><?= htmlspecialchars($u['email']) ?></div>
                 </div>
               </div>
             </td>
-            <td class="px-4 py-3 whitespace-nowrap">
-              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+            <td class="px-4 py-3.5 whitespace-nowrap">
+              <span class="px-2.5 py-0.5 inline-flex text-xs font-semibold rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                 <?= htmlspecialchars(\App\Helpers\UIHelper::roleLabel($u['role'])) ?>
               </span>
             </td>
-            <td class="px-4 py-3 whitespace-nowrap">
+            <td class="px-4 py-3.5 whitespace-nowrap">
               <?php if ($u['account_status'] === 'PENDING_APPROVAL'): ?>
                 <?= \App\Helpers\UIHelper::badge('PENDING_APPROVAL', 'WARNING') ?>
               <?php elseif ($u['account_status'] === 'APPROVED' && $u['is_active']): ?>
@@ -113,8 +111,8 @@ ob_start();
                 <?= \App\Helpers\UIHelper::badge('Nonaktif', 'DANGER') ?>
               <?php endif; ?>
             </td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-              <?= $u['last_login_at'] ? date('d M Y H:i', strtotime($u['last_login_at'])) : 'Belum Pernah' ?>
+            <td class="px-4 py-3.5 whitespace-nowrap text-xs text-slate-400">
+              <?= $u['last_login_at'] ? date('d M Y, H:i', strtotime($u['last_login_at'])) : 'Belum Pernah' ?>
             </td>
             <?php
             $rowActions = [];
@@ -123,7 +121,7 @@ ob_start();
             if ($u['account_status'] === 'PENDING_APPROVAL') {
               $rowActions[] = [
                 'type' => 'button', 'label' => 'Tinjau', 'icon' => 'fa-clipboard-check',
-                'onclick' =>"openApprovalModal(" . (int)$u['id'] .", '" . htmlspecialchars($u['name'], ENT_QUOTES) ."', '" . ($u['photo_path'] ? url('/file?path=' . urlencode($u['photo_path'])) : '') ."')"
+                'onclick' => "openApprovalModal(" . (int)$u['id'] . ", '" . htmlspecialchars($u['name'], ENT_QUOTES) . "', '" . ($u['photo_path'] ? url('/file?path=' . urlencode($u['photo_path'])) : '') . "')"
               ];
             }
             require __DIR__ . '/../components/table/row_actions.php';
@@ -151,50 +149,48 @@ ob_start();
 
 <!-- Approval Modal -->
 <div id="approvalModal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-    <div class="fixed inset-0 bg-gray-50 dark:bg-gray-9000 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-    <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-      <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-        <div class="sm:flex sm:items-start mb-4">
-          <div id="approvePhotoContainer" class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-700 sm:mx-0 sm:h-20 sm:w-20 overflow-hidden hidden">
-            <img id="approveUserPhoto" src="" alt="Foto Profil" class="h-20 w-20 object-cover">
-          </div>
-          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="modal-title">
-              Tinjau Pendaftaran: <span id="approveUserName" class="font-bold"></span>
-            </h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Harap verifikasi identitas pengguna sebelum menyetujui atau menolak akses.</p>
-          </div>
+  <div class="flex items-center justify-center min-h-screen p-4 text-center">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeApprovalModal()" aria-hidden="true"></div>
+    <div class="relative bg-white dark:bg-slate-900 rounded-2xl text-left overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 fade-in">
+      <div class="sm:flex sm:items-start mb-4">
+        <div id="approvePhotoContainer" class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800 sm:mx-0 sm:h-20 sm:w-20 overflow-hidden hidden ring-2 ring-slate-100 dark:ring-slate-700">
+          <img id="approveUserPhoto" src="" alt="Foto Profil" class="h-20 w-20 object-cover">
         </div>
-        
-        <div class="mt-4 flex gap-4">
-          <form action="<?= url('/users/approve') ?>" method="POST" class="flex-1">
-            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-            <input type="hidden" name="id" id="approveUserId">
-            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:text-sm">
-              Setujui (Approve)
-            </button>
-          </form>
+        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+          <h3 class="text-base font-bold text-slate-900 dark:text-slate-100" id="modal-title">
+            Tinjau Pendaftaran: <span id="approveUserName" class="text-blue-600 dark:text-blue-400"></span>
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Harap verifikasi identitas pengguna sebelum menyetujui atau menolak akses.</p>
         </div>
-        
-        <div class="mt-6 border-t dark:border-gray-700 pt-4">
-          <form action="<?= url('/users/reject') ?>" method="POST">
+      </div>
+      
+      <div class="mt-5 space-y-4">
+        <form action="<?= url('/users/approve') ?>" method="POST">
+          <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+          <input type="hidden" name="id" id="approveUserId">
+          <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 bg-emerald-600 text-sm font-semibold text-white hover:bg-emerald-700 shadow-sm transition-colors">
+            <i class="fas fa-check"></i> Setujui (Approve)
+          </button>
+        </form>
+
+        <div class="border-t border-slate-100 dark:border-slate-800 pt-4">
+          <form action="<?= url('/users/reject') ?>" method="POST" class="space-y-3">
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
             <input type="hidden" name="id" id="rejectUserId">
-            <div class="mb-3">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Alasan Penolakan</label>
-              <textarea name="rejection_reason" required rows="2" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-red-500 focus:ring-red-500" placeholder="Wajib diisi untuk penolakan..."></textarea>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wide text-slate-700 dark:text-slate-300 mb-1">Alasan Penolakan <span class="text-red-500">*</span></label>
+              <textarea name="rejection_reason" required rows="2" class="w-full py-2 px-3 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Wajib diisi untuk penolakan..."></textarea>
             </div>
-            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:text-sm">
-              Tolak (Reject)
+            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 bg-red-600 text-sm font-semibold text-white hover:bg-red-700 shadow-sm transition-colors">
+              <i class="fas fa-times"></i> Tolak (Reject)
             </button>
           </form>
         </div>
       </div>
-      <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-        <button type="button" onclick="closeApprovalModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-          Batal
+
+      <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+        <button type="button" onclick="closeApprovalModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+          Tutup
         </button>
       </div>
     </div>

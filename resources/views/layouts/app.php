@@ -245,6 +245,107 @@ function renderHeader($label, $sidebarGroupText) {
     }
 
     /* ========================================================
+       DISAFA MODERN SAAS THEME HARMONIZATION (GLOBAL)
+       ======================================================== */
+    main .bg-white.shadow,
+    main .bg-white.shadow-sm,
+    main .bg-white.rounded-lg,
+    main .bg-white.rounded-xl {
+      background-color: #ffffff !important;
+      border-radius: 1rem !important; /* rounded-2xl */
+      border: 1px solid rgba(226, 232, 240, 0.8) !important; /* slate-200/80 */
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+    }
+    .dark main .bg-gray-800,
+    .dark main .bg-slate-900 {
+      background-color: #0f172a !important;
+      border: 1px solid #1e293b !important;
+    }
+    .dark main .border-gray-700,
+    .dark main .border-gray-800 {
+      border-color: #1e293b !important;
+    }
+    main .border-gray-200 {
+      border-color: rgba(226, 232, 240, 0.8) !important;
+    }
+
+    /* Global Table Container & Styling */
+    main .overflow-x-auto {
+      border-radius: 1rem !important;
+    }
+    main table thead {
+      background-color: #f8fafc !important; /* slate-50 */
+    }
+    .dark main table thead {
+      background-color: rgba(30, 41, 59, 0.6) !important; /* slate-800/60 */
+    }
+    main table thead th {
+      font-size: 0.72rem !important;
+      font-weight: 700 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      color: #64748b !important; /* slate-500 */
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+    }
+    .dark main table thead th {
+      color: #94a3b8 !important; /* slate-400 */
+      border-bottom-color: #1e293b !important;
+    }
+    main table tbody tr {
+      transition: background-color 0.15s ease !important;
+    }
+    main table tbody tr:hover {
+      background-color: rgba(248, 250, 252, 0.8) !important;
+    }
+    .dark main table tbody tr:hover {
+      background-color: rgba(30, 41, 59, 0.4) !important;
+    }
+    main table tbody td {
+      border-bottom: 1px solid #f1f5f9 !important; /* slate-100 */
+    }
+    .dark main table tbody td {
+      border-bottom-color: #1e293b !important;
+    }
+
+    /* Global Inputs */
+    main input[type="text"],
+    main input[type="email"],
+    main input[type="password"],
+    main input[type="number"],
+    main input[type="date"],
+    main select,
+    main textarea {
+      border-radius: 0.75rem !important; /* rounded-xl */
+      border: 1px solid #cbd5e1 !important; /* slate-300 */
+      transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    }
+    .dark main input[type="text"],
+    .dark main input[type="email"],
+    .dark main input[type="password"],
+    .dark main input[type="number"],
+    .dark main input[type="date"],
+    .dark main select,
+    .dark main textarea {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+    main input:focus,
+    main select:focus,
+    main textarea:focus {
+      border-color: #2563eb !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    }
+
+    /* Buttons */
+    main button.bg-blue-600,
+    main a.bg-blue-600 {
+      border-radius: 0.75rem !important;
+      font-weight: 600 !important;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    }
+
+    /* ========================================================
        MOBILE UX & COMPACT TABLE OPTIMIZATION (< 640px)
        ======================================================== */
     @media (max-width: 639px) {

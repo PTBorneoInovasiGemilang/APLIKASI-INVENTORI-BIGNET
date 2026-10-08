@@ -9,14 +9,16 @@ $categoryId = (int)($_GET['category_id'] ?? 0);
 $warehouseId = (int)($_GET['warehouse_id'] ?? 0);
 $status = trim($_GET['status'] ?? '');
 ?>
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 no-print">
-  <div class="mb-6 flex items-center">
-    <a href="<?= url('/serials') ?>" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 mr-4">
-      <i class="fas fa-arrow-left"></i>
-    </a>
-    <div class="flex-1">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Cetak Label Massal</h1>
-      <p class="text-sm text-gray-600 dark:text-gray-400">Pilih nomor seri dan/atau item non-serialized → satu lembar cetak A4.</p>
+<div class="space-y-6 no-print">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <a href="<?= url('/serials') ?>" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Cetak Label Massal</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pilih nomor seri dan/atau item non-serialized → satu lembar cetak A4.</p>
+      </div>
     </div>
   </div>
 

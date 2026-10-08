@@ -2,10 +2,10 @@
 $pageTitle = 'Scan Barcode / QR';
 ob_start();
 ?>
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-6 fade-in">
-    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Scan Barcode / QR</h1>
-    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Arahkan scanner (atau ketik manual) kode barang / nomor seri untuk membuka detail.</p>
+<div class="space-y-6 max-w-3xl mx-auto">
+  <div class="fade-in">
+    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Scan Barcode / QR</h1>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Arahkan scanner (atau ketik manual) kode barang / nomor seri untuk membuka detail.</p>
   </div>
 
   <?php if (isset($_SESSION['error'])): ?>

@@ -15,6 +15,7 @@
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] Harmonisasi Menyeluruh UI & Tema Aplikasi (Seluruh Menu & Seluruh Role): Penyelarasan tema Disafa modern SaaS di seluruh modul transaksi, master data, laporan, utilitas, dan sistem, bebas double padding, dan responsif optimal di desktop & mobile.
 - [x] Redesain Seluruh Modul Master Data (Admin & Superadmin): Kategori, Satuan, Gudang, Lokasi, dan Master Barang dilengkapi KPI summary cards, modal rounded-2xl, dan tampilan form edit bertema modern SaaS Disafa.
 - [x] Redesain Modul Pengajuan Barang (Admin & Superadmin): KPI summary widget, quick-filter segmented pills, dan peremajaan UI detail persetujuan serta dokumentasi barang keluar.
 - [x] Redesain Modul Stok Barang (Admin & Superadmin): KPI summary widget, quick-filter segmented pills, visualisasi ketersediaan stok modern, dan tabel responsif tema Disafa SaaS.

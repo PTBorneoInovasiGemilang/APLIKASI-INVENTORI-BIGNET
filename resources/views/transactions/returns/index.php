@@ -5,33 +5,71 @@ ob_start();
 if (empty($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+
+$pendingCount = 0;
+$completedCount = 0;
+foreach ($returns as $summaryRow) {
+  if (($summaryRow['status'] ?? '') === 'PENDING') $pendingCount++;
+  if (($summaryRow['status'] ?? '') === 'COMPLETED') $completedCount++;
+}
 ?>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
       <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Pengembalian Barang</h1>
       <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-        Kelola barang yang diajukan untuk dikembalikan dan periksa hasil pemeriksaannya.
+        Kelola pengembalian barang pinjaman teknisi dan verifikasi kondisi fisik saat kembali.
       </p>
     </div>
     <?php if ($role === 'TEKNISI_NOC'): ?>
-      <a href="<?= url('/returns/create') ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-sm transition-all w-full sm:w-auto">
+      <a href="<?= url('/returns/create') ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm text-xs transition-all w-full sm:w-auto">
         <i class="fas fa-undo text-xs"></i> Ajukan Pengembalian
       </a>
     <?php endif; ?>
   </div>
 
   <?php if (isset($_SESSION['success'])): ?>
-    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200 shadow-sm">
       <?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
     </div>
   <?php endif; ?>
   <?php if (isset($_SESSION['error'])): ?>
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200 shadow-sm">
       <?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
     </div>
   <?php endif; ?>
+
+  <!-- Summary Cards (Disafa Style) -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border <?= $pendingCount > 0 ? 'border-amber-300 dark:border-amber-700/60 ring-2 ring-amber-100 dark:ring-amber-950/30' : 'border-slate-200/80 dark:border-slate-800' ?> p-4 sm:p-5 flex items-center">
+      <div class="p-3 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300 shrink-0">
+        <i class="fas fa-clock text-base sm:text-lg"></i>
+      </div>
+      <div class="ml-3 sm:ml-4 min-w-0">
+        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Menunggu Pemeriksaan</p>
+        <p class="text-xl sm:text-2xl font-extrabold <?= $pendingCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100' ?>"><?= $pendingCount ?></p>
+      </div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center">
+      <div class="p-3 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300 shrink-0">
+        <i class="fas fa-circle-check text-base sm:text-lg"></i>
+      </div>
+      <div class="ml-3 sm:ml-4 min-w-0">
+        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Selesai Diproses</p>
+        <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100"><?= $completedCount ?></p>
+      </div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center">
+      <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 shrink-0">
+        <i class="fas fa-info-circle text-base sm:text-lg"></i>
+      </div>
+      <div class="ml-3 sm:ml-4 min-w-0">
+        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Proses Admin</p>
+        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">Kondisi fisik diperiksa sebelum stok kembali ke gudang.</p>
+      </div>
+    </div>
+  </div>
 
   <?php
   $toolbarAction = url('/returns');
@@ -39,89 +77,58 @@ if (empty($_SESSION['csrf_token'])) {
   require __DIR__ . '/../../components/table/toolbar.php';
   ?>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-    <?php
-    $pendingCount = 0;
-    $completedCount = 0;
-    foreach ($returns as $summaryRow) {
-      if (($summaryRow['status'] ?? '') === 'PENDING') $pendingCount++;
-      if (($summaryRow['status'] ?? '') === 'COMPLETED') $completedCount++;
-    }
-    ?>
-    <div class="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900/40 rounded-xl p-4">
-      <div class="text-xs font-semibold text-yellow-700 dark:text-yellow-300 uppercase">Menunggu Pemeriksaan</div>
-      <div class="text-2xl font-bold text-yellow-900 dark:text-yellow-100 mt-1"><?= $pendingCount ?></div>
-    </div>
-    <div class="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/40 rounded-xl p-4">
-      <div class="text-xs font-semibold text-green-700 dark:text-green-300 uppercase">Selesai Diproses</div>
-      <div class="text-2xl font-bold text-green-900 dark:text-green-100 mt-1"><?= $completedCount ?></div>
-    </div>
-    <div class="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 rounded-xl p-4">
-      <div class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase">Informasi</div>
-      <div class="text-sm text-blue-800 dark:text-blue-200 mt-1">Admin memeriksa kondisi sebelum pengembalian dinyatakan selesai.</div>
-    </div>
-  </div>
-
-  <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-    <table class="w-full min-w-[800px] lg:min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-      <thead class="bg-gray-50 dark:bg-gray-700">
-        <tr>
-          <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-12">No</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Teknisi</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Gudang Pengembalian</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Status</th>
-          <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Aksi</th>
-        </tr>
-      </thead>
-      <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-        <?php $no = $offset + 1; foreach ($returns as $ret): ?>
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-            <td data-label="No" class="px-4 py-4 text-sm text-center text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
-            <td data-label="Tanggal" class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap"><?= date('d M Y', strtotime($ret['created_at'])) ?></td>
-            <td data-label="Teknisi" class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100">
-              <?= htmlspecialchars($ret['technician_name'] ?? '-') ?>
-            </td>
-            <td data-label="Gudang Pengembalian" class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
-              <?= htmlspecialchars($ret['warehouse_name'] ?? '-') ?>
-            </td>
-            <td data-label="Status" class="px-4 py-4">
-              <?php if ($ret['status'] === 'PENDING'): ?>
-                <?= \App\Helpers\UIHelper::badge('Menunggu Pemeriksaan', 'WARNING') ?>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Barang belum dinyatakan diterima.</div>
-              <?php elseif ($ret['status'] === 'COMPLETED'): ?>
-                <?= \App\Helpers\UIHelper::badge('Selesai', 'SUCCESS') ?>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Sudah diproses Admin.</div>
-              <?php else: ?>
-                <?= \App\Helpers\UIHelper::badge($ret['status'], 'NEUTRAL') ?>
-              <?php endif; ?>
-            </td>
-            <td data-label="Aksi" class="px-4 py-4 text-center">
-              <?php
-              $isPending = ($ret['status'] ?? '') === 'PENDING';
-              $rowActions = [[
-                'type' => 'view',
-                'url' => url('/returns/show?id=' . (int)$ret['id']),
-                'label' => $isPending && in_array($role, ['ADMIN','SUPERADMIN'], true) ? 'Approve' : 'Lihat',
-                'icon' => $isPending && in_array($role, ['ADMIN','SUPERADMIN'], true) ? 'fa-clipboard-check' : 'fa-eye',
-                'title' => $isPending ? 'Periksa Pengembalian' : 'Detail Pengembalian'
-              ]];
-              require __DIR__ . '/../../components/table/row_actions.php';
-              ?>
-            </td>
+  <div class="bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[760px] lg:min-w-full divide-y divide-slate-200/80 dark:divide-slate-800">
+        <thead class="bg-slate-50 dark:bg-slate-800/60">
+          <tr>
+            <th class="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-12">No</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tanggal</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Teknisi</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Gudang Pengembalian</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+            <th class="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-24">Aksi</th>
           </tr>
-        <?php endforeach; ?>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+          <?php $no = $offset + 1; foreach ($returns as $ret): ?>
+            <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+              <td class="px-4 py-3.5 text-xs text-center text-slate-400 font-semibold"><?= $no++ ?></td>
+              <td class="px-4 py-3.5 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap"><?= date('d M Y, H:i', strtotime($ret['created_at'])) ?></td>
+              <td class="px-4 py-3.5 text-sm font-bold text-slate-900 dark:text-slate-100">
+                <?= htmlspecialchars($ret['technician_name'] ?? '-') ?>
+              </td>
+              <td class="px-4 py-3.5 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                <?= htmlspecialchars($ret['warehouse_name']) ?>
+              </td>
+              <td class="px-4 py-3.5 whitespace-nowrap">
+                <?php if ($ret['status'] === 'PENDING'): ?>
+                  <?= \App\Helpers\UIHelper::badge('Menunggu Pemeriksaan', 'WARNING') ?>
+                <?php elseif ($ret['status'] === 'COMPLETED'): ?>
+                  <?= \App\Helpers\UIHelper::badge('Selesai', 'SUCCESS') ?>
+                <?php else: ?>
+                  <?= \App\Helpers\UIHelper::badge($ret['status'], 'DANGER') ?>
+                <?php endif; ?>
+              </td>
+              <td class="px-4 py-3.5 text-center text-sm">
+                <a href="<?= url('/returns/show?id=' . $ret['id']) ?>" class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold text-xs py-1 px-2.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors">
+                  <i class="fas fa-eye text-xs"></i> <?= ($ret['status'] === 'PENDING' && \App\Helpers\AuthHelper::hasRole(['ADMIN'])) ? 'Proses' : 'Lihat' ?>
+                </a>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+          <?php if (empty($returns)): ?>
+            <?php 
+            $colspan = 6;
+            $emptyMessage ="Belum ada data pengembalian.";
+            require __DIR__ . '/../../components/table/empty_state.php';
+            ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
 
-        <?php if (empty($returns)): ?>
-          <?php
-          $colspan = 6;
-          $emptyMessage ="Belum ada pengajuan pengembalian.";
-          require __DIR__ . '/../../components/table/empty_state.php';
-          ?>
-        <?php endif; ?>
-      </tbody>
-    </table>
-    <?php
+    <?php 
     $paginationBaseUrl = url('/returns');
     require __DIR__ . '/../../components/table/pagination.php';
     ?>
