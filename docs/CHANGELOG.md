@@ -15,6 +15,24 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-08 — BUG FIXES & WORKFLOW RECONCILIATION
+**Task:** Perbaikan 5 temuan bug & inkonsistensi arsitektur modul Pengembalian (Returns) dan Evidence View.
+**Goal:** Menghilangkan fatal crash pada unauthorized evidence request, memperbaiki schema query SQL returns, menyediakan endpoint `apiLoanItems` dan route reject, menambahkan tombol/modal tolak pengembalian, serta menghapus folder view duplikat.
+**Changed:**
+- `resources/views/errors/403.php`: Dibuat view error 403 mandiri yang selaras dengan tema sistem dan dark mode.
+- `app/Controllers/ReturnController.php`: Hapus referensi kolom tidak ada `processed_at = NOW()` pada query `process()` dan `reject()`. Tambah notifikasi saat return ditolak.
+- `app/Controllers/ReturnWorkflowController.php`: Implementasi method `apiLoanItems()` untuk menyuplai daftar item loan aktif secara JSON.
+- `routes/web.php`: Daftarkan route `POST /returns/reject` ke `ReturnWorkflowController@reject`.
+- `app/Core/Router.php`: Tambahkan `LoanWorkflowController` dan `ReturnWorkflowController` ke daftar router-level restricted mutation controllers untuk Superadmin.
+- `resources/views/transactions/returns/show.php`: Tambahkan tombol "Tolak Pengembalian" dan modal konfirmasi alasan penolakan bagi Admin.
+- `resources/views/workflow/returns/`: Hapus folder dan view duplikat yang tidak terpakai (orphaned).
+**Business impact:** Alur pengembalian barang dan penolakan dapat diproses penuh oleh Admin tanpa SQL error, unauthorized evidence menampilkan UI 403 yang ramah pengguna, dan teknisi menerima notifikasi jika pengembalian ditolak.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Python scanner 170 routes (0 broken), audit view require (0 missing), static check.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-09-21 — FIX ITEM SELECTION SCOPING BY WAREHOUSE
 **Task:** Item Selection bergantung pada gudang untuk Barang Masuk & Barang Keluar.
 **Goal:** User dipaksa memilih gudang sebelum bisa memilih item, dan pilihan item bergantung pada gudang yang dipilih (Barang Keluar hanya menampilkan yang memiliki stok di gudang tersebut).

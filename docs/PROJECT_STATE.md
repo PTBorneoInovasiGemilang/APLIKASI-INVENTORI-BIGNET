@@ -3,22 +3,23 @@
 > File ini adalah "save game" project. Harus selalu menggambarkan kondisi TERKINI.
 
 ## LAST UPDATED
-- Date: 2026-09-18
-- Updated by: Agent Antigravity — sesi DEDICATED BROWSER UAT — SUBMISSION WAREHOUSE FULFILLMENT
+- Date: 2026-10-08
+- Updated by: AI Agent — Sesi Remediasi Bug Audit & Workflow Pengembalian
 
 ## CURRENT PHASE
-- P0: **DOCUMENTATION HYGIENE & FINAL BASELINE COMPLETED** —
-  1. Melakukan pembersihan dokumentasi historis ke `docs/archive/`.
-  2. Menghapus file laporan usang/temporary (Phase 2 & Phase 3).
-  3. Sinkronisasi dokumen akhir untuk memastikan tidak ada broken references (Phase 4).
-  4. Konsolidasi laporan UAT berdasarkan target/CORE E2E terbaru.
+- P0: **DOCUMENTATION HYGIENE & FINAL BASELINE COMPLETED**
 
 ## CURRENT TASK
-- Task: DEDICATED BROWSER UAT — SUBMISSION WAREHOUSE FULFILLMENT
-- Objective: Verifikasi Playwright E2E E2E untuk alur Warehouse Fulfillment pada Submission (4 target requirements).
+- Task: REMEDIASI 5 BUG AUDIT (403 VIEW, SQL RETURN, ENDPOINTS & REJECT WORKFLOW)
+- Objective: Memperbaiki seluruh temuan audit keamanan, SQL mismatch, kelengkapan alur tolak pengembalian, dan pembersihan file view mati.
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] Remidiasi BUG-056: View `errors/403.php` dibuat mandiri dan terintegrasi dengan layout/dark mode.
+- [x] Remidiasi BUG-057: Hapus kolom non-existent `processed_at` pada query `ReturnController`.
+- [x] Remidiasi BUG-058: Implementasi `ReturnWorkflowController@apiLoanItems` dan registrasi route `POST /returns/reject`.
+- [x] Remidiasi BUG-059: Tambahkan tombol & modal aksi Tolak Pengembalian di UI Detail Pengembalian + notifikasi ke Teknisi.
+- [x] Pembersihan folder duplikat mati `resources/views/workflow/returns/` (terkonsolidasi ke `transactions/returns/`).
 - [x] DEDICATED BROWSER UAT — SUBMISSION WAREHOUSE FULFILLMENT: Playwright spec `test_uat_warehouse_fulfillment_e2e.spec.js` PASS untuk end-to-end flow.
 - [x] UAT SUPERADMIN ROLE (Read-only check, D-014 exception, negative mutation check)
 - [x] Initial DB Schema Creation

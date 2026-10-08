@@ -120,12 +120,45 @@ if (empty($_SESSION['csrf_token'])) {
     </div>
 
     <?php if ($canProcess): ?>
-    <div class="flex justify-end mt-6">
-      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow">
+    <div class="flex justify-end gap-3 mt-6">
+      <button type="button" onclick="openRejectReturnModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow transition-colors">
+        Tolak Pengembalian
+      </button>
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition-colors">
         Setujui & Tandai Sudah Dikembalikan
       </button>
     </div>
   </form>
+
+  <!-- Modal Tolak Pengembalian -->
+  <div id="rejectReturnModal" class="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/80 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-700">
+      <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Tolak Pengembalian Barang</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Pengajuan pengembalian akan ditolak dan dicatat pada sistem. Masukkan alasan penolakan.</p>
+      <form method="POST" action="<?= url('/returns/reject') ?>">
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+        <input type="hidden" name="id" value="<?= $return['id'] ?>">
+        <div class="mb-4">
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Alasan Penolakan <span class="text-red-500">*</span></label>
+          <textarea name="reason" rows="3" required placeholder="Tuliskan alasan penolakan..." class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm shadow-sm focus:border-red-500 focus:ring-red-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button type="button" onclick="closeRejectReturnModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">Batal</button>
+          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow transition-colors">Tolak Pengembalian</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    function openRejectReturnModal() {
+      var modal = document.getElementById('rejectReturnModal');
+      if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+    }
+    function closeRejectReturnModal() {
+      var modal = document.getElementById('rejectReturnModal');
+      if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+    }
+  </script>
   <?php endif; ?>
 </div>
 

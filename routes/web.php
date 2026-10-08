@@ -36,6 +36,7 @@ $router->get('/returns/create', 'ReturnWorkflowController@create');
 $router->post('/returns/store', 'ReturnWorkflowController@store');
 $router->get('/returns/show', 'ReturnWorkflowController@show');
 $router->post('/returns/process', 'ReturnWorkflowController@process');
+$router->post('/returns/reject', 'ReturnWorkflowController@reject');
 $router->get('/returns/api/items', 'ReturnWorkflowController@apiLoanItems');
 
 $router->get('/installations', 'InstallationController@index'); $router->get('/installations/create', 'InstallationController@create'); $router->post('/installations/store', 'InstallationController@store'); $router->get('/installations/show', 'InstallationController@show'); $router->get('/installations/my_items', 'InstallationController@myItems'); $router->get('/installations/photos', 'InstallationController@photos');

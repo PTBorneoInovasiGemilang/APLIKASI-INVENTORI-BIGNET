@@ -78,7 +78,8 @@ class Router {
                                 'CategoryController', 'UnitController', 'WarehouseController', 
                                 'LocationController', 'MasterItemController', 'SubmissionController',
                                 'IncomingController', 'OutgoingController', 'TransferController', 
-                                'LoanController', 'ReturnController', 'InstallationController', 
+                                'LoanController', 'LoanWorkflowController', 'ReturnController', 
+                                'ReturnWorkflowController', 'InstallationController', 
                                 'AdjustmentController', 'IncidentController'
                             ];
                             $safeActions = ['index', 'show', 'timeline', 'myItems', 'photos'];

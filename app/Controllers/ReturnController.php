@@ -437,7 +437,7 @@ class ReturnController {
             $newLoanStatus = $totalQty > 0 && $totalReturned >= $totalQty ? 'RETURNED' : 'PARTIAL_RETURNED';
             $pdo->prepare("UPDATE loans SET status = ?, processed_by = ? WHERE id = ?")->execute([$newLoanStatus, $user_id, $loan_id]);
 
-            $pdo->prepare("UPDATE returns SET status = 'COMPLETED', processed_by = ?, processed_at = NOW() WHERE id = ?")->execute([$user_id, $id]);
+            $pdo->prepare("UPDATE returns SET status = 'COMPLETED', processed_by = ? WHERE id = ?")->execute([$user_id, $id]);
 
             $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'PROCESS', 'returns', ?)");
             $auditStmt->execute([$user_id, $id]);
@@ -482,9 +482,12 @@ class ReturnController {
             if (!$return || $return['status'] !== 'PENDING') {
                 throw new \Exception('Pengembalian tidak valid atau sudah diproses.');
             }
-            $pdo->prepare("UPDATE returns SET status='REJECTED', processed_by=?, processed_at=NOW(), notes=CONCAT(COALESCE(notes,''), CASE WHEN COALESCE(notes,'')='' THEN '' ELSE '\n' END, 'Ditolak: ', ?) WHERE id=?")->execute([AuthHelper::user()['id'], $reason, $id]);
+            $pdo->prepare("UPDATE returns SET status='REJECTED', processed_by=?, notes=CONCAT(COALESCE(notes,''), CASE WHEN COALESCE(notes,'')='' THEN '' ELSE '\n' END, 'Ditolak: ', ?) WHERE id=?")->execute([AuthHelper::user()['id'], $reason, $id]);
             $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id) VALUES (?, 'REJECT', 'returns', ?)")->execute([AuthHelper::user()['id'], $id]);
             $pdo->commit();
+            try {
+                \App\Helpers\NotificationHelper::createForUsers([(int)$return['technician_id']], 'Pengembalian Ditolak', 'Pengajuan pengembalian barang Anda ditolak Admin.', 'danger', '/returns/show?id=' . $id);
+            } catch (\Throwable $ignored) {}
             $_SESSION['success'] = 'Pengajuan pengembalian ditolak.';
         } catch (\Throwable $e) {
             if ($pdo->inTransaction()) $pdo->rollBack();

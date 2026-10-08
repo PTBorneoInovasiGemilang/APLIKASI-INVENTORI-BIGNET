@@ -60,4 +60,50 @@ class ReturnWorkflowController extends ReturnController
         }catch(\Throwable $e){if($pdo->inTransaction())$pdo->rollBack();$_SESSION['error']='Gagal memproses pengembalian: '.$e->getMessage();}
         $this->go('/returns/show?id='.$id);
     }
+
+    public function apiLoanItems(): void
+    {
+        header('Content-Type: application/json');
+        try {
+            $loanId = (int)($_GET['loan_id'] ?? $_GET['id'] ?? 0);
+            if ($loanId <= 0) {
+                echo json_encode([]);
+                return;
+            }
+            $pdo = Database::getInstance()->getConnection();
+
+            $stmt = $pdo->prepare("SELECT li.id AS loan_item_id, li.master_item_id, m.nama, m.is_serialized, (li.quantity - li.returned_quantity) AS remaining_quantity, 'STOCK' AS source_type FROM loan_items li JOIN master_items m ON li.master_item_id = m.id WHERE li.loan_id = ? AND (li.quantity - li.returned_quantity) > 0 ORDER BY li.id");
+            $stmt->execute([$loanId]);
+            $stockItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $snStmt = $pdo->prepare("SELECT sn.id, sn.serial_number FROM loan_item_serials lis JOIN serial_numbers sn ON lis.serial_number_id = sn.id WHERE lis.loan_item_id = ? AND lis.status IN ('PENDING','BORROWED') ORDER BY sn.serial_number");
+            foreach ($stockItems as &$item) {
+                $item['serials'] = [];
+                if ((int)$item['is_serialized'] === 1) {
+                    $snStmt->execute([(int)$item['loan_item_id']]);
+                    $item['serials'] = $snStmt->fetchAll(PDO::FETCH_ASSOC);
+                }
+            }
+            unset($item);
+
+            $manualStmt = $pdo->prepare("SELECT lmi.id AS manual_item_id, lmi.master_item_id, lmi.name AS nama, COALESCE(m.is_serialized,0) AS is_serialized, (lmi.quantity - lmi.returned_quantity) AS remaining_quantity, 'MANUAL' AS source_type FROM loan_manual_items lmi LEFT JOIN master_items m ON m.id = lmi.master_item_id WHERE lmi.loan_id = ? AND (lmi.quantity - lmi.returned_quantity) > 0 ORDER BY lmi.id");
+            $manualStmt->execute([$loanId]);
+            $manualItems = $manualStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $manualSnStmt = $pdo->prepare("SELECT sn.id, sn.serial_number FROM loan_item_serials lis JOIN serial_numbers sn ON lis.serial_number_id = sn.id WHERE lis.loan_manual_item_id = ? AND lis.status IN ('PENDING','BORROWED') ORDER BY sn.serial_number");
+            foreach ($manualItems as &$item) {
+                $item['serials'] = [];
+                if ((int)$item['is_serialized'] === 1) {
+                    $manualSnStmt->execute([(int)$item['manual_item_id']]);
+                    $item['serials'] = $manualSnStmt->fetchAll(PDO::FETCH_ASSOC);
+                }
+            }
+            unset($item);
+
+            echo json_encode(array_merge($stockItems, $manualItems), JSON_UNESCAPED_UNICODE);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        }
+    }
 }
