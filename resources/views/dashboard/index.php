@@ -47,188 +47,167 @@ if (!function_exists('dashboardBadge')) {
 
 <div class="space-y-6">
 
-  <!-- Welcome Banner -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 flex items-center justify-between border border-gray-200 dark:border-gray-700">
+  <!-- Overview Header (Disafa SaaS Style) -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Selamat datang, <?= htmlspecialchars($user['name']) ?>!</h2>
-      <p class="text-gray-500 dark:text-gray-400 mt-1">
-        <?php if (isset($teknis_view) && $teknis_view): ?>
-          Berikut ringkasan aktivitas dan barang yang menjadi tanggung jawab Anda.
-        <?php else: ?>
-          Monitoring stok dan pergerakan operasional gudang secara real-time.
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Overview</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Monitoring stok dan pergerakan operasional gudang secara real-time</p>
+    </div>
+    <div class="flex items-center gap-2 self-start sm:self-auto">
+      <div class="inline-flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm">
+        <i class="fas fa-warehouse text-blue-500 text-xs"></i>
+        <span>Semua Gudang</span>
+      </div>
+      <button onclick="window.location.reload()" class="inline-flex items-center gap-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200/90 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-colors">
+        <i class="fas fa-sync-alt text-slate-400 text-xs"></i>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hero KPI Widget (Royal Blue Gradient Banner - Disafa Style) -->
+  <?php if (!isset($teknis_view) || !$teknis_view): ?>
+  <div class="bg-gradient-to-r from-[#0a2540] via-[#0d3b66] to-[#1d4ed8] text-white rounded-2xl shadow-lg p-5 sm:p-6 relative overflow-hidden">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-white/10">
+      <div class="pr-3 pt-2 sm:pt-0">
+        <p class="text-[11px] font-semibold text-blue-200/90 uppercase tracking-wider">Total Jenis Barang</p>
+        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-1"><?= number_format($stats['total_items']) ?></p>
+        <p class="text-[11px] text-blue-200/70 mt-0.5">Master barang unik</p>
+      </div>
+      <div class="sm:px-4 pt-3 sm:pt-0">
+        <p class="text-[11px] font-semibold text-blue-200/90 uppercase tracking-wider">Total Stok Fisik</p>
+        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-1"><?= number_format($stats['total_stock']) ?></p>
+        <p class="text-[11px] text-blue-200/70 mt-0.5">Unit di seluruh gudang</p>
+      </div>
+      <div class="sm:px-4 pt-3 sm:pt-0">
+        <p class="text-[11px] font-semibold text-blue-200/90 uppercase tracking-wider">Stok Rendah</p>
+        <p class="text-2xl sm:text-3xl font-extrabold <?= $stats['low_stock'] > 0 ? 'text-amber-300' : 'text-white' ?> mt-1"><?= number_format($stats['low_stock']) ?></p>
+        <p class="text-[11px] text-blue-200/70 mt-0.5"><?= $stats['low_stock'] > 0 ? 'Perlu restock' : 'Semua aman' ?></p>
+      </div>
+      <div class="sm:px-4 pt-3 sm:pt-0">
+        <p class="text-[11px] font-semibold text-blue-200/90 uppercase tracking-wider">Masuk Hari Ini</p>
+        <p class="text-2xl sm:text-3xl font-extrabold text-emerald-300 mt-1"><?= number_format($stats['incoming_today']) ?></p>
+        <p class="text-[11px] text-blue-200/70 mt-0.5">Transaksi masuk</p>
+      </div>
+      <div class="sm:px-4 pt-3 sm:pt-0">
+        <p class="text-[11px] font-semibold text-blue-200/90 uppercase tracking-wider">Keluar Hari Ini</p>
+        <p class="text-2xl sm:text-3xl font-extrabold text-blue-100 mt-1"><?= number_format($stats['outgoing_today']) ?></p>
+        <p class="text-[11px] text-blue-200/70 mt-0.5">Transaksi keluar</p>
+      </div>
+    </div>
+  </div>
+  <?php else: ?>
+  <div class="bg-gradient-to-r from-[#0a2540] via-[#0d3b66] to-[#1d4ed8] text-white rounded-2xl shadow-lg p-5 sm:p-6 relative overflow-hidden">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-white/10">
+      <div class="pr-3 pt-2 sm:pt-0">
+        <p class="text-[11px] font-semibold text-blue-200/90 uppercase tracking-wider">Pengajuan Aktif Saya</p>
+        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-1"><?= number_format($stats['active_submissions']) ?></p>
+        <p class="text-[11px] text-blue-200/70 mt-0.5">Menunggu/disetujui</p>
+      </div>
+      <div class="sm:px-4 pt-3 sm:pt-0">
+        <p class="text-[11px] font-semibold text-blue-200/90 uppercase tracking-wider">Barang Dipinjam</p>
+        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-1"><?= number_format($stats['active_loans']) ?></p>
+        <p class="text-[11px] text-blue-200/70 mt-0.5">Tanggung jawab aktif</p>
+      </div>
+      <div class="sm:px-4 pt-3 sm:pt-0">
+        <p class="text-[11px] font-semibold text-blue-200/90 uppercase tracking-wider">Barang Dipegang</p>
+        <p class="text-2xl sm:text-3xl font-extrabold text-emerald-300 mt-1"><?= number_format($stats['held_serials']) ?></p>
+        <p class="text-[11px] text-blue-200/70 mt-0.5">Nomor seri di tangan</p>
+      </div>
+      <div class="sm:px-4 pt-3 sm:pt-0">
+        <p class="text-[11px] font-semibold text-blue-200/90 uppercase tracking-wider">Total Pengajuan</p>
+        <p class="text-2xl sm:text-3xl font-extrabold text-blue-100 mt-1"><?= number_format($stats['total_submissions'] ?? 0) ?></p>
+        <p class="text-[11px] text-blue-200/70 mt-0.5">Riwayat pengajuan</p>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Needs Attention Card (Disafa Style) -->
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+      <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+        <span>Needs Attention</span>
+        <?php if (!empty($alerts)): ?>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"><?= count($alerts) ?></span>
         <?php endif; ?>
-      </p>
+      </h3>
+      <div class="flex flex-wrap items-center gap-1.5 text-xs">
+        <a href="<?= url('/stocks?filter=low_stock') ?>" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium transition-colors">Stok Rendah</a>
+        <a href="<?= url('/submissions?status=PENDING') ?>" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium transition-colors">Pengajuan</a>
+        <a href="<?= url('/incidents?status=PENDING') ?>" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium transition-colors">Insiden</a>
+      </div>
     </div>
-    <div class="hidden md:block text-right">
-      <p class="text-sm font-medium text-gray-500 dark:text-gray-400"><?= date('l, d F Y') ?></p>
-    </div>
-  </div>
-  <!-- KPI Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-    <?php if (!isset($teknis_view) || !$teknis_view): ?>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300">
-          <i class="fas fa-boxes fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Jenis Barang</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['total_items']) ?></p>
-          <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Jumlah master barang unik</p>
-        </div>
-      </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300">
-          <i class="fas fa-cubes fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Stok Fisik</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['total_stock']) ?></p>
-          <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Total unit stok di seluruh gudang</p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700 <?= $stats['low_stock'] > 0 ? 'ring-2 ring-red-200 dark:ring-red-800' : '' ?>">
-        <div class="p-3 rounded-xl bg-red-50 text-red-600 dark:bg-red-900/50 dark:text-red-300">
-          <i class="fas fa-exclamation-triangle fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Stok Rendah</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['low_stock']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-green-50 text-green-600 dark:bg-green-900/50 dark:text-green-300">
-          <i class="fas fa-arrow-down fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Masuk Hari Ini</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['incoming_today']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-900/50 dark:text-amber-300">
-          <i class="fas fa-arrow-up fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Keluar Hari Ini</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['outgoing_today']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300">
-          <i class="fas fa-truck fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Dalam Transfer</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['transfers_in_transit']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300">
-          <i class="fas fa-clipboard-list fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Pengajuan Aktif</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_submissions']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-900/50 dark:text-orange-300">
-          <i class="fas fa-handshake fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Peminjaman Aktif</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_loans']) ?></p>
-        </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-900/50 dark:text-teal-300">
-          <i class="fas fa-tools fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Terpasang</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['installed_assets']) ?></p>
-        </div>
-      </div>
-    <?php else: ?>
-      <!-- Teknisi: KPI personal -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300">
-          <i class="fas fa-clipboard-list fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Pengajuan Aktif Saya</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_submissions']) ?></p>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300">
-          <i class="fas fa-clipboard-check fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Pengajuan</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['total_submissions'] ?? 0) ?></p>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-900/50 dark:text-orange-300">
-          <i class="fas fa-hand-holding fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Barang Dipinjam</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['active_loans']) ?></p>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex items-center border border-gray-200 dark:border-gray-700">
-        <div class="p-3 rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-900/50 dark:text-teal-300">
-          <i class="fas fa-barcode fa-lg"></i>
-        </div>
-        <div class="ml-4">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Barang Dipegang</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?= number_format($stats['held_serials']) ?></p>
-        </div>
-      </div>
-    <?php endif; ?>
-  </div>
-
-  <?php if (!empty($alerts)): ?>
-  <!-- Alerts / Anomaly -->
-  <div>
-    <h3 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-      <i class="fas fa-exclamation-circle mr-1 text-amber-500"></i> Perhatian
-    </h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <?php foreach ($alerts as $alert): ?>
-        <?php
-        $levelCls = [
-          'danger' => 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300',
-          'warning' => 'border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300',
-          'info' => 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300',
-        ][$alert['level']] ?? 'border-gray-300 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300';
-        $iconCls = ['danger' => 'text-red-500', 'warning' => 'text-amber-500', 'info' => 'text-blue-500'][$alert['level']] ?? 'text-gray-400';
-        ?>
-        <a href="<?= $alert['url'] ?>" class="flex items-start gap-3 p-4 rounded-lg border <?= $levelCls ?> hover:opacity-90 transition-opacity">
-          <i class="fas <?= $alert['icon'] ?> mt-1 <?= $iconCls ?>"></i>
-          <div>
-            <p class="text-sm font-bold"><?= htmlspecialchars($alert['title']) ?></p>
-            <p class="text-xs opacity-90 mt-0.5"><?= htmlspecialchars($alert['desc']) ?></p>
+    <div class="pt-4">
+      <?php if (empty($alerts)): ?>
+        <div class="py-6 text-center text-sm">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 mb-2">
+            <i class="fas fa-check text-sm"></i>
           </div>
-        </a>
-      <?php endforeach; ?>
+          <p class="font-semibold text-emerald-600 dark:text-emerald-400">Semua aman</p>
+          <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Tidak ada kejadian atau anomali yang perlu perhatian saat ini.</p>
+        </div>
+      <?php else: ?>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <?php foreach ($alerts as $alert): ?>
+            <?php
+            $levelCls = [
+              'danger' => 'border-red-200 dark:border-red-800 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300',
+              'warning' => 'border-amber-200 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300',
+              'info' => 'border-blue-200 dark:border-blue-800 bg-blue-50/70 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300',
+            ][$alert['level']] ?? 'border-slate-200 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
+            $iconCls = ['danger' => 'text-red-500', 'warning' => 'text-amber-500', 'info' => 'text-blue-500'][$alert['level']] ?? 'text-slate-400';
+            ?>
+            <a href="<?= $alert['url'] ?>" class="flex items-start gap-3 p-3.5 rounded-xl border <?= $levelCls ?> hover:shadow-sm transition-all">
+              <i class="fas <?= $alert['icon'] ?> mt-0.5 <?= $iconCls ?>"></i>
+              <div>
+                <p class="text-xs font-bold"><?= htmlspecialchars($alert['title']) ?></p>
+                <p class="text-xs opacity-90 mt-0.5"><?= htmlspecialchars($alert['desc']) ?></p>
+              </div>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+  </div>
+
+  <!-- Sekunder KPI Grid -->
+  <?php if (!isset($teknis_view) || !$teknis_view): ?>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-4 sm:p-5 flex items-center border border-slate-200/80 dark:border-slate-800">
+      <div class="p-3 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300">
+        <i class="fas fa-truck fa-lg"></i>
+      </div>
+      <div class="ml-3.5">
+        <p class="text-xs font-semibold text-slate-400 uppercase">Dalam Transfer</p>
+        <p class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100"><?= number_format($stats['transfers_in_transit']) ?></p>
+      </div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-4 sm:p-5 flex items-center border border-slate-200/80 dark:border-slate-800">
+      <div class="p-3 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300">
+        <i class="fas fa-clipboard-list fa-lg"></i>
+      </div>
+      <div class="ml-3.5">
+        <p class="text-xs font-semibold text-slate-400 uppercase">Pengajuan Aktif</p>
+        <p class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100"><?= number_format($stats['active_submissions']) ?></p>
+      </div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-4 sm:p-5 flex items-center border border-slate-200/80 dark:border-slate-800">
+      <div class="p-3 rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-900/40 dark:text-teal-300">
+        <i class="fas fa-tools fa-lg"></i>
+      </div>
+      <div class="ml-3.5">
+        <p class="text-xs font-semibold text-slate-400 uppercase">Aset Terpasang</p>
+        <p class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100"><?= number_format($stats['installed_assets']) ?></p>
+      </div>
     </div>
   </div>
   <?php endif; ?>
 
   <!-- Top Teknisi: Paling Sering Mengajukan -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 mb-6">
-    <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800 mb-6">
+    <div class="px-4 py-4 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
       <div>
         <h3 class="text-base font-semibold text-gray-800 dark:text-white">
           <i class="fas fa-trophy mr-2 text-yellow-500"></i> Top Teknisi yang Paling Sering Mengajukan
@@ -239,7 +218,7 @@ if (!function_exists('dashboardBadge')) {
     </div>
 
     <?php if (!empty($topSubmitters)): ?>
-      <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+      <div class="divide-y divide-slate-100 dark:divide-slate-800/60">
         <?php foreach ($topSubmitters as $rank => $top): ?>
           <?php
             $rankNumber = $rank + 1;
@@ -282,8 +261,8 @@ if (!function_exists('dashboardBadge')) {
   </div>
 
   <!-- Top Barang Paling Sering Keluar -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 mb-6">
-    <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800 mb-6">
+    <div class="px-4 py-4 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
       <div>
         <h3 class="text-base font-semibold text-gray-800 dark:text-white">
           <i class="fas fa-arrow-up mr-2 text-red-500"></i> Barang yang Paling Sering Keluar
@@ -294,7 +273,7 @@ if (!function_exists('dashboardBadge')) {
     </div>
 
     <?php if (!empty($topOutgoingItems)): ?>
-      <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+      <div class="divide-y divide-slate-100 dark:divide-slate-800/60">
         <?php foreach ($topOutgoingItems as $rank => $item): ?>
           <?php
             $rankNumber = $rank + 1;
@@ -342,8 +321,8 @@ if (!function_exists('dashboardBadge')) {
   </div>
 
   <!-- Prediksi Stok & Rekomendasi Restock -->
-  <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 mb-6">
-    <div class="px-4 sm:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+  <section class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800 mb-6">
+    <div class="px-4 sm:px-5 py-4 border-b border-slate-200/80 dark:border-slate-800">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div class="flex items-start gap-3 min-w-0">
           <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300">
@@ -361,7 +340,7 @@ if (!function_exists('dashboardBadge')) {
     </div>
 
     <?php if (!empty($restockRecommendations)): ?>
-      <div class="divide-y divide-gray-100 dark:divide-gray-700/70">
+      <div class="divide-y divide-slate-100 dark:divide-slate-800/70">
         <?php foreach ($restockRecommendations as $rec): ?>
           <?php
             $critical = !empty($rec['critical']);
@@ -394,21 +373,21 @@ if (!function_exists('dashboardBadge')) {
                 </div>
 
                 <!-- Statistik -->
-                <div class="rounded-lg bg-white/80 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 px-3 py-2.5">
+                <div class="rounded-lg bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 px-3 py-2.5">
                   <p class="text-[9px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500">Stok saat ini</p>
                   <p class="mt-1 text-base font-extrabold text-gray-900 dark:text-white leading-none">
                     <?= number_format($rec['physical']) ?> <span class="text-[11px] font-bold text-gray-400 dark:text-gray-500"><?= htmlspecialchars($rec['unit_name']) ?></span>
                   </p>
                 </div>
 
-                <div class="rounded-lg bg-white/80 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 px-3 py-2.5">
+                <div class="rounded-lg bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 px-3 py-2.5">
                   <p class="text-[9px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500">Keluar 30 hari</p>
                   <p class="mt-1 text-base font-extrabold text-gray-900 dark:text-white leading-none">
                     <?= number_format($rec['outgoing_30d']) ?> <span class="text-[11px] font-bold text-gray-400 dark:text-gray-500"><?= htmlspecialchars($rec['unit_name']) ?></span>
                   </p>
                 </div>
 
-                <div class="rounded-lg bg-white/80 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 px-3 py-2.5">
+                <div class="rounded-lg bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 px-3 py-2.5">
                   <p class="text-[9px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500">Prediksi habis</p>
                   <p class="mt-1 text-sm font-extrabold <?= $predictionTone ?> leading-tight"><?= htmlspecialchars($daysText) ?></p>
                 </div>
@@ -459,12 +438,12 @@ if (!function_exists('dashboardBadge')) {
           'purple' => 'border-purple-200 dark:border-purple-800 hover:border-purple-400 text-purple-600 dark:text-purple-300',
           'teal' => 'border-teal-200 dark:border-teal-800 hover:border-teal-400 text-teal-600 dark:text-teal-300',
           'orange' => 'border-orange-200 dark:border-orange-800 hover:border-orange-400 text-orange-600 dark:text-orange-300',
-          'gray' => 'border-gray-200 dark:border-gray-700 hover:border-gray-400 text-gray-600 dark:text-gray-300',
+          'gray' => 'border-slate-200/80 dark:border-slate-800 hover:border-gray-400 text-gray-600 dark:text-gray-300',
           'slate' => 'border-slate-200 dark:border-slate-700 hover:border-slate-400 text-slate-600 dark:text-slate-300',
         ];
         $cls = $colorMap[$qa['color']] ?? $colorMap['blue'];
         ?>
-        <a href="<?= $qa['url'] ?>" class="bg-white dark:bg-gray-800 border-2 rounded-lg p-4 transition-all hover:shadow-md <?= $cls ?>">
+        <a href="<?= $qa['url'] ?>" class="bg-white dark:bg-slate-900 border-2 rounded-lg p-4 transition-all hover:shadow-md <?= $cls ?>">
           <i class="fas <?= $qa['icon'] ?> text-lg"></i>
           <p class="text-sm font-bold mt-2"><?= htmlspecialchars($qa['label']) ?></p>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 hidden lg:block"><?= htmlspecialchars($qa['desc']) ?></p>
@@ -493,7 +472,7 @@ if (!function_exists('dashboardBadge')) {
         $hasData = false;
         foreach ($points as $pt) { if ($pt['count'] > 0) { $hasData = true; break; } }
       ?>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5">
+      <div class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800 p-5">
         <div class="flex items-center justify-between mb-4">
           <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200"><?= $def['title'] ?></h4>
           <span class="text-xs text-gray-400"><?= $hasData ? $max . ' max/bln' : '' ?></span>
@@ -520,13 +499,13 @@ if (!function_exists('dashboardBadge')) {
   </div>
 
   <!-- Pergerakan Stok Terakhir -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800">
+    <div class="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
       <h3 class="text-base font-semibold text-gray-800 dark:text-white"><i class="fas fa-exchange-alt mr-2 text-blue-500"></i> Pergerakan Stok Terakhir</h3>
       <a href="<?= url('/reports/ledger') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat semua →</a>
     </div>
     <?php if (!empty($recentLedger)): ?>
-    <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+    <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
       <?php foreach ($recentLedger as $lg): ?>
         <div class="px-6 py-3.5 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
           <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <?= $lg['quantity_delta'] >= 0 ? 'bg-green-50 text-green-600 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-50 text-red-600 dark:bg-red-900/50 dark:text-red-300' ?> flex-shrink-0">
@@ -558,13 +537,13 @@ if (!function_exists('dashboardBadge')) {
   <!-- Lists: Pengajuan Aktif & Stok Rendah -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Pengajuan Aktif -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800">
+      <div class="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
         <h3 class="text-base font-semibold text-gray-800 dark:text-white"><i class="fas fa-clipboard-list mr-2 text-purple-500"></i> Pengajuan Aktif</h3>
         <a href="<?= url('/submissions') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat semua →</a>
       </div>
       <?php if (!empty($activeSubmissions)): ?>
-      <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+      <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
         <?php foreach ($activeSubmissions as $sub): ?>
           <a href="<?= url('/submissions/show?id=' . $sub['id']) ?>" class="px-6 py-3.5 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
             <div class="flex-1 min-w-0">
@@ -584,13 +563,13 @@ if (!function_exists('dashboardBadge')) {
     </div>
 
     <!-- Stok Rendah -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800">
+      <div class="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
         <h3 class="text-base font-semibold text-gray-800 dark:text-white"><i class="fas fa-exclamation-triangle mr-2 text-red-500"></i> Stok Rendah</h3>
         <a href="<?= url('/stocks') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat semua →</a>
       </div>
       <?php if (!empty($lowStockList)): ?>
-      <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+      <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
         <?php foreach ($lowStockList as $ls): ?>
           <div class="px-6 py-3.5 flex items-center gap-3">
             <div class="flex-1 min-w-0">
@@ -615,13 +594,13 @@ if (!function_exists('dashboardBadge')) {
   <!-- Lists: Outstanding Return & Instalasi Terpasang -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Outstanding Return -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800">
+      <div class="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
         <h3 class="text-base font-semibold text-gray-800 dark:text-white"><i class="fas fa-hand-holding mr-2 text-orange-500"></i> Belum Dikembalikan</h3>
         <a href="<?= url('/loans') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat semua →</a>
       </div>
       <?php if (!empty($outstandingLoans)): ?>
-      <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+      <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
         <?php foreach ($outstandingLoans as $loan): ?>
           <div class="px-6 py-3.5 flex items-center gap-3">
             <div class="flex-1 min-w-0">
@@ -645,13 +624,13 @@ if (!function_exists('dashboardBadge')) {
     </div>
 
     <!-- Instalasi Terpasang -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800">
+      <div class="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
         <h3 class="text-base font-semibold text-gray-800 dark:text-white"><i class="fas fa-tools mr-2 text-teal-500"></i> Instalasi Terpasang</h3>
         <a href="<?= url('/installations') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat semua →</a>
       </div>
       <?php if (!empty($recentInstallations)): ?>
-      <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+      <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
         <?php foreach ($recentInstallations as $inst): ?>
           <div class="px-6 py-3.5 flex items-center gap-3">
             <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/50 dark:text-teal-300 flex-shrink-0">
@@ -675,13 +654,13 @@ if (!function_exists('dashboardBadge')) {
   </div>
 
   <!-- Damage / Lost -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800">
+    <div class="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
       <h3 class="text-base font-semibold text-gray-800 dark:text-white"><i class="fas fa-exclamation-triangle mr-2 text-red-500"></i> Insiden (Damage / Lost)</h3>
       <a href="<?= url('/incidents') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat semua →</a>
     </div>
     <?php if (!empty($recentIncidents)): ?>
-    <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+    <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
       <?php foreach ($recentIncidents as $inc): ?>
         <a href="<?= url('/incidents/show?id=' . $inc['id']) ?>" class="px-6 py-3.5 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
           <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <?= $inc['incident_type'] === 'LOST' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300' : 'bg-red-50 text-red-600 dark:bg-red-900/50 dark:text-red-300' ?> flex-shrink-0">
@@ -705,12 +684,12 @@ if (!function_exists('dashboardBadge')) {
   </div>
 
   <!-- Recent Activity -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800">
+    <div class="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
       <h3 class="text-base font-semibold text-gray-800 dark:text-white"><i class="fas fa-history mr-2 text-blue-500"></i> Aktivitas Terbaru</h3>
       <a href="<?= url('/reports/audit') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat semua →</a>
     </div>
-    <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+    <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
       <?php if (!empty($recentActivities)): ?>
         <?php foreach ($recentActivities as $activity): ?>
           <div class="px-6 py-3.5 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors flex items-center space-x-3">
@@ -736,13 +715,13 @@ if (!function_exists('dashboardBadge')) {
   <?php else: ?>
   <!-- Teknisi: Pengajuan Saya, Peminjaman Saya, Instalasi Saya -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800">
+      <div class="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
         <h3 class="text-base font-semibold text-gray-800 dark:text-white"><i class="fas fa-clipboard-list mr-2 text-purple-500"></i> Pengajuan Saya</h3>
         <a href="<?= url('/submissions') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat semua →</a>
       </div>
       <?php if (!empty($mySubmissions)): ?>
-      <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+      <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
         <?php foreach ($mySubmissions as $sub): ?>
           <a href="<?= url('/submissions/show?id=' . $sub['id']) ?>" class="px-6 py-3.5 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3">
             <div class="flex-1 min-w-0">
@@ -767,13 +746,13 @@ if (!function_exists('dashboardBadge')) {
       <?php endif; ?>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800">
+      <div class="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
         <h3 class="text-base font-semibold text-gray-800 dark:text-white"><i class="fas fa-hand-holding mr-2 text-orange-500"></i> Peminjaman Saya</h3>
         <a href="<?= url('/loans') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat semua →</a>
       </div>
       <?php if (!empty($myLoans)): ?>
-      <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+      <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
         <?php foreach ($myLoans as $loan): ?>
           <div class="px-6 py-3.5 flex items-center gap-3">
             <div class="flex-1 min-w-0">
@@ -798,13 +777,13 @@ if (!function_exists('dashboardBadge')) {
   </div>
 
   <!-- Instalasi Saya -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200/80 dark:border-slate-800">
+    <div class="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
       <h3 class="text-base font-semibold text-gray-800 dark:text-white"><i class="fas fa-tools mr-2 text-teal-500"></i> Instalasi Saya</h3>
       <a href="<?= url('/installations/my_items') ?>" class="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">Lihat semua →</a>
     </div>
     <?php if (!empty($myInstallations)): ?>
-    <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+    <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
       <?php foreach ($myInstallations as $inst): ?>
         <div class="px-6 py-3.5 flex items-center gap-3">
           <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/50 dark:text-teal-300 flex-shrink-0">

@@ -15,6 +15,7 @@
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] Redesain Tema UI SaaS Modern (Disafa Style): Sidebar putih bersih, active link pill biru muda, user profile footer, royal blue gradient hero widget, dan kartu rounded-2xl.
 - [x] Optimasi Spacing UI (4px Grid & Mobile UX): Eliminasi double padding, penyesuaian padding kartu dan touch target pada viewport mobile.
 - [x] Remidiasi BUG-060: Standardisasi kop cetak seluruh laporan ke route `/logo` dengan fallback default.
 - [x] Remidiasi BUG-061: Dukungan multi-format (PNG, JPG, JPEG, WEBP) untuk pemuat logo PDF di `PdfHelper`.

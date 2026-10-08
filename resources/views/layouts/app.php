@@ -8,15 +8,15 @@ $primaryColor = setting('primary_color', 'blue');
 $sidebarTheme = setting('sidebar_theme', 'dark');
 $defaultTheme = setting('default_theme', 'light');
 
-// Prepare color classes based on setting
-$primaryBg ="bg-{$primaryColor}-600 hover:bg-{$primaryColor}-700";
-$primaryText ="text-{$primaryColor}-600";
-$sidebarBg = $sidebarTheme === 'dark' ? 'bg-gray-900 text-gray-300' : 'bg-white text-gray-700 border-r border-gray-200';
-$sidebarHover = $sidebarTheme === 'dark' ? 'hover:bg-gray-800 hover:text-white' : 'hover:bg-gray-100 hover:text-gray-900';
-$sidebarActive = $sidebarTheme === 'dark' ? 'bg-gray-800 text-white' : 'bg-blue-50 text-blue-700 font-semibold';
-$sidebarIcon = $sidebarTheme === 'dark' ? 'text-gray-500' : 'text-gray-400';
-$sidebarGroupText = $sidebarTheme === 'dark' ? 'text-gray-500' : 'text-gray-400';
-$sidebarBorder = $sidebarTheme === 'dark' ? 'border-gray-800' : 'border-gray-200';
+// Prepare color classes based on setting (Disafa modern clean SaaS theme)
+$primaryBg = "bg-blue-600 hover:bg-blue-700";
+$primaryText = "text-blue-600";
+$sidebarBg = 'bg-white text-slate-700 border-r border-slate-200/90 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800';
+$sidebarHover = 'hover:bg-slate-50 hover:text-slate-900 dark:hover:bg-slate-800/60 dark:hover:text-white';
+$sidebarActive = 'bg-blue-50/90 text-blue-600 font-semibold rounded-xl dark:bg-blue-950/40 dark:text-blue-400';
+$sidebarIcon = 'text-slate-400 dark:text-slate-500';
+$sidebarGroupText = 'text-slate-400 dark:text-slate-500 font-bold tracking-wider';
+$sidebarBorder = 'border-slate-200/80 dark:border-slate-800';
 
 $favicon = setting('favicon_path') ? url('/file?path=' . urlencode(setting('favicon_path'))) : '';
 $logo = setting('logo_path') ? url('/file?path=' . urlencode(setting('logo_path'))) : '';
@@ -147,7 +147,7 @@ if (!function_exists('iconClass')) {
       return $semantic[$basePath];
     }
 
-    return isActive($path, $currentPath) ? $primaryText : $sidebarIcon;
+    return isActive($path, $currentPath) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500';
   }
 }
 
@@ -172,13 +172,13 @@ function renderMenu($label, $icon, $path, $currentPath, $sidebarActive, $sidebar
   $url = url($path);
   $badge = '';
   if ((int)$badgeCount > 0) {
-    $badge = '<span class="ml-auto inline-flex min-w-[20px] h-5 px-1.5 items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none shadow-sm">'.(int)$badgeCount.'</span>';
+    $badge = '<span class="ml-auto inline-flex min-w-[20px] h-5 px-1.5 items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300 text-[10px] font-bold leading-none shadow-sm">'.(int)$badgeCount.'</span>';
   }
-  return"<a href=\"{$url}\" class=\"sidebar-link flex items-center px-3 py-2.5 min-h-[44px] rounded-lg text-sm {$cls}\">\n        <i class=\"{$icon} w-5 text-center text-sm {$iCls}\"></i>\n        <span class=\"ml-3\">{$label}</span>{$badge}\n      </a>";
+  return "<a href=\"{$url}\" class=\"sidebar-link flex items-center px-3 py-2 min-h-[40px] rounded-xl text-sm font-medium transition-all {$cls}\">\n        <i class=\"{$icon} w-5 text-center text-sm {$iCls}\"></i>\n        <span class=\"ml-3\">{$label}</span>{$badge}\n      </a>";
 }
 
 function renderHeader($label, $sidebarGroupText) {
-  return"<div class=\"pt-4 pb-2 px-3 text-[10px] font-bold {$sidebarGroupText} uppercase tracking-widest\">{$label}</div>";
+  return "<div class=\"pt-4 pb-1.5 px-3 text-[10px] font-bold {$sidebarGroupText} uppercase tracking-wider\">{$label}</div>";
 }
 ?>
 <!DOCTYPE html>
@@ -514,12 +514,12 @@ function renderHeader($label, $sidebarGroupText) {
     }
   </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200 fade-in">
+<body class="bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-200 fade-in font-sans">
 
   <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
-  <aside id="sidebar" class="w-64 h-screen <?= $sidebarBg ?> shadow-lg flex flex-col fixed left-0 top-0 overflow-hidden z-30 transition-transform -translate-x-full lg:translate-x-0">
-    <a href="<?= url('/dashboard') ?>" class="px-5 py-4 flex items-center border-b <?= $sidebarBorder ?> min-h-[64px] flex-shrink-0 hover:opacity-80 transition-opacity">
+  <aside id="sidebar" class="w-64 h-screen <?= $sidebarBg ?> shadow-sm flex flex-col fixed left-0 top-0 overflow-hidden z-30 transition-transform -translate-x-full lg:translate-x-0">
+    <a href="<?= url('/dashboard') ?>" class="px-5 py-4 flex items-center border-b <?= $sidebarBorder ?> min-h-[64px] flex-shrink-0 hover:opacity-90 transition-opacity">
       <?php if ($logo): ?>
         <img src="<?= $logo ?>" alt="Logo" class="h-8 mr-3 object-contain">
       <?php else: ?>
@@ -634,40 +634,56 @@ function renderHeader($label, $sidebarGroupText) {
         <?= renderMenu('Lapor Kerusakan/Kehilangan', 'fas fa-exclamation-triangle', '/incidents/create', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
       <?php endif; ?>
     </div>
+    <!-- User Profile Footer at Sidebar Bottom (Disafa SaaS Style) -->
+    <div class="p-3 border-t <?= $sidebarBorder ?> bg-white dark:bg-slate-900 flex items-center justify-between gap-3 shrink-0">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <?php if ($photo_path): ?>
+          <img src="<?= url('/file?path='.urlencode($photo_path)) ?>" class="w-9 h-9 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700 shrink-0" alt="Foto">
+        <?php else: ?>
+          <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-slate-100 dark:ring-slate-800 shrink-0">
+            <?= strtoupper(substr($userName, 0, 2)) ?>
+          </div>
+        <?php endif; ?>
+        <div class="min-w-0">
+          <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate leading-tight"><?= htmlspecialchars($userName) ?></p>
+          <p class="text-[10px] text-slate-400 dark:text-slate-500 truncate mt-0.5"><?= $roleLabel ?></p>
+        </div>
+      </div>
+      <a href="<?= url('/logout') ?>" title="Keluar" class="text-slate-400 hover:text-red-600 dark:hover:text-red-400 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0">
+        <i class="fas fa-sign-out-alt text-sm"></i>
+      </a>
+    </div>
   </aside>
 
   <div class="lg:ml-64 min-h-screen flex flex-col transition-all">
-    <header class="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800 min-h-[56px] sm:min-h-[64px] flex items-center justify-between px-3 sm:px-4 lg:px-6 sticky top-0 z-20">
+    <header class="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200/90 dark:border-slate-800 min-h-[56px] sm:min-h-[64px] flex items-center justify-between px-3 sm:px-4 lg:px-6 sticky top-0 z-20">
       <div class="flex items-center flex-1 min-w-0 mr-4">
-        <button class="lg:hidden shrink-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none mr-2 sm:mr-3 p-2 rounded-lg transition-colors" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="fas fa-bars text-lg"></i></button>
-        <div class="min-w-0"><h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h2></div>
+        <button class="lg:hidden shrink-0 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none mr-2 sm:mr-3 p-2 rounded-lg transition-colors" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="fas fa-bars text-lg"></i></button>
+        <div class="min-w-0"><h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 truncate"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h2></div>
       </div>
-      <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
-        <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-sm"></i></button>
-        <div class="flex items-center gap-3 ml-auto mr-3">
-          <div class="text-right leading-tight">
-            <p id="serverClockDate" class="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 font-medium hidden sm:block">
-              <?= date('l, d M Y') ?>
-            </p>
-            <p class="text-sm sm:text-base font-bold text-gray-700 dark:text-gray-200 tabular-nums" aria-label="Waktu server">
-              <i class="fas fa-clock text-blue-500 mr-1 text-xs sm:text-sm"></i>
-              <span id="serverClockTime"><?= date('H:i:s') ?></span>
-            </p>
-          </div>
+      <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
+        <a href="<?= url('/search') ?>" class="hidden md:flex items-center gap-2 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/90 dark:border-slate-700 rounded-xl px-3.5 py-1.5 text-xs text-slate-400 transition-colors">
+          <i class="fas fa-search text-slate-400 text-xs"></i>
+          <span>Cari barang, user...</span>
+        </a>
+        <div class="hidden sm:inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm">
+          <i class="fas fa-building text-blue-500 text-xs"></i>
+          <span><?= htmlspecialchars($appName) ?></span>
         </div>
+        <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 focus:outline-none p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-sm"></i></button>
         <?php if (isset($_SESSION['user_id'])): ?>
         <?php $unreadCount = \App\Helpers\NotificationHelper::unreadCount((int)$_SESSION['user_id']); ?>
-        <a href="<?= url('/notifications') ?>" class="relative text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-800 transition-colors" aria-label="Notifikasi"><i class="fas fa-bell text-sm"></i><?php if ($unreadCount > 0): ?><span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span><?php endif; ?></a>
+        <a href="<?= url('/notifications') ?>" class="relative text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 focus:outline-none p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Notifikasi"><i class="fas fa-bell text-sm"></i><?php if ($unreadCount > 0): ?><span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span><?php endif; ?></a>
         <?php endif; ?>
-        <div class="relative ml-3">
-          <button id="userDropdownBtn" class="flex items-center space-x-2 focus:outline-none">
-            <?php if ($photo_path): ?><img src="<?= url('/file?path='.urlencode($photo_path)) ?>" class="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700" alt="Foto"><?php else: ?><div class="w-8 h-8 rounded-full bg-<?= $primaryColor ?>-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-gray-200 dark:ring-gray-700"><?= strtoupper(substr($userName, 0, 1)) ?></div><?php endif; ?><i class="fas fa-chevron-down text-xs text-gray-400"></i>
+        <div class="relative ml-2">
+          <button id="userDropdownBtn" class="flex items-center space-x-2 focus:outline-none p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <?php if ($photo_path): ?><img src="<?= url('/file?path='.urlencode($photo_path)) ?>" class="w-8 h-8 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700" alt="Foto"><?php else: ?><div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-slate-200 dark:ring-slate-700"><?= strtoupper(substr($userName, 0, 1)) ?></div><?php endif; ?><i class="fas fa-chevron-down text-xs text-slate-400"></i>
           </button>
-          <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-            <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700"><p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><?= htmlspecialchars($userName) ?></p><p class="text-xs text-gray-500 dark:text-gray-400 truncate"><?= $roleLabel ?></p></div>
-            <a href="<?= url('/profile') ?>" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-700"><i class="fas fa-user-circle mr-2 w-4 text-center"></i> Profil Saya</a>
-            <a href="<?= url('/profile?tab=password') ?>" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-700"><i class="fas fa-key mr-2 w-4 text-center"></i> Ubah Password</a>
-            <a href="<?= url('/logout') ?>" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 border-t border-gray-100 dark:border-gray-700 mt-1"><i class="fas fa-sign-out-alt mr-2 w-4 text-center"></i> Keluar</a>
+          <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-lg py-1.5 ring-1 ring-black/5 border border-slate-100 dark:border-slate-700 focus:outline-none z-50">
+            <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-700"><p class="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate"><?= htmlspecialchars($userName) ?></p><p class="text-xs text-slate-400 dark:text-slate-400 truncate"><?= $roleLabel ?></p></div>
+            <a href="<?= url('/profile') ?>" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"><i class="fas fa-user-circle mr-2 w-4 text-center"></i> Profil Saya</a>
+            <a href="<?= url('/profile?tab=password') ?>" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"><i class="fas fa-key mr-2 w-4 text-center"></i> Ubah Password</a>
+            <a href="<?= url('/logout') ?>" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 border-t border-slate-100 dark:border-slate-700 mt-1"><i class="fas fa-sign-out-alt mr-2 w-4 text-center"></i> Keluar</a>
           </div>
         </div>
       </div>
