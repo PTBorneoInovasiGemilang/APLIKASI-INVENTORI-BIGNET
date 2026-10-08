@@ -18,7 +18,7 @@ if (!isset($page) || !isset($totalPages) || !isset($totalItems) || !isset($pagin
   <div class="text-sm text-gray-700 dark:text-gray-400">
     Menampilkan halaman <span class="font-bold text-gray-900 dark:text-gray-100"><?= $page ?></span> dari <span class="font-bold text-gray-900 dark:text-gray-100"><?= $totalPages ?></span> (Total: <span class="font-bold text-gray-900 dark:text-gray-100"><?= number_format($totalItems) ?></span> data)
   </div>
-  <div class="flex flex-wrap justify-center gap-1">
+  <div class="flex flex-wrap justify-center gap-1 sm:gap-1.5">
     <?php 
       $queryParams = $_GET;
       unset($queryParams['page']);
@@ -26,7 +26,7 @@ if (!isset($page) || !isset($totalPages) || !isset($totalItems) || !isset($pagin
       $baseUrl = $paginationBaseUrl . ($queryString ? '?' . $queryString . '&' : '?');
     ?>
     <?php if ($page > 1): ?>
-      <a href="<?= $baseUrl . 'page=' . ($page - 1) ?>" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded border border-gray-300 dark:border-gray-600 text-sm flex items-center transition-colors">
+      <a href="<?= $baseUrl . 'page=' . ($page - 1) ?>" class="px-3 py-1.5 sm:py-1 min-h-[36px] sm:min-h-0 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded border border-gray-300 dark:border-gray-600 text-sm flex items-center transition-colors">
         <i class="fas fa-chevron-left text-xs mr-1"></i> Prev
       </a>
     <?php endif; ?>
@@ -36,11 +36,11 @@ if (!isset($page) || !isset($totalPages) || !isset($totalItems) || !isset($pagin
       $endPage = min($totalPages, $page + 2);
       for ($i = $startPage; $i <= $endPage; $i++): 
     ?>
-      <a href="<?= $baseUrl . 'page=' . $i ?>" class="px-3 py-1 <?= $i === $page ? 'bg-blue-600 text-white border-blue-600 font-bold' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white border-gray-300 dark:border-gray-600' ?> rounded border text-sm transition-colors"><?= $i ?></a>
+      <a href="<?= $baseUrl . 'page=' . $i ?>" class="px-3 py-1.5 sm:py-1 min-h-[36px] min-w-[36px] flex items-center justify-center <?= $i === $page ? 'bg-blue-600 text-white border-blue-600 font-bold' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white border-gray-300 dark:border-gray-600' ?> rounded border text-sm transition-colors"><?= $i ?></a>
     <?php endfor; ?>
     
     <?php if ($page < $totalPages): ?>
-      <a href="<?= $baseUrl . 'page=' . ($page + 1) ?>" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded border border-gray-300 dark:border-gray-600 text-sm flex items-center transition-colors">
+      <a href="<?= $baseUrl . 'page=' . ($page + 1) ?>" class="px-3 py-1.5 sm:py-1 min-h-[36px] sm:min-h-0 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded border border-gray-300 dark:border-gray-600 text-sm flex items-center transition-colors">
         Next <i class="fas fa-chevron-right text-xs ml-1"></i>
       </a>
     <?php endif; ?>

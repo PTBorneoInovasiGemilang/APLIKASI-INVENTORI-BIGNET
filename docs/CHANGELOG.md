@@ -15,6 +15,26 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-08 — UI PADDING OPTIMIZATION (4PX GRID & MOBILE UX)
+**Task:** Optimasi jarak padding pada UI web dengan sistem kelipatan 4px dan peningkatan kenyamanan tampilan untuk pengguna mobile.
+**Goal:** Menghilangkan double padding pada container mobile, menstandarkan padding dengan kelipatan 4px (12px, 16px, 20px, 24px, 32px), dan memperbesar touch target untuk tombol serta input di layar sentuh.
+**Changed:**
+- `resources/views/layouts/app.php`: 
+  - Ubah padding shell konten: eliminasi double padding mobile dengan me-reset `padding: 0` pada `.fade-in` dan menyematkan padding responsif kelipatan 4px pada `<main>` (`p-3 sm:p-4 md:p-6 2xl:p-8`).
+  - Tambahkan aturan CSS mobile `<640px` untuk padding kartu (`16px = 4 x 4px`) dan input form min-height `40px` (10 x 4px) agar ramah sentuhan jempol.
+  - Perbesar touch target tombol hamburger mobile dari `p-1` ke `p-2 rounded-lg`.
+  - Sesuaikan tinggi header mobile ke `min-h-[56px] sm:min-h-[64px]` (kelipatan 4px).
+- `resources/views/components/table/toolbar.php`: Buat tombol aksi Cari dan Reset responsif (`flex-1 sm:flex-initial py-2 px-4 rounded-lg`) agar mudah ditekan di layar kecil.
+- `resources/views/components/table/pagination.php`: Beri min-height `36px` (9 x 4px) dan padding `px-3 py-1.5 sm:py-1` pada tombol paginasi untuk kemudahan tap jari.
+- `resources/views/components/table/row_actions.php`: Standardisasi padding menu baris ke `px-4 py-2` (16px dan 8px, kelipatan 4px).
+- `resources/views/reports/stock_position.php` & `report_viewer.php`: Standardisasi tombol filter dan export ke kelipatan 4px.
+**Business impact:** Tampilan web di smartphone menjadi jauh lebih lega (tambahan area pandang horizontal ~56px), form dan tombol tidak terpotong atau terlalu kecil, dan tampilan visual konsisten dengan grid 4px modern.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Code check, uji kelipatan 4px (12px, 16px, 20px, 24px, 32px), dan verifikasi responsivitas mobile.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-08 — REPORT BRANDING & LOGO STANDARDIZATION
 **Task:** Standardisasi integrasi logo Superadmin di seluruh menu laporan (Print & PDF).
 **Goal:** Memastikan logo yang dikonfigurasi Superadmin (atau logo default sistem) selalu tampil rapi pada kop cetak HTML dan berkas PDF seluruh menu laporan.

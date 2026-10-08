@@ -236,10 +236,10 @@ ob_start();
         <a href="?" class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold py-2 px-6 rounded shadow text-sm">
           <i class="fas fa-undo mr-2"></i> Atur Ulang
         </a>
-        <button type="submit" name="export" value="csv" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow text-sm ml-auto">
+        <button type="submit" name="export" value="csv" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow text-sm sm:ml-auto w-full sm:w-auto flex items-center justify-center">
           <i class="fas fa-file-csv mr-2"></i> Export CSV (Semua Hasil)
         </button>
-        <button type="submit" name="export" value="pdf" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow text-sm">
+        <button type="submit" name="export" value="pdf" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow text-sm w-full sm:w-auto flex items-center justify-center">
           <i class="fas fa-file-pdf mr-2"></i> Export PDF (Semua Hasil)
         </button>
       </div>

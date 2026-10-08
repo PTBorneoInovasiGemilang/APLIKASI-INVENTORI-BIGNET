@@ -37,7 +37,7 @@ $reportAppName = \App\Helpers\SettingsHelper::get('app_name', 'Sistem Gudang');
       </div>
     </div>
   </div>
-  <button type="button" onclick="window.print()" class="inline-flex items-center justify-center rounded-xl bg-gray-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600">
+  <button type="button" onclick="window.print()" class="inline-flex items-center justify-center rounded-xl bg-gray-800 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600">
     <i class="fas fa-print mr-2"></i> Cetak
   </button>
 </div>
@@ -52,15 +52,15 @@ $reportAppName = \App\Helpers\SettingsHelper::get('app_name', 'Sistem Gudang');
   </div>
 </div>
 
-<form method="get" class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 print:hidden">
+<form method="get" class="mb-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 print:hidden">
   <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
     <div>
       <label class="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-400">Pencarian</label>
-      <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Cari barang atau gudang..." class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-900 dark:text-white">
+      <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Cari barang atau gudang..." class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-900 dark:text-white">
     </div>
     <div>
       <label class="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-400">Gudang</label>
-      <select name="warehouse_id" class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-900 dark:text-white">
+      <select name="warehouse_id" class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-900 dark:text-white">
         <option value="0">Semua Gudang</option>
         <?php foreach ($warehouses as $wh): ?>
           <option value="<?= (int)$wh['id'] ?>" <?= $warehouseId === (int)$wh['id'] ? 'selected' : '' ?>><?= htmlspecialchars($wh['name']) ?></option>
@@ -68,8 +68,8 @@ $reportAppName = \App\Helpers\SettingsHelper::get('app_name', 'Sistem Gudang');
       </select>
     </div>
     <div class="flex items-end gap-2">
-      <button class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"><i class="fas fa-search mr-2"></i>Cari</button>
-      <a href="<?= url('/reports/stock-position') ?>" class="inline-flex items-center justify-center rounded-xl bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"><i class="fas fa-rotate-left mr-2"></i>Atur Ulang</a>
+      <button class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"><i class="fas fa-search mr-2"></i>Cari</button>
+      <a href="<?= url('/reports/stock-position') ?>" class="inline-flex items-center justify-center rounded-xl bg-gray-100 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"><i class="fas fa-rotate-left mr-2"></i>Atur Ulang</a>
     </div>
   </div>
 </form>
@@ -139,7 +139,7 @@ foreach($cards as $card):
             <td class="px-4 py-3 text-right text-sm font-bold text-amber-700 dark:text-amber-300"><?= number_format((int)$row['borrowed_quantity']) ?></td>
             <td class="px-4 py-3 text-right text-sm font-bold text-indigo-700 dark:text-indigo-300"><?= number_format((int)$row['in_transit_quantity']) ?></td>
             <td class="px-4 py-3 text-right text-sm font-black text-gray-900 dark:text-white"><?= number_format((int)$row['total_asset_quantity']) ?></td>
-            <td class="px-4 py-3 text-sm"><span class="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-200"><?= htmlspecialchars($row['stock_status']) ?></span></td>
+            <td class="px-4 py-3 text-sm"><span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-200"><?= htmlspecialchars($row['stock_status']) ?></span></td>
           </tr>
         <?php endforeach; ?>
       <?php endif; ?>

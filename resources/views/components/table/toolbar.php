@@ -21,11 +21,11 @@ $resetUrl = $resetUrl ?? $toolbarAction;
     
     <?php if (isset($extraFilters)) echo $extraFilters; ?>
     
-    <div class="flex gap-2">
-      <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded shadow transition-colors text-sm flex items-center justify-center min-w-[90px]" onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin mr-2\'></i>...';">
+    <div class="flex gap-2 w-full sm:w-auto">
+      <button type="submit" class="flex-1 sm:flex-initial bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded-lg shadow transition-colors text-sm flex items-center justify-center min-w-[90px]" onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin mr-2\'></i>...';">
         <i class="fas fa-search mr-2"></i> Cari
       </button>
-      <a href="<?= htmlspecialchars($resetUrl) ?>" class="bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 font-bold py-2 px-4 rounded shadow transition-colors text-sm flex items-center justify-center">
+      <a href="<?= htmlspecialchars($resetUrl) ?>" class="flex-1 sm:flex-initial bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 font-bold py-2 px-4 rounded-lg shadow transition-colors text-sm flex items-center justify-center">
         <i class="fas fa-undo mr-2"></i> Reset
       </a>
     </div>

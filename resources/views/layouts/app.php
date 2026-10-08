@@ -221,13 +221,13 @@ function renderHeader($label, $sidebarGroupText) {
     .sidebar-link { transition: all 0.15s ease; }
     .sidebar-link:hover { transform: translateX(2px); }
     .fade-in { animation: fadeIn 0.25s ease-in-out; }
-    /* Standard shell: semua halaman dari seluruh role memakai titik awal horizontal/vertical yang sama. */
+    /* Standard shell: semua halaman dari seluruh role memakai titik awal horizontal/vertical yang sama (kelipatan 4px). */
     main > .flex-1 > .fade-in {
       width: 100%;
       max-width: none;
       margin-left: auto;
       margin-right: auto;
-      padding: 20px 24px 32px;
+      padding: 0;
       box-sizing: border-box;
     }
 
@@ -242,6 +242,28 @@ function renderHeader($label, $sidebarGroupText) {
       padding-bottom: 0 !important;
       padding-left: 0 !important;
       padding-right: 0 !important;
+    }
+
+    /* Mobile UX: optimasi sentuhan jempol & form input (kelipatan 4px) */
+    @media (max-width: 639px) {
+      /* Padding container kartu di mobile disesuaikan agar hemat ruang (16px = 4 x 4px) */
+      main .p-6,
+      main .p-8 {
+        padding: 16px !important;
+      }
+      main .px-6 {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+      main .py-8 {
+        padding-top: 20px !important;
+        padding-bottom: 20px !important;
+      }
+      /* Input & tombol form di layar kecil min-height 40px (10 x 4px) agar nyaman disentuh */
+      input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], select, textarea {
+        font-size: 14px;
+        min-height: 40px;
+      }
     }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     .toast { animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 4.7s forwards; }
@@ -517,9 +539,9 @@ function renderHeader($label, $sidebarGroupText) {
   </aside>
 
   <div class="lg:ml-64 min-h-screen flex flex-col transition-all">
-    <header class="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800 min-h-[64px] flex items-center justify-between px-4 lg:px-6 sticky top-0 z-20">
+    <header class="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800 min-h-[56px] sm:min-h-[64px] flex items-center justify-between px-3 sm:px-4 lg:px-6 sticky top-0 z-20">
       <div class="flex items-center flex-1 min-w-0 mr-4">
-        <button class="lg:hidden shrink-0 text-gray-500 dark:text-gray-400 focus:outline-none mr-3 p-1" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="fas fa-bars text-lg"></i></button>
+        <button class="lg:hidden shrink-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none mr-2 sm:mr-3 p-2 rounded-lg transition-colors" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="fas fa-bars text-lg"></i></button>
         <div class="min-w-0"><h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h2></div>
       </div>
       <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
@@ -558,7 +580,7 @@ function renderHeader($label, $sidebarGroupText) {
       <?php if (isset($_SESSION['error'])): ?><div class="toast bg-red-50 border border-red-200 text-red-800 dark:bg-red-900/80 dark:border-red-700 dark:text-red-200 px-4 py-3 rounded-lg shadow-lg flex items-center max-w-sm"><i class="fas fa-exclamation-circle mr-3 text-red-500"></i><span class="text-sm"><?= htmlspecialchars($_SESSION['error']) ?></span></div><?php unset($_SESSION['error']); endif; ?>
     </div>
 
-    <main class="flex-1 bg-gray-50 dark:bg-gray-950 p-4 2xl:p-6 2xl:flex 2xl:gap-6">
+    <main class="flex-1 bg-gray-50 dark:bg-gray-950 p-3 sm:p-4 md:p-6 2xl:p-8 2xl:flex 2xl:gap-6">
       <div class="flex-1 min-w-0 w-full"><div class="fade-in"><?= $content ?></div></div>
       <?php
       if (!isset($guide) && !isset($guide_content)) $guide = \App\Helpers\PageGuideHelper::forPath($currentPath);

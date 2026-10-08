@@ -15,6 +15,7 @@
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] Optimasi Spacing UI (4px Grid & Mobile UX): Eliminasi double padding, penyesuaian padding kartu dan touch target pada viewport mobile.
 - [x] Remidiasi BUG-060: Standardisasi kop cetak seluruh laporan ke route `/logo` dengan fallback default.
 - [x] Remidiasi BUG-061: Dukungan multi-format (PNG, JPG, JPEG, WEBP) untuk pemuat logo PDF di `PdfHelper`.
 - [x] Remidiasi BUG-056: View `errors/403.php` dibuat mandiri dan terintegrasi dengan layout/dark mode.
