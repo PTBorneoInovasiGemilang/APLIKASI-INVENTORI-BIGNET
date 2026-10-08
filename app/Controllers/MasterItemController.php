@@ -81,6 +81,12 @@ class MasterItemController {
         $stmt->execute($params);
         $items = $stmt->fetchAll();
 
+        // Stats
+        $statTotal = (int)$pdo->query("SELECT COUNT(*) FROM master_items")->fetchColumn();
+        $statActive = (int)$pdo->query("SELECT COUNT(*) FROM master_items WHERE is_active = 1")->fetchColumn();
+        $statSerialized = (int)$pdo->query("SELECT COUNT(*) FROM master_items WHERE is_serialized = 1")->fetchColumn();
+        $statBulk = (int)$pdo->query("SELECT COUNT(*) FROM master_items WHERE is_serialized = 0")->fetchColumn();
+
         // Get categories and units for the add form and filters
         $categories = $pdo->query("SELECT * FROM item_categories WHERE is_active = 1 ORDER BY name ASC")->fetchAll();
         $units = $pdo->query("SELECT * FROM units WHERE is_active = 1 ORDER BY name ASC")->fetchAll();

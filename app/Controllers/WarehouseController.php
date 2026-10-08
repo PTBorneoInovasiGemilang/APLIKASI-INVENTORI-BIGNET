@@ -41,6 +41,10 @@ class WarehouseController {
             $whereSql = "WHERE " . implode(" AND ", $whereClauses);
         }
 
+        $statTotal = (int)$pdo->query("SELECT COUNT(*) FROM warehouses")->fetchColumn();
+        $statActive = (int)$pdo->query("SELECT COUNT(*) FROM warehouses WHERE is_active = 1")->fetchColumn();
+        $statInactive = (int)$pdo->query("SELECT COUNT(*) FROM warehouses WHERE is_active = 0")->fetchColumn();
+
         $countSql = "SELECT COUNT(*) FROM warehouses $whereSql";
         $stmtCount = $pdo->prepare($countSql);
         $stmtCount->execute($params);

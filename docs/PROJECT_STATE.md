@@ -15,6 +15,7 @@
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] Redesain Seluruh Modul Master Data (Admin & Superadmin): Kategori, Satuan, Gudang, Lokasi, dan Master Barang dilengkapi KPI summary cards, modal rounded-2xl, dan tampilan form edit bertema modern SaaS Disafa.
 - [x] Redesain Modul Pengajuan Barang (Admin & Superadmin): KPI summary widget, quick-filter segmented pills, dan peremajaan UI detail persetujuan serta dokumentasi barang keluar.
 - [x] Redesain Modul Stok Barang (Admin & Superadmin): KPI summary widget, quick-filter segmented pills, visualisasi ketersediaan stok modern, dan tabel responsif tema Disafa SaaS.
 - [x] Redesain Antarmuka Profil Pengguna (All Roles): Hero card identitas modern, segmented tabs (Data Diri, Keamanan & Password, Aktivitas), toggle intip kata sandi, dan optimasi mobile.
