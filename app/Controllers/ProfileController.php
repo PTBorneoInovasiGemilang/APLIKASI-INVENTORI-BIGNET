@@ -20,6 +20,11 @@ class ProfileController {
         $stmt->execute([$user_id]);
         $profile = $stmt->fetch();
 
+        // 5 riwayat aktivitas audit terakhir milik user
+        $actStmt = $pdo->prepare("SELECT * FROM audit_logs WHERE user_id = ? ORDER BY id DESC LIMIT 5");
+        $actStmt->execute([$user_id]);
+        $recentActivities = $actStmt->fetchAll(PDO::FETCH_ASSOC);
+
         require __DIR__ . '/../../resources/views/profile/show.php';
     }
 
@@ -86,9 +91,12 @@ class ProfileController {
         exit;
     }
     public function update() {
+        $tab = trim($_POST['tab'] ?? '');
+        $redirectUrl = url('/profile' . ($tab ? '?tab=' . urlencode($tab) : ''));
+
         if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
             $_SESSION['error'] = "Invalid request.";
-            header("Location: " . url('/profile'));
+            header("Location: " . $redirectUrl);
             exit;
         }
 
@@ -101,7 +109,7 @@ class ProfileController {
 
         if (empty($name)) {
             $_SESSION['error'] = "Nama wajib diisi.";
-            header("Location: " . url('/profile'));
+            header("Location: " . $redirectUrl);
             exit;
         }
 
@@ -115,19 +123,19 @@ class ProfileController {
 
             if (empty($currentPassword) || !$currentHash || !password_verify($currentPassword, $currentHash)) {
                 $_SESSION['error'] = "Password saat ini salah. Password tidak diubah.";
-                header("Location: " . url('/profile'));
+                header("Location: " . url('/profile?tab=password'));
                 exit;
             }
 
             if (strlen($password) < 6) {
                 $_SESSION['error'] = "Password minimal 6 karakter.";
-                header("Location: " . url('/profile'));
+                header("Location: " . url('/profile?tab=password'));
                 exit;
             }
 
             if ($password !== $passwordConfirmation) {
                 $_SESSION['error'] = "Konfirmasi password tidak cocok.";
-                header("Location: " . url('/profile'));
+                header("Location: " . url('/profile?tab=password'));
                 exit;
             }
 
@@ -138,6 +146,11 @@ class ProfileController {
             // Audit Log
             $auditStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, entity, entity_id, ip_address, user_agent) VALUES (?, 'PASSWORD_CHANGE', 'users', ?, ?, ?)");
             $auditStmt->execute([$user_id, $user_id, $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? '']);
+            
+            $_SESSION['success'] = "Password dan profil berhasil diperbarui.";
+            $_SESSION['user_name'] = $name;
+            header("Location: " . url('/profile?tab=password'));
+            exit;
         } else {
             $stmt = $pdo->prepare("UPDATE users SET name = ?, phone = ? WHERE id = ?");
             $stmt->execute([$name, $phone, $user_id]);
@@ -146,8 +159,8 @@ class ProfileController {
         // Update session
         $_SESSION['user_name'] = $name;
 
-        $_SESSION['success'] = "Profile updated successfully.";
-        header("Location: " . url('/profile'));
+        $_SESSION['success'] = "Profil berhasil diperbarui.";
+        header("Location: " . $redirectUrl);
         exit;
     }
 }

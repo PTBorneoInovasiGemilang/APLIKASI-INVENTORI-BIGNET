@@ -15,6 +15,26 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-08 — USER PROFILE SETTINGS UI OVERHAUL (ALL ROLES)
+**Task:** Redesain antarmuka Pengaturan Profil Pengguna di seluruh role menjadi modern, rapi, dan mudah digunakan di desktop maupun mobile.
+**Goal:** Memisahkan pengaturan data diri dan keamanan kata sandi ke dalam navigasi tab terstruktur, menyajikan kartu hero identitas dengan badge peran semantik, integrasi unggah foto instan, fitur toggle lihat/sembunyikan kata sandi, serta log 5 aktivitas terakhir.
+**Changed:**
+- `resources/views/profile/show.php`:
+  - Hero Header Card: Avatar besar dengan tombol kamera cepat, badge role semantik (`SUPERADMIN`, `ADMIN`, `TEKNISI_NOC`), status akun aktif, email, nomor telepon, dan tanggal bergabung.
+  - Segmented Tab Navigation: Tab Data Diri (`?tab=general`), Keamanan & Password (`?tab=password`), dan Log Aktivitas (`?tab=activity`).
+  - Tab Data Diri: Form bersih dengan input Nama Lengkap, Email (read-only terverifikasi), Nomor Telepon/WhatsApp, dan kartu ringkasan hak akses pengguna.
+  - Tab Password: Form kata sandi mandiri dengan ikon mata untuk intip kata sandi, indikator keamanan, dan tombol aksi tegas.
+  - Tab Aktivitas: Menampilkan 5 riwayat audit log terakhir milik pengguna dengan timestamp dan IP address.
+- `app/Controllers/ProfileController.php`:
+  - Method `show()` menyuplai 5 data `audit_logs` milik pengguna untuk tab aktivitas.
+  - Method `update()` mendukung redirect kembali ke tab aktif (`?tab=general` atau `?tab=password`) saat sukses maupun gagal.
+**Business impact:** Semua pengguna (Superadmin, Admin, Teknisi) memiliki pengalaman pengelolaan profil yang elegan, intuitif, dan nyaman digunakan dari smartphone maupun komputer.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Code audit (170 routes, 0 missing requires, 0 syntax error).
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-08 — COMPREHENSIVE MOBILE VIEW REFINEMENT (FIX EMPTY STATE & HEADER SQUEEZE)
 **Task:** Perbaikan menyeluruh UI mobile lintas role dan perbaikan rendering empty state tabel.
 **Goal:** Memperbaiki teks empty state yang sebelumnya tertekan vertikal per suku kata, merapikan header mobile agar judul tidak terpotong sempit ("Penga..."), serta menyelaraskan tombol aksi dan heading di semua modul agar proporsional di smartphone.
