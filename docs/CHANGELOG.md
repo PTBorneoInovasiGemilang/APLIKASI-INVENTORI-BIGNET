@@ -15,6 +15,20 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-08 — REPORT BRANDING & LOGO STANDARDIZATION
+**Task:** Standardisasi integrasi logo Superadmin di seluruh menu laporan (Print & PDF).
+**Goal:** Memastikan logo yang dikonfigurasi Superadmin (atau logo default sistem) selalu tampil rapi pada kop cetak HTML dan berkas PDF seluruh menu laporan.
+**Changed:**
+- `app/Controllers/StaticController.php`: Tambahkan fallback otomatis ke logo default perusahaan (`Big-Color Logo.png`) pada endpoint publik `/logo`.
+- `resources/views/reports/report_viewer.php` & `stock_position.php`: Standardisasi URL kop cetak ke `url('/logo')` agar tidak bergantung pada status upload spesifik dan bebas broken image.
+- `app/Helpers/PdfHelper.php`: Perluas pemuat logo PDF menggunakan `imagecreatefromstring` untuk mendukung seluruh format gambar yang diunggah Superadmin (PNG, JPG, JPEG, WEBP).
+**Business impact:** Semua hasil cetak dan unduhan PDF laporan menyertakan identitas visual perusahaan secara konsisten sesuai pengaturan Superadmin.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Static verification, pengecekan ketersediaan file branding, balanced brace checks.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-08 — BUG FIXES & WORKFLOW RECONCILIATION
 **Task:** Perbaikan 5 temuan bug & inkonsistensi arsitektur modul Pengembalian (Returns) dan Evidence View.
 **Goal:** Menghilangkan fatal crash pada unauthorized evidence request, memperbaiki schema query SQL returns, menyediakan endpoint `apiLoanItems` dan route reject, menambahkan tombol/modal tolak pengembalian, serta menghapus folder view duplikat.

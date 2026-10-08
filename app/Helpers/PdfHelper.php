@@ -72,10 +72,22 @@ class PdfHelper
             }
         }
 
-        // Use GD when available.
-        if (function_exists('imagecreatefrompng') && function_exists('imagejpeg')) {
+        // Use GD when available (supports PNG, JPG, JPEG, WEBP).
+        if (function_exists('imagejpeg')) {
             try {
-                $src = @imagecreatefrompng($path);
+                $src = null;
+                if (function_exists('imagecreatefromstring')) {
+                    $rawBytes = @file_get_contents($path);
+                    if ($rawBytes !== false && $rawBytes !== '') {
+                        $src = @imagecreatefromstring($rawBytes);
+                    }
+                }
+                if (!$src && function_exists('imagecreatefrompng')) {
+                    $src = @imagecreatefrompng($path);
+                }
+                if (!$src && function_exists('imagecreatefromjpeg')) {
+                    $src = @imagecreatefromjpeg($path);
+                }
                 if ($src) {
                     $width = imagesx($src);
                     $height = imagesy($src);

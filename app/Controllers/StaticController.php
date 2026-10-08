@@ -50,23 +50,33 @@ class StaticController {
 
     private function serveBranding($settingKey) {
         $path = \App\Helpers\SettingsHelper::get($settingKey, '');
+        $defaultLogo = __DIR__ . '/../../Big-Color Logo.png';
+
         if (empty($path)) {
-            http_response_code(404);
-            exit('Not found');
-        }
+            if ($settingKey === 'logo_path' && is_file($defaultLogo)) {
+                $file = $defaultLogo;
+            } else {
+                http_response_code(404);
+                exit('Not found');
+            }
+        } else {
+            $filename = basename($path); // anti-traversal: abaikan komponen direktori
+            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'svg', 'ico', 'webp'];
+            if (!in_array($ext, $allowed)) {
+                http_response_code(404);
+                exit('Not found');
+            }
 
-        $filename = basename($path); // anti-traversal: abaikan komponen direktori
-        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'svg', 'ico', 'webp'];
-        if (!in_array($ext, $allowed)) {
-            http_response_code(404);
-            exit('Not found');
-        }
-
-        $file = __DIR__ . '/../../storage/private_uploads/' . $filename;
-        if (!is_file($file)) {
-            http_response_code(404);
-            exit('Not found');
+            $file = __DIR__ . '/../../storage/private_uploads/' . $filename;
+            if (!is_file($file)) {
+                if ($settingKey === 'logo_path' && is_file($defaultLogo)) {
+                    $file = $defaultLogo;
+                } else {
+                    http_response_code(404);
+                    exit('Not found');
+                }
+            }
         }
 
         $mimeType = mime_content_type($file);

@@ -15,6 +15,8 @@
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] Remidiasi BUG-060: Standardisasi kop cetak seluruh laporan ke route `/logo` dengan fallback default.
+- [x] Remidiasi BUG-061: Dukungan multi-format (PNG, JPG, JPEG, WEBP) untuk pemuat logo PDF di `PdfHelper`.
 - [x] Remidiasi BUG-056: View `errors/403.php` dibuat mandiri dan terintegrasi dengan layout/dark mode.
 - [x] Remidiasi BUG-057: Hapus kolom non-existent `processed_at` pada query `ReturnController`.
 - [x] Remidiasi BUG-058: Implementasi `ReturnWorkflowController@apiLoanItems` dan registrasi route `POST /returns/reject`.

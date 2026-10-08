@@ -131,8 +131,7 @@ ob_start();
   </div>
 
   <?php
-    $reportLogo = \App\Helpers\SettingsHelper::get('logo_path', '');
-    $reportLogoUrl = $reportLogo ? url('/file?path=' . urlencode($reportLogo)) : '';
+    $reportLogoUrl = url('/logo');
     $reportCompany = \App\Helpers\SettingsHelper::get('company_name', 'PT. BIG');
     $reportAppName = \App\Helpers\SettingsHelper::get('app_name', 'Sistem Gudang');
     $reportWarehouseLabel = 'Semua Gudang';
