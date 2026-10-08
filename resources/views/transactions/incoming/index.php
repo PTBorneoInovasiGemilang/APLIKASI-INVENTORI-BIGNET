@@ -4,11 +4,14 @@ $pageTitle = 'Barang Masuk';
 ob_start();
 ?>
 
-<div class="flex justify-between items-center mb-6">
-  <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Barang Masuk</h1>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+  <div>
+    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Barang Masuk</h1>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Penerimaan barang baru dari pengadaan ke gudang penyimpanan.</p>
+  </div>
   <?php if (!\App\Helpers\AuthHelper::hasRole('SUPERADMIN')): ?>
-  <a href="<?php echo url('/incoming/create'); ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition-colors">
-    <i class="fas fa-plus mr-2"></i> Tambah Barang Masuk
+  <a href="<?php echo url('/incoming/create'); ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-sm transition-all w-full sm:w-auto">
+    <i class="fas fa-plus text-xs"></i> Tambah Barang Masuk
   </a>
   <?php endif; ?>
 </div>

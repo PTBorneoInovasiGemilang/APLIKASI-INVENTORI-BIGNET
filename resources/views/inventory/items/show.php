@@ -287,7 +287,7 @@ ob_start();
         <div class="p-8 text-center text-gray-500 dark:text-gray-400 text-sm">Barang ini belum pernah dipasang/diinstalasi.</div>
       <?php else: ?>
         <div class="overflow-x-auto">
-          <table class="min-w-full text-left text-sm mobile-card-table">
+          <table class="min-w-full text-left text-sm">
             <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
               <tr>
                 <th class="p-4 font-medium">Tanggal</th>

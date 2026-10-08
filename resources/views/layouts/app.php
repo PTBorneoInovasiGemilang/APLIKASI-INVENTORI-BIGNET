@@ -263,6 +263,13 @@ function renderHeader($label, $sidebarGroupText) {
         font-size: 12px !important;
         line-height: 1.35 !important;
       }
+      table tbody td[colspan] {
+        padding: 32px 16px !important;
+        text-align: center !important;
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+      }
       /* Compact badges di dalam tabel */
       table .inline-flex[class*="rounded-full"],
       table span[class*="rounded-full"] {
@@ -482,35 +489,20 @@ function renderHeader($label, $sidebarGroupText) {
     .app-modal-panel { animation: modalIn 0.18s ease-out; }
     @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-    @media (max-width: 640px) {
-      .mobile-card-table {
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: 100% !important;
-        table-layout: fixed !important;
-      }
-      .mobile-card-table thead { display: none; }
-      .mobile-card-table,
-      .mobile-card-table tbody,
-      .mobile-card-table tr,
-      .mobile-card-table td { display: block; width: 100%; box-sizing: border-box; }
-      .mobile-card-table tr { border: 1px solid #e5e7eb; border-radius: 0.75rem; margin-bottom: 0.75rem; padding: 0.35rem 0.75rem; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.04); overflow: hidden; }
-      .dark .mobile-card-table tr { border-color: #374151; background: #1f2937; }
-      .mobile-card-table td { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; padding: 0.65rem 0; border: none; white-space: normal !important; text-align: right; border-bottom: 1px dashed #e5e7eb; min-height: 2.5rem; overflow-wrap: anywhere; word-break: break-word; }
-      .dark .mobile-card-table td { border-bottom-color: #374151; }
-      .mobile-card-table td:last-child { border-bottom: none; }
-      .mobile-card-table td::before { content: attr(data-label); font-weight: 700; font-size: 0.72rem; color: #6b7280; text-align: left; flex: 0 0 38%; max-width: 38%; line-height: 1.25; }
-      .dark .mobile-card-table td::before { color: #9ca3af; }
-      .mobile-card-table td > * { min-width: 0; max-width: 100%; }
-      .mobile-card-table td { position: static !important; left: auto !important; right: auto !important; }
-      .mobile-card-table td:first-child,
-      .mobile-card-table td:last-child { background-color: transparent !important; }
-      .mobile-card-table tr td:only-child { display: block; text-align: center; }
-      .mobile-card-table tr td:only-child::before { content: none; }
-      .mobile-card-table td[data-label="Aksi"] { justify-content: flex-end; }
-      .mobile-card-table td[data-label="Aksi"]::before { display: none; }
-      .mobile-card-table td[data-label="No"] { justify-content: flex-start; }
-      .mobile-card-table td[data-label="No"]::before { display: none; }
+    /* Table empty state centering & anti vertical-wrap fix */
+    table tbody tr td[colspan] {
+      text-align: center !important;
+      vertical-align: middle !important;
+      white-space: normal !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+    }
+    table tbody tr td[colspan] div,
+    table tbody tr td[colspan] h3,
+    table tbody tr td[colspan] p {
+      white-space: normal !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
     }
   </style>
 </head>
@@ -637,31 +629,31 @@ function renderHeader($label, $sidebarGroupText) {
   </aside>
 
   <div class="lg:ml-64 min-h-screen flex flex-col transition-all">
-    <header class="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200/90 dark:border-slate-800 min-h-[56px] sm:min-h-[64px] flex items-center justify-between px-3 sm:px-4 lg:px-6 sticky top-0 z-20">
-      <div class="flex items-center flex-1 min-w-0 mr-4">
-        <button class="lg:hidden shrink-0 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none mr-2 sm:mr-3 p-2 rounded-lg transition-colors" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="fas fa-bars text-lg"></i></button>
-        <div class="min-w-0"><h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 truncate"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h2></div>
+    <header class="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200/90 dark:border-slate-800 min-h-[56px] sm:min-h-[64px] flex items-center justify-between px-2.5 sm:px-4 lg:px-6 sticky top-0 z-20">
+      <div class="flex items-center min-w-0 mr-2 sm:mr-4">
+        <button class="lg:hidden shrink-0 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none mr-2 p-1.5 rounded-lg transition-colors" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="fas fa-bars text-base sm:text-lg"></i></button>
+        <div class="min-w-0"><h2 class="text-sm sm:text-base md:text-lg font-bold text-slate-800 dark:text-slate-100 truncate"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h2></div>
       </div>
-      <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
-        <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 focus:outline-none p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-sm"></i></button>
-        <div class="flex items-center gap-3 ml-auto mr-3">
-          <div class="text-right leading-tight">
-            <p id="serverClockDate" class="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 font-medium hidden sm:block">
+      <div class="flex items-center space-x-1 sm:space-x-3 shrink-0">
+        <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 focus:outline-none p-1.5 sm:p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-xs sm:text-sm"></i></button>
+        <div class="flex items-center text-right leading-tight mr-1 sm:mr-2">
+          <div>
+            <p id="serverClockDate" class="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 font-medium hidden md:block">
               <?= date('l, d M Y') ?>
             </p>
-            <p class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200 tabular-nums" aria-label="Waktu server">
-              <i class="fas fa-clock text-blue-500 mr-1 text-xs sm:text-sm"></i>
+            <p class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 tabular-nums" aria-label="Waktu server">
+              <i class="fas fa-clock text-blue-500 mr-0.5 sm:mr-1 text-[10px] sm:text-xs"></i>
               <span id="serverClockTime"><?= date('H:i:s') ?></span>
             </p>
           </div>
         </div>
         <?php if (isset($_SESSION['user_id'])): ?>
         <?php $unreadCount = \App\Helpers\NotificationHelper::unreadCount((int)$_SESSION['user_id']); ?>
-        <a href="<?= url('/notifications') ?>" class="relative text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 focus:outline-none p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Notifikasi"><i class="fas fa-bell text-sm"></i><?php if ($unreadCount > 0): ?><span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span><?php endif; ?></a>
+        <a href="<?= url('/notifications') ?>" class="relative text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 focus:outline-none p-1.5 sm:p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Notifikasi"><i class="fas fa-bell text-xs sm:text-sm"></i><?php if ($unreadCount > 0): ?><span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] sm:text-[10px] font-bold rounded-full min-w-[14px] sm:min-w-[16px] h-3.5 sm:h-4 px-1 flex items-center justify-center"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span><?php endif; ?></a>
         <?php endif; ?>
-        <div class="relative ml-2">
-          <button id="userDropdownBtn" class="flex items-center space-x-2 focus:outline-none p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            <?php if ($photo_path): ?><img src="<?= url('/file?path='.urlencode($photo_path)) ?>" class="w-8 h-8 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700" alt="Foto"><?php else: ?><div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-slate-200 dark:ring-slate-700"><?= strtoupper(substr($userName, 0, 1)) ?></div><?php endif; ?><i class="fas fa-chevron-down text-xs text-slate-400"></i>
+        <div class="relative ml-1 sm:ml-2">
+          <button id="userDropdownBtn" class="flex items-center space-x-1 sm:space-x-2 focus:outline-none p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <?php if ($photo_path): ?><img src="<?= url('/file?path='.urlencode($photo_path)) ?>" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700" alt="Foto"><?php else: ?><div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-slate-200 dark:ring-slate-700"><?= strtoupper(substr($userName, 0, 1)) ?></div><?php endif; ?><i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
           </button>
           <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-lg py-1.5 ring-1 ring-black/5 border border-slate-100 dark:border-slate-700 focus:outline-none z-50">
             <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-700"><p class="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate"><?= htmlspecialchars($userName) ?></p><p class="text-xs text-slate-400 dark:text-slate-400 truncate"><?= $roleLabel ?></p></div>

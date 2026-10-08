@@ -17,14 +17,14 @@ $labels = [
 </style>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Peminjaman Barang</h1>
-      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Permintaan, persetujuan, serah terima, dan pengembalian.</p>
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Peminjaman Barang</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Permintaan, persetujuan, serah terima, dan pengembalian.</p>
     </div>
     <?php if ($role === 'TEKNISI_NOC'): ?>
-      <a href="<?= url('/loans/create') ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg inline-flex items-center">
-        <i class="fas fa-plus mr-2"></i>Peminjaman Baru
+      <a href="<?= url('/loans/create') ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-sm transition-all w-full sm:w-auto">
+        <i class="fas fa-plus text-xs"></i> Peminjaman Baru
       </a>
     <?php endif; ?>
   </div>

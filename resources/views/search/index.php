@@ -3,9 +3,9 @@ $pageTitle = 'Pencarian Barang';
 ob_start();
 ?>
 
-<div class="mb-6 fade-in">
-  <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Pencarian Barang</h1>
-  <p class="text-gray-600 dark:text-gray-400">Temukan barang secara spesifik menggunakan berbagai filter dan kata kunci.</p>
+<div class="mb-4 sm:mb-6 fade-in">
+  <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Pencarian Barang</h1>
+  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Temukan barang secara spesifik menggunakan berbagai filter dan kata kunci.</p>
 </div>
 
 <!-- Panel Panduan -->

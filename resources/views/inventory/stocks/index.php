@@ -4,14 +4,11 @@ $title = 'Stok Barang';
 ob_start();
 ?>
 
-<div class="mb-6 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-  <div>
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Stok Barang</h1>
-    <p class="mt-1 max-w-3xl text-sm text-gray-500 dark:text-gray-400">
-      Pantau kondisi barang per gudang. Lihat jumlah yang siap digunakan, sedang dipinjam, dan sedang dikirim.
-      Klik <strong>Lihat</strong> untuk membuka detail barang dan nomor seri.
-    </p>
-  </div>
+<div class="mb-4 sm:mb-6 flex flex-col gap-1 sm:gap-2">
+  <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Stok Barang</h1>
+  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+    Pantau kondisi barang per gudang. Lihat jumlah yang siap digunakan, sedang dipinjam, dan sedang dikirim.
+  </p>
 </div>
 
 <?php

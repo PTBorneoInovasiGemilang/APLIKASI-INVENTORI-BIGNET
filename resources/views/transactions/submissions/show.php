@@ -85,7 +85,7 @@ ob_start();
     <input type="hidden" name="id" value="<?php echo $submission['id']; ?>">
     
     <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 mobile-card-table" id="mappingTable">
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="mappingTable">
       <thead class="bg-gray-50 dark:bg-gray-700">
         <tr>
           <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Barang</th>

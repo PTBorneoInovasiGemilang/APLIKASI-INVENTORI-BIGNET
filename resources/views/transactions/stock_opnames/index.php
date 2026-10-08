@@ -4,17 +4,14 @@ $pageTitle = 'Stock Opname';
 ob_start();
 ?>
 
-<div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
   <div>
-    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100"><?= $title ?></h1>
-    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Audit fisik stok gudang dan penyesuaian selisih.</p>
+    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight"><?= $title ?></h1>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Audit fisik stok gudang dan penyesuaian selisih.</p>
   </div>
   <?php if (\App\Helpers\AuthHelper::hasRole(['ADMIN'])): ?>
-  <a href="<?= url('/opnames/create') ?>" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">
-    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-    </svg>
-    Buat Stock Opname
+  <a href="<?= url('/opnames/create') ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-sm transition-all w-full sm:w-auto">
+    <i class="fas fa-plus text-xs"></i> Buat Stock Opname
   </a>
   <?php endif; ?>
 </div>

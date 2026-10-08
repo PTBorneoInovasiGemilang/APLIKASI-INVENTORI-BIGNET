@@ -3,13 +3,13 @@ $pageTitle = 'Manajemen Pengguna';
 ob_start();
 ?>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Users</h1>
-      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Manage system users, roles, and access.</p>
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Manajemen Pengguna</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelola pengguna sistem, peran, dan hak akses.</p>
     </div>
-    <a href="<?= url('/users/create') ?>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-sm text-sm font-medium transition-colors">
-      <i class="fas fa-plus mr-2"></i> Add User
+    <a href="<?= url('/users/create') ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-sm transition-all w-full sm:w-auto">
+      <i class="fas fa-plus text-xs"></i> Tambah Pengguna
     </a>
   </div>
 

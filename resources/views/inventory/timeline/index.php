@@ -11,9 +11,9 @@ ob_start();
 ?>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Riwayat Perjalanan Barang</h1>
-    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Lacak riwayat lengkap mutasi Serial Number dan Stok Bulk.</p>
+  <div class="mb-4 sm:mb-6">
+    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Riwayat Perjalanan Barang</h1>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lacak riwayat lengkap mutasi Serial Number dan Stok Bulk.</p>
   </div>
 
   <?php if (isset($_SESSION['success'])): ?>
@@ -53,7 +53,7 @@ ob_start();
     </div>
 
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[800px] lg:min-w-full table-sticky mobile-card-table divide-y divide-gray-200 dark:divide-gray-700">
+      <table class="w-full min-w-[800px] lg:min-w-full table-sticky divide-y divide-gray-200 dark:divide-gray-700">
         <thead class="bg-gray-50 dark:bg-gray-700">
           <tr>
             <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>

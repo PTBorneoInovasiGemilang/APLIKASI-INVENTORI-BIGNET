@@ -4,11 +4,14 @@ $title = 'Nomor Seri';
 ob_start();
 ?>
 
-<div class="flex flex-wrap justify-between items-center gap-3 mb-6">
-  <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Nomor Seri</h1>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+  <div>
+    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Nomor Seri</h1>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Daftar seluruh unit barang berseri unik, status, dan lokasi fisik.</p>
+  </div>
   <?php if (!empty($serials)): ?>
-  <a href="<?= url('/technician-labels?serial_ids=' . implode(',', array_column($serials, 'id'))) ?>" class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm">
-    <i class="fas fa-print"></i> Cetak Semua Label (<?= count($serials) ?>)
+  <a href="<?= url('/technician-labels?serial_ids=' . implode(',', array_column($serials, 'id'))) ?>" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm w-full sm:w-auto">
+    <i class="fas fa-print text-xs"></i> Cetak Semua Label (<?= count($serials) ?>)
   </a>
   <?php endif; ?>
 </div>
@@ -37,7 +40,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
 
 <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
   <div class="overflow-x-auto">
-    <table class="w-full min-w-[800px] lg:min-w-full table-sticky mobile-card-table divide-y divide-gray-200 dark:divide-gray-700">
+    <table class="w-full min-w-[800px] lg:min-w-full table-sticky divide-y divide-gray-200 dark:divide-gray-700">
       <thead class="bg-gray-50 dark:bg-gray-700">
         <tr>
           <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>

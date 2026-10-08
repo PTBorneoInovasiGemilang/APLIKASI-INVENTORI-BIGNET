@@ -4,11 +4,14 @@ $pageTitle = 'Pengajuan Barang';
 ob_start();
 ?>
 
-<div class="flex justify-between items-center mb-6">
-  <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Daftar Pengajuan</h2>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+  <div>
+    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Daftar Pengajuan</h1>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelola permintaan dan pengajuan kebutuhan barang teknisi.</p>
+  </div>
   <?php if (\App\Helpers\AuthHelper::hasRole('TEKNISI_NOC')): ?>
-  <a href="<?php echo url('/submissions/create'); ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition-colors">
-    <i class="fas fa-plus mr-2"></i> Buat Pengajuan
+  <a href="<?php echo url('/submissions/create'); ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-sm transition-all w-full sm:w-auto">
+    <i class="fas fa-plus text-xs"></i> Buat Pengajuan
   </a>
   <?php endif; ?>
 </div>
@@ -47,7 +50,7 @@ require __DIR__ . '/../../components/table/toolbar.php';
 
 <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
   <div class="overflow-x-auto">
-    <table class="w-full min-w-[800px] lg:min-w-full table-sticky mobile-card-table divide-y divide-gray-200 dark:divide-gray-700">
+    <table class="w-full min-w-[700px] lg:min-w-full table-sticky divide-y divide-gray-200 dark:divide-gray-700">
       <thead class="bg-gray-50 dark:bg-gray-700">
         <tr>
           <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>

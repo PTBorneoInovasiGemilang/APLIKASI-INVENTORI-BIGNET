@@ -25,12 +25,12 @@ $colspan = $colspan ?? 1; // fallback aman: jangan pernah render colspan="0"
 
 $inner = function () use ($icon, $emptyIconColor, $emptyMessage, $emptySubMessage) {
   ?>
-  <div class="flex flex-col items-center justify-center mx-auto max-w-md text-center py-8">
-    <div class="inline-flex items-center justify-center w-14 h-14 rounded-full <?= htmlspecialchars($emptyIconColor) ?> mb-3 border border-gray-200 dark:border-gray-600">
-      <i class="fas <?= htmlspecialchars($icon) ?> text-xl"></i>
+  <div class="flex flex-col items-center justify-center mx-auto max-w-sm sm:max-w-md text-center py-6 sm:py-8 px-4">
+    <div class="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full <?= htmlspecialchars($emptyIconColor) ?> mb-3 border border-gray-200 dark:border-gray-600 shrink-0">
+      <i class="fas <?= htmlspecialchars($icon) ?> text-lg sm:text-xl"></i>
     </div>
-    <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 mb-1"><?= htmlspecialchars($emptyMessage) ?></h3>
-    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+    <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 leading-snug break-normal"><?= htmlspecialchars($emptyMessage) ?></h3>
+    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-xs sm:max-w-sm mx-auto leading-relaxed break-normal">
       <?= htmlspecialchars($emptySubMessage) ?>
     </p>
   </div>
@@ -40,12 +40,12 @@ $inner = function () use ($icon, $emptyIconColor, $emptyMessage, $emptySubMessag
 if ($emptyBare): ?>
   <?php $inner(); ?>
 <?php elseif ($emptyPanel): ?>
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-12 text-center mt-6">
+<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 sm:p-12 text-center mt-6">
   <?php $inner(); ?>
 </div>
 <?php else: ?>
 <tr>
-  <td colspan="<?= (int)$colspan ?>" class="px-4 py-16 text-center bg-white dark:bg-gray-800 align-middle">
+  <td colspan="<?= (int)$colspan ?>" class="px-4 py-8 sm:py-16 text-center bg-white dark:bg-gray-800 align-middle">
     <?php $inner(); ?>
   </td>
 </tr>

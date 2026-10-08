@@ -7,15 +7,15 @@ if (empty($_SESSION['csrf_token'])) {
 ?>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Instalasi</h1>
-      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Kelola instalasi lapangan dan barang yang digunakan.</p>
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Instalasi</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelola instalasi lapangan dan barang yang digunakan.</p>
     </div>
     
     <?php if (\App\Helpers\AuthHelper::hasRole(['TEKNISI_NOC'])): ?>
-    <a href="<?= url('/installations/create') ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow text-sm transition-colors">
-      <i class="fas fa-plus mr-2"></i> Buat Instalasi
+    <a href="<?= url('/installations/create') ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-sm transition-all w-full sm:w-auto">
+      <i class="fas fa-plus text-xs"></i> Buat Instalasi
     </a>
     <?php endif; ?>
   </div>
@@ -41,7 +41,7 @@ if (empty($_SESSION['csrf_token'])) {
 
   <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700">
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[800px] lg:min-w-full table-sticky mobile-card-table divide-y divide-gray-200 dark:divide-gray-700">
+      <table class="w-full min-w-[800px] lg:min-w-full table-sticky divide-y divide-gray-200 dark:divide-gray-700">
         <thead class="bg-gray-50 dark:bg-gray-700">
           <tr>
             <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">No</th>

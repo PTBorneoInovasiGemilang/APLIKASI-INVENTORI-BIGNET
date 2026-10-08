@@ -15,6 +15,26 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-08 — COMPREHENSIVE MOBILE VIEW REFINEMENT (FIX EMPTY STATE & HEADER SQUEEZE)
+**Task:** Perbaikan menyeluruh UI mobile lintas role dan perbaikan rendering empty state tabel.
+**Goal:** Memperbaiki teks empty state yang sebelumnya tertekan vertikal per suku kata, merapikan header mobile agar judul tidak terpotong sempit ("Penga..."), serta menyelaraskan tombol aksi dan heading di semua modul agar proporsional di smartphone.
+**Changed:**
+- `resources/views/layouts/app.php`:
+  - Header Mobile: Atur spacing dan proporsi header pada layar `<640px` (`px-2.5`, gap rapat antar icon, judul `text-sm sm:text-base md:text-lg`) sehingga judul halaman seperti "Pengajuan Barang" muat utuh tanpa terpotong.
+  - Hapus tuntas media query legacy `.mobile-card-table` yang memicu pemenggalan kata vertikal pada cell tabel.
+  - Atur styling eksplisit untuk `td[colspan]` (empty state) agar selalu terpusat, un-broken, dan memiliki spasi lega (`padding: 32px 16px`).
+- `resources/views/components/table/empty_state.php`:
+  - Tambahkan `break-normal` dan `max-w-sm` pada judul pesan kosong serta atur padding responsif `py-8 sm:py-16` agar teks tidak pernah patah vertikal.
+- Seluruh View Indeks (Semua Role & Modul):
+  - Hapus sisa class `mobile-card-table` pada tabel di 8 view (`submissions/index`, `submissions/show`, `installations/index`, `installations/my_items`, `incoming/show`, `returns/index`, `serials/index`, `items/show`, `timeline/index`).
+  - Standardisasi layout heading dan tombol aksi di 11 view modul (`submissions`, `installations`, `returns`, `loans`, `workflow/loans`, `incoming`, `outgoing`, `transfers`, `stock_opnames`, `adjustments`, `users`, `categories`, `warehouses`, `locations`, `units`, `items`, `serials`) menjadi kolom di mobile dan baris di desktop (`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6`), dengan tombol berukuran `w-full sm:w-auto rounded-xl py-2.5`.
+**Business impact:** Antarmuka smartphone di seluruh menu teknisi, admin, dan superadmin tampil proporsional, teks pesan kosong terbaca sempurna di tengah, tombol aksi mudah disentuh jempol, dan tabel dapat digeser horizontal dengan halus.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Code audit (170 routes, 0 missing requires, 0 unbalanced view tags), syntax check.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-08 — MODERN SAAS UI THEME OVERHAUL (DISAFA STYLE)
 **Task:** Redesain tema antarmuka (UI Theme) mengikuti gaya modern SaaS bersih (Disafa Cahaya Utama reference) tanpa mengubah logika bisnis dan database.
 **Goal:** Menghadirkan tampilan bersih dengan sidebar putih modern, active menu pill biru, user profile di sidebar bawah, header elegan dengan search & tenant pill, serta royal blue gradient overview hero widget pada dashboard.

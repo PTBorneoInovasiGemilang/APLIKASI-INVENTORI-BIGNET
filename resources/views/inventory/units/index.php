@@ -7,14 +7,14 @@ if (empty($_SESSION['csrf_token'])) {
 ?>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Satuan</h1>
-      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Kelola satuan ukur untuk kuantitas inventaris.</p>
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Satuan</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelola satuan ukur untuk kuantitas inventaris.</p>
     </div>
     <?php if (!\App\Helpers\AuthHelper::hasRole('SUPERADMIN')): ?>
-    <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow">
-      <i class="fas fa-plus mr-2"></i> Tambah Satuan
+    <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-sm transition-all w-full sm:w-auto">
+      <i class="fas fa-plus text-xs"></i> Tambah Satuan
     </button>
     <?php endif; ?>
   </div>

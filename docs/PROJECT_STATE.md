@@ -15,6 +15,7 @@
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] Perbaikan Menyeluruh Tampilan Mobile (Fix Empty State & Header Squeeze): Hapus legacy mobile-card-table, perbaiki teks pemenggalan suku kata pada empty state, dan rapikan header serta tombol aksi mobile lintas menu.
 - [x] Redesain Tema UI SaaS Modern (Disafa Style): Sidebar putih bersih, active link pill biru muda, user profile footer, royal blue gradient hero widget, dan kartu rounded-2xl.
 - [x] Optimasi Spacing UI (4px Grid & Mobile UX): Eliminasi double padding, penyesuaian padding kartu dan touch target pada viewport mobile.
 - [x] Remidiasi BUG-060: Standardisasi kop cetak seluruh laporan ke route `/logo` dengan fallback default.
