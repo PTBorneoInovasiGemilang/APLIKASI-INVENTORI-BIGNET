@@ -38,31 +38,40 @@ if (empty($_SESSION['csrf_token'])) {
 
   <!-- Summary Cards (Disafa Style) -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center">
-      <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 shrink-0">
-        <i class="fas fa-warehouse text-base sm:text-lg"></i>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 flex flex-col justify-between">
+      <div class="flex items-center justify-between gap-1.5">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Total Gudang</span>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 flex items-center justify-center shrink-0">
+          <i class="fas fa-warehouse text-xs sm:text-sm"></i>
+        </div>
       </div>
-      <div class="ml-3 sm:ml-4 min-w-0">
-        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Total Gudang</p>
-        <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($statTotal ?? 0) ?></p>
-      </div>
-    </div>
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center">
-      <div class="p-3 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300 shrink-0">
-        <i class="fas fa-circle-check text-base sm:text-lg"></i>
-      </div>
-      <div class="ml-3 sm:ml-4 min-w-0">
-        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Gudang Aktif</p>
-        <p class="text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400"><?= number_format($statActive ?? 0) ?></p>
+      <div class="mt-2 sm:mt-3">
+        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($statTotal ?? 0) ?></p>
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Semua fasilitas</p>
       </div>
     </div>
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center">
-      <div class="p-3 rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300 shrink-0">
-        <i class="fas fa-ban text-base sm:text-lg"></i>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 flex flex-col justify-between">
+      <div class="flex items-center justify-between gap-1.5">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Gudang Aktif</span>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300 flex items-center justify-center shrink-0">
+          <i class="fas fa-circle-check text-xs sm:text-sm"></i>
+        </div>
       </div>
-      <div class="ml-3 sm:ml-4 min-w-0">
-        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Nonaktif</p>
-        <p class="text-xl sm:text-2xl font-extrabold text-slate-700 dark:text-slate-300"><?= number_format($statInactive ?? 0) ?></p>
+      <div class="mt-2 sm:mt-3">
+        <p class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400"><?= number_format($statActive ?? 0) ?></p>
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Operasional aktif</p>
+      </div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 flex flex-col justify-between">
+      <div class="flex items-center justify-between gap-1.5">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Nonaktif</span>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300 flex items-center justify-center shrink-0">
+          <i class="fas fa-ban text-xs sm:text-sm"></i>
+        </div>
+      </div>
+      <div class="mt-2 sm:mt-3">
+        <p class="text-2xl sm:text-3xl font-extrabold text-slate-700 dark:text-slate-300"><?= number_format($statInactive ?? 0) ?></p>
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Diarsipkan</p>
       </div>
     </div>
   </div>

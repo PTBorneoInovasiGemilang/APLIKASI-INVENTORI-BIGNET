@@ -455,6 +455,14 @@ function renderHeader($label, $sidebarGroupText) {
       input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], select, textarea {
         font-size: 14px !important;
         min-height: 40px !important;
+      }
+      input[type="text"]:not([class*="pl-"]),
+      input[type="email"]:not([class*="pl-"]),
+      input[type="password"]:not([class*="pl-"]),
+      input[type="number"]:not([class*="pl-"]),
+      input[type="date"]:not([class*="pl-"]),
+      select,
+      textarea {
         padding-left: 12px !important;
         padding-right: 12px !important;
       }

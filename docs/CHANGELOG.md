@@ -15,6 +15,24 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-09 — FIX MOBILE KPI TRUNCATION & FORM INPUT ICON OVERLAP
+**Task:** Perbaikan bug tampilan kartu KPI terpotong ("TOTAL PENG...", "MENUNGGU...") dan tumpang tindih ikon form di tampilan mobile (Teknisi & All Roles).
+**Goal:** Memperbaiki layout kartu ringkasan KPI agar judul dan angka terbaca utuh tanpa terpotong elipsis di layar smartphone sempit, serta mengeliminasi tumpang tindih ikon pencarian dan dropdown status pada form filter.
+**Changed:**
+- `resources/views/layouts/app.php`:
+  - Perbaiki aturan CSS input mobile `<640px`: sematkan selektor `:not([class*="pl-"])` sehingga input yang memiliki ikon (seperti `pl-9` atau `pl-10`) tidak lagi ditimpa paksa oleh `padding-left: 12px !important`, membebaskan teks input dari tumpukan ikon.
+- `resources/views/transactions/submissions/index.php`:
+  - Kartu KPI: Ganti layout `flex items-center` menjadi `flex flex-col justify-between` dengan ikon mungil di pojok kanan atas (`w-7 h-7 sm:w-8 sm:h-8 rounded-lg`) dan hilangkan kelas `truncate` pada label judul serta subtitle sehingga terbaca 100% utuh tanpa terpotong ("Total Pengajuan", "Menunggu Review", "Disetujui", "Telah Selesai").
+  - Form Filter: Hapus dekorasi ikon tumpang tindih pada elemen `<select name="status">` dan atur input pencarian dengan padding rapi.
+- Modul Lain (`stocks/index.php`, `items/index.php`, `returns/index.php`, `categories/index.php`, `units/index.php`, `warehouses/index.php`, `locations/index.php`):
+  - Terapkan standarisasi kartu KPI modern top-right icon yang sama agar semua menu mobile konsisten dan bebas pemotongan elipsis.
+**Business impact:** Tampilan dasbor dan menu transaksi pada smartphone teknisi, admin, dan superadmin kini tampil rapi, kartu metrik proporsional, dan form filter mudah digunakan tanpa bug visual.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Code check, verifikasi balanced braces, dan 170 routes OK.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-08 — FULL APPLICATION UI HARMONIZATION & MOBILE RESPONSIVENESS OVERHAUL
 **Task:** Harmonisasi dan penyelarasan tema antarmuka secara global di seluruh menu untuk semua peran (Admin, Superadmin, dan Teknisi NOC) agar tampil konsisten dengan standar modern SaaS (Disafa style), bebas double padding, dan responsif sempurna di desktop maupun mobile.
 **Goal:** Menyeragamkan seluruh halaman aplikasi tanpa ada perbedaan tema antar menu, mengeliminasi sisa wrapper pembatas usang, menyelaraskan kartu, tabel `rounded-2xl`, tombol aksi, dan dialog modal tanpa mengubah logika bisnis atau struktur database.

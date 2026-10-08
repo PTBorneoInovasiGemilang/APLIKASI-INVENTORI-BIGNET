@@ -34,47 +34,55 @@ $currentSearch = trim($_GET['search'] ?? '');
 
   <!-- KPI Summary Cards (Disafa SaaS Style) -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center">
-      <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 shrink-0">
-        <i class="fas fa-boxes-stacked text-base sm:text-lg"></i>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 flex flex-col justify-between">
+      <div class="flex items-center justify-between gap-1.5">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Total Baris</span>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 flex items-center justify-center shrink-0">
+          <i class="fas fa-boxes-stacked text-xs sm:text-sm"></i>
+        </div>
       </div>
-      <div class="ml-3 sm:ml-4 min-w-0">
-        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Total Baris</p>
-        <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($stats['total_items']) ?></p>
-        <p class="text-[10px] text-slate-400 truncate mt-0.5">Katalog stok aktif</p>
+      <div class="mt-2 sm:mt-3">
+        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($stats['total_items']) ?></p>
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Katalog stok aktif</p>
       </div>
     </div>
 
-    <a href="<?= url('/stocks?filter=low_stock' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border <?= $stats['low_stock'] > 0 ? 'border-amber-300 dark:border-amber-700/60 ring-2 ring-amber-100 dark:ring-amber-950/30' : 'border-slate-200/80 dark:border-slate-800' ?> p-4 sm:p-5 flex items-center hover:shadow-md transition-all group">
-      <div class="p-3 rounded-xl <?= $stats['low_stock'] > 0 ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300' : 'bg-slate-50 text-slate-400 dark:bg-slate-800' ?> shrink-0">
-        <i class="fas fa-triangle-exclamation text-base sm:text-lg"></i>
+    <a href="<?= url('/stocks?filter=low_stock' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border <?= $stats['low_stock'] > 0 ? 'border-amber-300 dark:border-amber-700/60 ring-2 ring-amber-100 dark:ring-amber-950/30' : 'border-slate-200/80 dark:border-slate-800' ?> p-3.5 sm:p-5 flex flex-col justify-between hover:shadow-md transition-all group">
+      <div class="flex items-center justify-between gap-1.5">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Stok Rendah</span>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg <?= $stats['low_stock'] > 0 ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300' : 'bg-slate-50 text-slate-400 dark:bg-slate-800' ?> flex items-center justify-center shrink-0">
+          <i class="fas fa-triangle-exclamation text-xs sm:text-sm"></i>
+        </div>
       </div>
-      <div class="ml-3 sm:ml-4 min-w-0">
-        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Stok Rendah</p>
-        <p class="text-xl sm:text-2xl font-extrabold <?= $stats['low_stock'] > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100' ?>"><?= number_format($stats['low_stock']) ?></p>
-        <p class="text-[10px] text-slate-400 truncate mt-0.5">Perlu pengadaan</p>
-      </div>
-    </a>
-
-    <a href="<?= url('/stocks?filter=borrowed' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center hover:shadow-md transition-all group">
-      <div class="p-3 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-300 shrink-0">
-        <i class="fas fa-hand-holding text-base sm:text-lg"></i>
-      </div>
-      <div class="ml-3 sm:ml-4 min-w-0">
-        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Sedang Dipinjam</p>
-        <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($stats['active_loans']) ?></p>
-        <p class="text-[10px] text-slate-400 truncate mt-0.5">Dalam custody teknisi</p>
+      <div class="mt-2 sm:mt-3">
+        <p class="text-2xl sm:text-3xl font-extrabold <?= $stats['low_stock'] > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100' ?>"><?= number_format($stats['low_stock']) ?></p>
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Perlu pengadaan</p>
       </div>
     </a>
 
-    <a href="<?= url('/stocks?filter=in_transit' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center hover:shadow-md transition-all group">
-      <div class="p-3 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-300 shrink-0">
-        <i class="fas fa-truck text-base sm:text-lg"></i>
+    <a href="<?= url('/stocks?filter=borrowed' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 flex flex-col justify-between hover:shadow-md transition-all group">
+      <div class="flex items-center justify-between gap-1.5">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Sedang Dipinjam</span>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-300 flex items-center justify-center shrink-0">
+          <i class="fas fa-hand-holding text-xs sm:text-sm"></i>
+        </div>
       </div>
-      <div class="ml-3 sm:ml-4 min-w-0">
-        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Dalam Transfer</p>
-        <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($stats['in_transit']) ?></p>
-        <p class="text-[10px] text-slate-400 truncate mt-0.5">Sedang dikirim</p>
+      <div class="mt-2 sm:mt-3">
+        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($stats['active_loans']) ?></p>
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Dalam custody teknisi</p>
+      </div>
+    </a>
+
+    <a href="<?= url('/stocks?filter=in_transit' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 flex flex-col justify-between hover:shadow-md transition-all group">
+      <div class="flex items-center justify-between gap-1.5">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Dalam Transfer</span>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-300 flex items-center justify-center shrink-0">
+          <i class="fas fa-truck text-xs sm:text-sm"></i>
+        </div>
+      </div>
+      <div class="mt-2 sm:mt-3">
+        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($stats['in_transit']) ?></p>
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Sedang dikirim</p>
       </div>
     </a>
   </div>
@@ -120,56 +128,46 @@ $currentSearch = trim($_GET['search'] ?? '');
       <div>
         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1.5">Pencarian</label>
         <div class="relative">
-          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
             <i class="fas fa-search text-xs"></i>
           </span>
-          <input type="text" name="search" value="<?= htmlspecialchars($currentSearch) ?>" placeholder="Cari nama atau kode barang..." class="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+          <input type="text" name="search" value="<?= htmlspecialchars($currentSearch) ?>" placeholder="Cari nama atau kode barang..." class="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
         </div>
       </div>
 
       <!-- Warehouse Select -->
       <div>
         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1.5">Gudang</label>
-        <div class="relative">
-          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-            <i class="fas fa-warehouse text-xs"></i>
-          </span>
-          <select name="warehouse_id" class="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-            <option value="0">Semua Gudang</option>
-            <?php foreach ($warehouses as $wh): ?>
-              <option value="<?= (int)$wh['id'] ?>" <?= $currentWarehouseId === (int)$wh['id'] ? 'selected' : '' ?>>
-                <?= htmlspecialchars($wh['name']) ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
+        <select name="warehouse_id" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+          <option value="0">Semua Gudang</option>
+          <?php foreach ($warehouses as $wh): ?>
+            <option value="<?= (int)$wh['id'] ?>" <?= $currentWarehouseId === (int)$wh['id'] ? 'selected' : '' ?>>
+              <?= htmlspecialchars($wh['name']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
       </div>
 
       <!-- Category Select -->
       <div>
         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1.5">Kategori</label>
-        <div class="relative">
-          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-            <i class="fas fa-tags text-xs"></i>
-          </span>
-          <select name="category_id" class="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-            <option value="0">Semua Kategori</option>
-            <?php foreach ($categories as $cat): ?>
-              <option value="<?= (int)$cat['id'] ?>" <?= $currentCategoryId === (int)$cat['id'] ? 'selected' : '' ?>>
-                <?= htmlspecialchars($cat['name']) ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
+        <select name="category_id" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+          <option value="0">Semua Kategori</option>
+          <?php foreach ($categories as $cat): ?>
+            <option value="<?= (int)$cat['id'] ?>" <?= $currentCategoryId === (int)$cat['id'] ? 'selected' : '' ?>>
+              <?= htmlspecialchars($cat['name']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
       </div>
 
       <!-- Submit & Reset Buttons -->
       <div class="flex items-center gap-2">
-        <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm text-sm transition-all">
+        <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm text-sm transition-all min-h-[40px]">
           <i class="fas fa-search text-xs"></i>
           <span>Terapkan</span>
         </button>
-        <a href="<?= url('/stocks') ?>" class="inline-flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold py-2 px-3.5 rounded-xl text-sm transition-all" title="Reset Filter">
+        <a href="<?= url('/stocks') ?>" class="inline-flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold py-2.5 px-3.5 rounded-xl text-sm transition-all min-h-[40px]" title="Reset Filter">
           <i class="fas fa-rotate-left text-xs"></i>
           <span>Reset</span>
         </a>

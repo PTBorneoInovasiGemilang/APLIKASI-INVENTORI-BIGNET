@@ -42,31 +42,39 @@ foreach ($returns as $summaryRow) {
 
   <!-- Summary Cards (Disafa Style) -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border <?= $pendingCount > 0 ? 'border-amber-300 dark:border-amber-700/60 ring-2 ring-amber-100 dark:ring-amber-950/30' : 'border-slate-200/80 dark:border-slate-800' ?> p-4 sm:p-5 flex items-center">
-      <div class="p-3 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300 shrink-0">
-        <i class="fas fa-clock text-base sm:text-lg"></i>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border <?= $pendingCount > 0 ? 'border-amber-300 dark:border-amber-700/60 ring-2 ring-amber-100 dark:ring-amber-950/30' : 'border-slate-200/80 dark:border-slate-800' ?> p-3.5 sm:p-5 flex flex-col justify-between">
+      <div class="flex items-center justify-between gap-1.5">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Menunggu Pemeriksaan</span>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300 flex items-center justify-center shrink-0">
+          <i class="fas fa-clock text-xs sm:text-sm"></i>
+        </div>
       </div>
-      <div class="ml-3 sm:ml-4 min-w-0">
-        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Menunggu Pemeriksaan</p>
-        <p class="text-xl sm:text-2xl font-extrabold <?= $pendingCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100' ?>"><?= $pendingCount ?></p>
-      </div>
-    </div>
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center">
-      <div class="p-3 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300 shrink-0">
-        <i class="fas fa-circle-check text-base sm:text-lg"></i>
-      </div>
-      <div class="ml-3 sm:ml-4 min-w-0">
-        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Selesai Diproses</p>
-        <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100"><?= $completedCount ?></p>
+      <div class="mt-2 sm:mt-3">
+        <p class="text-2xl sm:text-3xl font-extrabold <?= $pendingCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100' ?>"><?= $pendingCount ?></p>
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5"><?= $pendingCount > 0 ? 'Perlu tindakan review' : 'Semua sudah diperiksa' ?></p>
       </div>
     </div>
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center">
-      <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 shrink-0">
-        <i class="fas fa-info-circle text-base sm:text-lg"></i>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 flex flex-col justify-between">
+      <div class="flex items-center justify-between gap-1.5">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Selesai Diproses</span>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300 flex items-center justify-center shrink-0">
+          <i class="fas fa-circle-check text-xs sm:text-sm"></i>
+        </div>
       </div>
-      <div class="ml-3 sm:ml-4 min-w-0">
-        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Proses Admin</p>
-        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">Kondisi fisik diperiksa sebelum stok kembali ke gudang.</p>
+      <div class="mt-2 sm:mt-3">
+        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100"><?= $completedCount ?></p>
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Sudah kembali ke stok</p>
+      </div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 flex flex-col justify-between">
+      <div class="flex items-center justify-between gap-1.5">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Proses Admin</span>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 flex items-center justify-center shrink-0">
+          <i class="fas fa-info-circle text-xs sm:text-sm"></i>
+        </div>
+      </div>
+      <div class="mt-2 sm:mt-3">
+        <p class="text-xs text-slate-600 dark:text-slate-300 font-medium leading-relaxed">Admin memeriksa fisik barang sebelum status selesai.</p>
       </div>
     </div>
   </div>
