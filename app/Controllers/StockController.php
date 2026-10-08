@@ -148,6 +148,13 @@ class StockController
         $warehouses = $pdo->query("SELECT * FROM warehouses WHERE is_active = 1 ORDER BY name")->fetchAll();
         $categories = $pdo->query("SELECT * FROM item_categories WHERE is_active = 1 ORDER BY name")->fetchAll();
 
+        $stats = [
+            'total_items' => $totalItems,
+            'low_stock' => (int)$pdo->query("SELECT COUNT(*) FROM stocks s JOIN master_items m ON s.master_item_id = m.id WHERE m.stok_minimum > 0 AND s.quantity <= m.stok_minimum " . ($warehouseId > 0 ? "AND s.warehouse_id = $warehouseId" : ""))->fetchColumn(),
+            'active_loans' => (int)$pdo->query("SELECT COUNT(*) FROM loans WHERE status IN ('BORROWED','PARTIAL_RETURNED') " . ($warehouseId > 0 ? "AND warehouse_id = $warehouseId" : ""))->fetchColumn(),
+            'in_transit' => (int)$pdo->query("SELECT COUNT(*) FROM transfers WHERE status IN ('IN_TRANSIT','PARTIAL_RECEIVED') " . ($warehouseId > 0 ? "AND source_warehouse_id = $warehouseId" : ""))->fetchColumn(),
+        ];
+
         require __DIR__ . '/../../resources/views/inventory/stocks/index.php';
     }
 }

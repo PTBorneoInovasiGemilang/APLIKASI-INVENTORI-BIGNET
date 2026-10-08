@@ -2,267 +2,362 @@
 $pageTitle = 'Stok Barang';
 $title = 'Stok Barang';
 ob_start();
+
+$currentFilter = $_GET['filter'] ?? '';
+$currentTracking = $_GET['tracking'] ?? '';
+$currentWarehouseId = (int)($_GET['warehouse_id'] ?? 0);
+$currentCategoryId = (int)($_GET['category_id'] ?? 0);
+$currentSearch = trim($_GET['search'] ?? '');
 ?>
 
-<div class="mb-4 sm:mb-6 flex flex-col gap-1 sm:gap-2">
-  <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Stok Barang</h1>
-  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-    Pantau kondisi barang per gudang. Lihat jumlah yang siap digunakan, sedang dipinjam, dan sedang dikirim.
-  </p>
-</div>
+<div class="space-y-6">
 
-<?php
-$toolbarAction = url('/stocks');
-$searchPlaceholder = 'Cari nama barang...';
-ob_start();
-?>
-<div>
-  <label class="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">Gudang</label>
-  <select name="warehouse_id" class="w-48 rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-    <option value="0">Semua Gudang</option>
-    <?php foreach ($warehouses as $wh): ?>
-      <option value="<?= (int)$wh['id'] ?>" <?= isset($_GET['warehouse_id']) && (int)$_GET['warehouse_id'] === (int)$wh['id'] ? 'selected' : '' ?>>
-        <?= htmlspecialchars($wh['name']) ?>
-      </option>
-    <?php endforeach; ?>
-  </select>
-</div>
+  <!-- Header Page & Action Button -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Stok Barang</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+        Monitoring posisi fisik, ketersediaan, peminjaman, dan transfer stok antar gudang.
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="<?= url('/reports/stock-position') ?>" class="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700 font-semibold py-2 px-4 rounded-xl shadow-sm text-xs transition-all">
+        <i class="fas fa-chart-pie text-blue-500 text-xs"></i>
+        <span>Laporan Posisi Stok</span>
+      </a>
+      <a href="<?= url('/serials') ?>" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm text-xs transition-all">
+        <i class="fas fa-barcode text-xs"></i>
+        <span>Nomor Seri</span>
+      </a>
+    </div>
+  </div>
 
-<div>
-  <label class="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">Kategori</label>
-  <select name="category_id" class="w-48 rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-    <option value="0">Semua Kategori</option>
-    <?php foreach ($categories as $cat): ?>
-      <option value="<?= (int)$cat['id'] ?>" <?= isset($_GET['category_id']) && (int)$_GET['category_id'] === (int)$cat['id'] ? 'selected' : '' ?>>
-        <?= htmlspecialchars($cat['name']) ?>
-      </option>
-    <?php endforeach; ?>
-  </select>
-</div>
+  <!-- KPI Summary Cards (Disafa SaaS Style) -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center">
+      <div class="p-3 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 shrink-0">
+        <i class="fas fa-boxes-stacked text-base sm:text-lg"></i>
+      </div>
+      <div class="ml-3 sm:ml-4 min-w-0">
+        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Total Baris</p>
+        <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($stats['total_items']) ?></p>
+        <p class="text-[10px] text-slate-400 truncate mt-0.5">Katalog stok aktif</p>
+      </div>
+    </div>
 
-<div>
-  <label class="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">Pelacakan</label>
-  <select name="tracking" class="w-48 rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-    <option value="">Semua Barang</option>
-    <option value="serialized" <?= ($_GET['tracking'] ?? '') === 'serialized' ? 'selected' : '' ?>>Pakai Nomor Seri</option>
-    <option value="non_serialized" <?= ($_GET['tracking'] ?? '') === 'non_serialized' ? 'selected' : '' ?>>Tanpa Nomor Seri</option>
-  </select>
-</div>
+    <a href="<?= url('/stocks?filter=low_stock' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border <?= $stats['low_stock'] > 0 ? 'border-amber-300 dark:border-amber-700/60 ring-2 ring-amber-100 dark:ring-amber-950/30' : 'border-slate-200/80 dark:border-slate-800' ?> p-4 sm:p-5 flex items-center hover:shadow-md transition-all group">
+      <div class="p-3 rounded-xl <?= $stats['low_stock'] > 0 ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300' : 'bg-slate-50 text-slate-400 dark:bg-slate-800' ?> shrink-0">
+        <i class="fas fa-triangle-exclamation text-base sm:text-lg"></i>
+      </div>
+      <div class="ml-3 sm:ml-4 min-w-0">
+        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Stok Rendah</p>
+        <p class="text-xl sm:text-2xl font-extrabold <?= $stats['low_stock'] > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100' ?>"><?= number_format($stats['low_stock']) ?></p>
+        <p class="text-[10px] text-slate-400 truncate mt-0.5">Perlu pengadaan</p>
+      </div>
+    </a>
 
-<div>
-  <label class="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">Pergerakan</label>
-  <select name="filter" class="w-48 rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-    <option value="">Semua Kondisi</option>
-    <option value="low_stock" <?= ($_GET['filter'] ?? '') === 'low_stock' ? 'selected' : '' ?>>Stok Rendah</option>
-    <option value="borrowed" <?= ($_GET['filter'] ?? '') === 'borrowed' ? 'selected' : '' ?>>Sedang Dipinjam</option>
-    <option value="in_transit" <?= ($_GET['filter'] ?? '') === 'in_transit' ? 'selected' : '' ?>>Dalam Pengiriman</option>
-  </select>
-</div>
-<?php
-$extraFilters = ob_get_clean();
-require __DIR__ . '/../../components/table/toolbar.php';
-?>
+    <a href="<?= url('/stocks?filter=borrowed' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center hover:shadow-md transition-all group">
+      <div class="p-3 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-300 shrink-0">
+        <i class="fas fa-hand-holding text-base sm:text-lg"></i>
+      </div>
+      <div class="ml-3 sm:ml-4 min-w-0">
+        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Sedang Dipinjam</p>
+        <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($stats['active_loans']) ?></p>
+        <p class="text-[10px] text-slate-400 truncate mt-0.5">Dalam custody teknisi</p>
+      </div>
+    </a>
 
-<div class="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-  <table class="w-full min-w-[800px] lg:min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-    <thead class="bg-gray-50 dark:bg-gray-700">
-      <tr>
-        <th class="w-12 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">No</th>
-        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Gudang</th>
-        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Barang</th>
-        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Pelacakan</th>
-        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Ringkasan Stok</th>
-        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Kondisi</th>
-        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Aksi</th>
-      </tr>
-    </thead>
+    <a href="<?= url('/stocks?filter=in_transit' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 flex items-center hover:shadow-md transition-all group">
+      <div class="p-3 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-300 shrink-0">
+        <i class="fas fa-truck text-base sm:text-lg"></i>
+      </div>
+      <div class="ml-3 sm:ml-4 min-w-0">
+        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Dalam Transfer</p>
+        <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100"><?= number_format($stats['in_transit']) ?></p>
+        <p class="text-[10px] text-slate-400 truncate mt-0.5">Sedang dikirim</p>
+      </div>
+    </a>
+  </div>
 
-    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-    <?php
-    $no = ($offset ?? 0) + 1;
-    foreach ($stocks as $stock):
-      $physical = (int)$stock['physical_quantity'];
-      $available = (int)$stock['available_quantity'];
-      $borrowed = (int)$stock['borrowed_quantity'];
-      $inTransit = (int)$stock['in_transit_quantity'];
-      $isLow = !empty($stock['is_low_stock']);
-      $unit = $stock['unit_name'] ?: 'unit';
-      $availablePercent = $physical > 0 ? min(100, round(($available / $physical) * 100)) : 0;
+  <!-- Segmented Quick Filter Pills -->
+  <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+    <a href="<?= url('/stocks' . ($currentWarehouseId > 0 ? '?warehouse_id=' . $currentWarehouseId : '')) ?>" class="px-3.5 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all <?= empty($currentFilter) && empty($currentTracking) ? 'bg-blue-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700' ?>">
+      Semua Stok
+    </a>
+    <a href="<?= url('/stocks?filter=low_stock' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="px-3.5 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 <?= $currentFilter === 'low_stock' ? 'bg-amber-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700' ?>">
+      <i class="fas fa-triangle-exclamation text-[10px]"></i>
+      <span>Stok Rendah</span>
+      <?php if ($stats['low_stock'] > 0): ?>
+        <span class="inline-flex items-center justify-center px-1.5 py-0.2 rounded-full text-[10px] <?= $currentFilter === 'low_stock' ? 'bg-amber-700 text-white' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300' ?>"><?= $stats['low_stock'] ?></span>
+      <?php endif; ?>
+    </a>
+    <a href="<?= url('/stocks?filter=borrowed' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="px-3.5 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 <?= $currentFilter === 'borrowed' ? 'bg-orange-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700' ?>">
+      <i class="fas fa-hand-holding text-[10px]"></i>
+      <span>Sedang Dipinjam</span>
+    </a>
+    <a href="<?= url('/stocks?filter=in_transit' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="px-3.5 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 <?= $currentFilter === 'in_transit' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700' ?>">
+      <i class="fas fa-truck text-[10px]"></i>
+      <span>Dalam Pengiriman</span>
+    </a>
+    <a href="<?= url('/stocks?tracking=serialized' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="px-3.5 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 <?= $currentTracking === 'serialized' ? 'bg-purple-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700' ?>">
+      <i class="fas fa-barcode text-[10px]"></i>
+      <span>Pakai Serial</span>
+    </a>
+    <a href="<?= url('/stocks?tracking=non_serialized' . ($currentWarehouseId > 0 ? '&warehouse_id=' . $currentWarehouseId : '')) ?>" class="px-3.5 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 <?= $currentTracking === 'non_serialized' ? 'bg-slate-700 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700' ?>">
+      <i class="fas fa-cubes text-[10px]"></i>
+      <span>Non-Serial (Bulk)</span>
+    </a>
+  </div>
 
-      // Identitas warna per gudang — konsisten untuk semua item di gudang yang sama.
-      $warehousePalettes = [
-        'blue' => [
-          'accent' => 'text-blue-600 dark:text-blue-400',
-          'soft' => 'bg-blue-50 dark:bg-blue-950/30',
-          'softText' => 'text-blue-700 dark:text-blue-300',
-          'bar' => 'bg-blue-500',
-          'border' => 'border-blue-200 dark:border-blue-800'
-        ],
-        'green' => [
-          'accent' => 'text-green-600 dark:text-green-400',
-          'soft' => 'bg-green-50 dark:bg-green-950/30',
-          'softText' => 'text-green-700 dark:text-green-300',
-          'bar' => 'bg-green-500',
-          'border' => 'border-green-200 dark:border-green-800'
-        ],
-        'purple' => [
-          'accent' => 'text-purple-600 dark:text-purple-400',
-          'soft' => 'bg-purple-50 dark:bg-purple-950/30',
-          'softText' => 'text-purple-700 dark:text-purple-300',
-          'bar' => 'bg-purple-500',
-          'border' => 'border-purple-200 dark:border-purple-800'
-        ],
-        'orange' => [
-          'accent' => 'text-orange-600 dark:text-orange-400',
-          'soft' => 'bg-orange-50 dark:bg-orange-950/30',
-          'softText' => 'text-orange-700 dark:text-orange-300',
-          'bar' => 'bg-orange-500',
-          'border' => 'border-orange-200 dark:border-orange-800'
-        ],
-        'pink' => [
-          'accent' => 'text-pink-600 dark:text-pink-400',
-          'soft' => 'bg-pink-50 dark:bg-pink-950/30',
-          'softText' => 'text-pink-700 dark:text-pink-300',
-          'bar' => 'bg-pink-500',
-          'border' => 'border-pink-200 dark:border-pink-800'
-        ],
-        'cyan' => [
-          'accent' => 'text-cyan-600 dark:text-cyan-400',
-          'soft' => 'bg-cyan-50 dark:bg-cyan-950/30',
-          'softText' => 'text-cyan-700 dark:text-cyan-300',
-          'bar' => 'bg-cyan-500',
-          'border' => 'border-cyan-200 dark:border-cyan-800'
-        ],
-      ];
-      // Gudang utama diberi warna identitas tetap; gudang lain mendapat warna berbeda secara konsisten.
-      $warehouseNameKey = strtoupper(trim((string)$stock['warehouse_name']));
-      $warehouseColorMap = [
-        'GUDANG 28 OKTOBER' => 'green',
-        'GUDANG NGABANG' => 'blue',
-        'GUDANG SEKADAU' => 'purple',
-        'GUDANG SINTANG' => 'orange',
-        'GUDANG SANGGAU' => 'pink',
-      ];
-      $paletteKeys = array_keys($warehousePalettes);
-      if (isset($warehouseColorMap[$warehouseNameKey])) {
-        $warehousePaletteKey = $warehouseColorMap[$warehouseNameKey];
-      } else {
-        $warehousePaletteKey = $paletteKeys[max(0, ((int)$stock['warehouse_id'] - 1)) % count($paletteKeys)];
-      }
-      $warehousePalette = $warehousePalettes[$warehousePaletteKey];
-    ?>
-      <tr class="group transition hover:bg-gray-50 dark:hover:bg-gray-700/40">
-        <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400"><?= $no++ ?></td>
+  <!-- Detailed Filter & Search Toolbar (Disafa Style) -->
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5">
+    <form method="GET" action="<?= url('/stocks') ?>" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-end">
+      <?php if (!empty($currentFilter)): ?>
+        <input type="hidden" name="filter" value="<?= htmlspecialchars($currentFilter) ?>">
+      <?php endif; ?>
 
-        <td class="px-4 py-4 align-top">
-          <div class="text-sm font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($stock['warehouse_name']) ?></div>
-          <div class="mt-1 text-xs text-gray-500 dark:text-gray-400"><?= htmlspecialchars($stock['category_name'] ?? 'Tanpa kategori') ?></div>
-        </td>
+      <!-- Search Input -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1.5">Pencarian</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <i class="fas fa-search text-xs"></i>
+          </span>
+          <input type="text" name="search" value="<?= htmlspecialchars($currentSearch) ?>" placeholder="Cari nama atau kode barang..." class="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+        </div>
+      </div>
 
-        <td class="px-4 py-4 align-top">
-          <div class="text-sm font-semibold text-gray-900 dark:text-white"><?= htmlspecialchars($stock['item_name']) ?></div>
-          <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Satuan: <?= htmlspecialchars($unit) ?></div>
-        </td>
+      <!-- Warehouse Select -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1.5">Gudang</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <i class="fas fa-warehouse text-xs"></i>
+          </span>
+          <select name="warehouse_id" class="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            <option value="0">Semua Gudang</option>
+            <?php foreach ($warehouses as $wh): ?>
+              <option value="<?= (int)$wh['id'] ?>" <?= $currentWarehouseId === (int)$wh['id'] ? 'selected' : '' ?>>
+                <?= htmlspecialchars($wh['name']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      </div>
 
-        <td class="px-4 py-4 align-top">
-          <?php if ((int)$stock['is_serialized'] === 1): ?>
-            <?= \App\Helpers\UIHelper::badge('Pakai Nomor Seri', 'INFO') ?>
-          <?php else: ?>
-            <?= \App\Helpers\UIHelper::badge('Tanpa Nomor Seri', 'NEUTRAL') ?>
-          <?php endif; ?>
-        </td>
+      <!-- Category Select -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1.5">Kategori</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <i class="fas fa-tags text-xs"></i>
+          </span>
+          <select name="category_id" class="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            <option value="0">Semua Kategori</option>
+            <?php foreach ($categories as $cat): ?>
+              <option value="<?= (int)$cat['id'] ?>" <?= $currentCategoryId === (int)$cat['id'] ? 'selected' : '' ?>>
+                <?= htmlspecialchars($cat['name']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      </div>
 
-        <td class="px-4 py-4 align-top">
-          <div class="min-w-[290px] max-w-[430px]">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <div class="text-2xl font-bold <?= $warehousePalette['accent'] ?>">
-                  <?= number_format($available) ?> <?= htmlspecialchars($unit) ?>
-                </div>
-                <div class="mt-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  tersedia dan siap digunakan
-                </div>
-              </div>
-              <div class="rounded-full <?= $warehousePalette['soft'] ?> px-2.5 py-1 text-xs font-bold <?= $warehousePalette['softText'] ?>">
-                <?= $availablePercent ?>%
-              </div>
-            </div>
+      <!-- Submit & Reset Buttons -->
+      <div class="flex items-center gap-2">
+        <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm text-sm transition-all">
+          <i class="fas fa-search text-xs"></i>
+          <span>Terapkan</span>
+        </button>
+        <a href="<?= url('/stocks') ?>" class="inline-flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold py-2 px-3.5 rounded-xl text-sm transition-all" title="Reset Filter">
+          <i class="fas fa-rotate-left text-xs"></i>
+          <span>Reset</span>
+        </a>
+      </div>
+    </form>
+  </div>
 
-            <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700" title="<?= $availablePercent ?>% dari total barang tersedia">
-              <div class="h-full rounded-full <?= $warehousePalette['bar'] ?> transition-all" style="width: <?= $availablePercent ?>%"></div>
-            </div>
+  <!-- Data Table Container (Clean Modern SaaS Table) -->
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[760px] lg:min-w-full divide-y divide-slate-200/80 dark:divide-slate-800">
+        <thead class="bg-slate-50 dark:bg-slate-800/60">
+          <tr>
+            <th class="w-12 px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">No</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Gudang</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Barang</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pelacakan</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 min-w-[280px]">Ketersediaan Stok</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+            <th class="w-28 px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Aksi</th>
+          </tr>
+        </thead>
 
-            <div class="mt-3 grid grid-cols-3 gap-2">
-              <div class="rounded-xl border <?= $warehousePalette['border'] ?> <?= $warehousePalette['soft'] ?> px-3 py-2.5">
-                <div class="text-sm font-bold <?= $warehousePalette['accent'] ?>"><?= number_format($physical) ?></div>
-                <div class="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">Stok Fisik</div>
-              </div>
-              <div class="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5 dark:border-orange-900/30 dark:bg-orange-950/20">
-                <div class="text-sm font-bold text-orange-600 dark:text-orange-400"><?= number_format($borrowed) ?></div>
-                <div class="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">Dipinjam</div>
-              </div>
-              <div class="rounded-xl border border-blue-100 bg-blue-50 px-3 py-2.5 dark:border-blue-900/30 dark:bg-blue-950/20">
-                <div class="text-sm font-bold text-blue-600 dark:text-blue-400"><?= number_format($inTransit) ?></div>
-                <div class="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">Dikirim</div>
-              </div>
-            </div>
-          </div>
-        </td>
-
-        <td class="px-4 py-4 align-top">
-          <div class="flex max-w-[180px] flex-wrap gap-1.5">
-            <?php if (!$stock['is_active']): ?>
-              <?= \App\Helpers\UIHelper::badge('Nonaktif', 'DANGER') ?>
-            <?php else: ?>
-              <?= $available > 0 ? \App\Helpers\UIHelper::badge('Stok Tersedia', 'SUCCESS') : \App\Helpers\UIHelper::badge('Tidak Ada Stok', 'NEUTRAL') ?>
-              <?php if ($borrowed > 0): ?>
-                <?= \App\Helpers\UIHelper::badge('Sedang Dipinjam', 'INFO') ?>
-              <?php endif; ?>
-              <?php if ($inTransit > 0): ?>
-                <?= \App\Helpers\UIHelper::badge('Dalam Pengiriman', 'INFO') ?>
-              <?php endif; ?>
-              <?php if ($isLow): ?>
-                <?= \App\Helpers\UIHelper::badge('Stok Rendah', 'WARNING') ?>
-              <?php endif; ?>
-            <?php endif; ?>
-          </div>
-        </td>
-
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
         <?php
-        $rowActions = [[
-          'type' => 'view',
-          'url' => url('/items/show/' . (int)$stock['master_item_id'] . '?warehouse_id=' . (int)$stock['warehouse_id']),
-          'label' => 'Lihat',
-          'icon' => 'fa-eye',
-          'title' => 'Detail Inventory 360'
-        ], [
-          'type' => 'link',
-          'url' => url('/items/incoming-evidence/' . (int)$stock['master_item_id'] . '?warehouse_id=' . (int)$stock['warehouse_id']),
-          'label' => 'Riwayat Foto Masuk',
-          'icon' => 'fa-camera'
-        ]];
-        require __DIR__ . '/../../components/table/row_actions.php';
+        $no = ($offset ?? 0) + 1;
+        foreach ($stocks as $stock):
+          $physical = (int)$stock['physical_quantity'];
+          $available = (int)$stock['available_quantity'];
+          $borrowed = (int)$stock['borrowed_quantity'];
+          $inTransit = (int)$stock['in_transit_quantity'];
+          $isLow = !empty($stock['is_low_stock']);
+          $unit = $stock['unit_name'] ?: 'unit';
+          $availablePercent = $physical > 0 ? min(100, round(($available / $physical) * 100)) : 0;
         ?>
-      </tr>
-    <?php endforeach; ?>
+          <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+            <!-- No -->
+            <td class="px-4 py-3.5 text-center text-xs font-semibold text-slate-400">
+              <?= $no++ ?>
+            </td>
 
-    <?php if (empty($stocks)):
-      $colspan = 7;
-      if (($_GET['filter'] ?? '') === 'low_stock') {
-        $emptyMessage = 'Belum ada barang dengan stok rendah.';
-      } elseif (($_GET['filter'] ?? '') === 'borrowed') {
-        $emptyMessage = 'Belum ada barang yang sedang dipinjam.';
-      } elseif (($_GET['filter'] ?? '') === 'in_transit') {
-        $emptyMessage = 'Belum ada barang yang sedang dalam pengiriman.';
-      } else {
-        $emptyMessage = 'Tidak ada catatan stok yang sesuai dengan filter.';
-      }
-      require __DIR__ . '/../../components/table/empty_state.php';
-    endif; ?>
-    </tbody>
-  </table>
+            <!-- Gudang & Kategori -->
+            <td class="px-4 py-3.5 align-top">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs shrink-0">
+                  <i class="fas fa-warehouse text-[11px]"></i>
+                </span>
+                <div class="min-w-0">
+                  <p class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate"><?= htmlspecialchars($stock['warehouse_name']) ?></p>
+                  <p class="text-[11px] text-slate-400 dark:text-slate-500 truncate"><?= htmlspecialchars($stock['category_name'] ?? 'Tanpa kategori') ?></p>
+                </div>
+              </div>
+            </td>
 
-  <?php $paginationBaseUrl = url('/stocks'); require __DIR__ . '/../../components/table/pagination.php'; ?>
+            <!-- Barang -->
+            <td class="px-4 py-3.5 align-top">
+              <div class="min-w-0">
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100 break-words"><?= htmlspecialchars($stock['item_name']) ?></p>
+                <div class="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
+                  <span>Satuan: <strong class="text-slate-600 dark:text-slate-300"><?= htmlspecialchars($unit) ?></strong></span>
+                  <?php if ((int)$stock['stok_minimum'] > 0): ?>
+                    <span>· Min: <?= number_format((int)$stock['stok_minimum']) ?></span>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </td>
+
+            <!-- Pelacakan -->
+            <td class="px-4 py-3.5 align-top">
+              <?php if ((int)$stock['is_serialized'] === 1): ?>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800">
+                  <i class="fas fa-barcode text-[9px]"></i> Serial
+                </span>
+              <?php else: ?>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <i class="fas fa-cubes text-[9px]"></i> Non-Serial
+                </span>
+              <?php endif; ?>
+            </td>
+
+            <!-- Rincian Ketersediaan Stok (Modern Card Breakdown) -->
+            <td class="px-4 py-3.5 align-top">
+              <div class="space-y-2">
+                <!-- Available Counter & Progress -->
+                <div class="flex items-baseline justify-between gap-3">
+                  <div class="flex items-baseline gap-1.5">
+                    <span class="text-lg font-black text-slate-900 dark:text-slate-100"><?= number_format($available) ?></span>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400"><?= htmlspecialchars($unit) ?> tersedia</span>
+                  </div>
+                  <span class="text-[11px] font-extrabold text-blue-600 dark:text-blue-400"><?= $availablePercent ?>%</span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full <?= $availablePercent > 50 ? 'bg-emerald-500' : ($availablePercent > 20 ? 'bg-blue-600' : 'bg-amber-500') ?> transition-all duration-300" style="width: <?= $availablePercent ?>%"></div>
+                </div>
+
+                <!-- Metric Chips (Fisik / Dipinjam / Dikirim) -->
+                <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700" title="Stok fisik di gudang">
+                    <span class="text-slate-400">Fisik:</span> <strong class="font-bold text-slate-800 dark:text-slate-200"><?= number_format($physical) ?></strong>
+                  </span>
+                  <?php if ($borrowed > 0): ?>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300 border border-orange-200/60 dark:border-orange-800" title="Sedang dipinjam teknisi">
+                      <span class="text-orange-400">Dipinjam:</span> <strong class="font-bold"><?= number_format($borrowed) ?></strong>
+                    </span>
+                  <?php endif; ?>
+                  <?php if ($inTransit > 0): ?>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800" title="Dalam proses transfer antar gudang">
+                      <span class="text-indigo-400">Transfer:</span> <strong class="font-bold"><?= number_format($inTransit) ?></strong>
+                    </span>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </td>
+
+            <!-- Kondisi / Status Badge -->
+            <td class="px-4 py-3.5 align-top">
+              <div class="flex flex-col gap-1 w-fit">
+                <?php if (!$stock['is_active']): ?>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 border border-red-200/60 dark:border-red-800">
+                    Nonaktif
+                  </span>
+                <?php else: ?>
+                  <?php if ($isLow): ?>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800">
+                      <i class="fas fa-triangle-exclamation text-[9px]"></i> Stok Rendah
+                    </span>
+                  <?php elseif ($available > 0): ?>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800">
+                      <i class="fas fa-circle-check text-[9px]"></i> Tersedia
+                    </span>
+                  <?php else: ?>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                      Habis
+                    </span>
+                  <?php endif; ?>
+                <?php endif; ?>
+              </div>
+            </td>
+
+            <!-- Aksi -->
+            <?php
+            $rowActions = [[
+              'type' => 'view',
+              'url' => url('/items/show/' . (int)$stock['master_item_id'] . '?warehouse_id=' . (int)$stock['warehouse_id']),
+              'label' => 'Detail 360',
+              'icon' => 'fa-eye',
+              'title' => 'Detail Inventory 360'
+            ], [
+              'type' => 'link',
+              'url' => url('/items/incoming-evidence/' . (int)$stock['master_item_id'] . '?warehouse_id=' . (int)$stock['warehouse_id']),
+              'label' => 'Foto Barang Masuk',
+              'icon' => 'fa-camera'
+            ]];
+            require __DIR__ . '/../../components/table/row_actions.php';
+            ?>
+          </tr>
+        <?php endforeach; ?>
+
+        <?php if (empty($stocks)):
+          $colspan = 7;
+          if ($currentFilter === 'low_stock') {
+            $emptyMessage = 'Tidak ada barang dengan stok rendah.';
+            $emptySubMessage = 'Semua stok berada di atas batas minimum.';
+          } elseif ($currentFilter === 'borrowed') {
+            $emptyMessage = 'Tidak ada barang yang sedang dipinjam.';
+            $emptySubMessage = 'Semua barang sedang berada di dalam gudang.';
+          } elseif ($currentFilter === 'in_transit') {
+            $emptyMessage = 'Tidak ada transfer barang yang sedang berjalan.';
+            $emptySubMessage = 'Tidak ada pengiriman antar gudang yang aktif.';
+          } else {
+            $emptyMessage = 'Tidak ada data stok yang sesuai dengan filter.';
+            $emptySubMessage = 'Coba atur ulang filter atau kata kunci pencarian Anda.';
+          }
+          require __DIR__ . '/../../components/table/empty_state.php';
+        endif; ?>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <?php
+    $paginationBaseUrl = url('/stocks');
+    require __DIR__ . '/../../components/table/pagination.php';
+    ?>
+  </div>
+
 </div>
 
 <?php

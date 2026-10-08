@@ -15,6 +15,23 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-08 — STOCKS MONITORING UI OVERHAUL (ADMIN & SUPERADMIN)
+**Task:** Redesain antarmuka modul Stok Barang (`/stocks`) pada role Admin dan Superadmin agar selaras dengan tema modern SaaS (Disafa style) dan nyaman digunakan.
+**Goal:** Menghadirkan ringkasan KPI stok real-time, tombol quick-filter segmented pills (Stok Rendah, Dipinjam, Dalam Pengiriman, Serial/Bulk), visualisasi persentase ketersediaan stok yang konsisten dan elegan, serta toolbar pencarian yang responsif.
+**Changed:**
+- `app/Controllers/StockController.php`: Tambahkan perhitungan cepat metrik KPI (`$stats`: total item, stok rendah, pinjaman aktif, barang dalam transfer) untuk dashboard header stok.
+- `resources/views/inventory/stocks/index.php`:
+  - Header & KPI Cards: 4 kartu ringkasan stok (Total Baris, Stok Rendah dengan peringatan amber, Sedang Dipinjam, Dalam Transfer) yang dapat diklik langsung untuk filter instan.
+  - Quick Filter Pills: Bar filter cepat segmented yang dapat di-scroll horizontal di mobile (Semua Stok, Stok Rendah, Sedang Dipinjam, Dalam Pengiriman, Pakai Serial, Non-Serial).
+  - Toolbar Pencarian & Filter: Grid input pencarian, dropdown gudang, dan kategori dengan icon yang konsisten.
+  - Tabel Stok Modern: Kartu ketersediaan dengan progress bar persentase, metric chips (Fisik, Dipinjam, Dikirim), badge kondisi semantik, serta tautan aksi Detail 360 & Foto Barang Masuk.
+**Business impact:** Admin dan Superadmin dapat memantau pergerakan stok, mendeteksi barang kritis, dan mengaudit ketersediaan fisik secara jauh lebih cepat dan intuitif.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Code check, verifikasi balanced braces, dan 170 routes OK.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-08 — USER PROFILE SETTINGS UI OVERHAUL (ALL ROLES)
 **Task:** Redesain antarmuka Pengaturan Profil Pengguna di seluruh role menjadi modern, rapi, dan mudah digunakan di desktop maupun mobile.
 **Goal:** Memisahkan pengaturan data diri dan keamanan kata sandi ke dalam navigasi tab terstruktur, menyajikan kartu hero identitas dengan badge peran semantik, integrasi unggah foto instan, fitur toggle lihat/sembunyikan kata sandi, serta log 5 aktivitas terakhir.
