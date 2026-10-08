@@ -634,25 +634,21 @@ function renderHeader($label, $sidebarGroupText) {
         <?= renderMenu('Lapor Kerusakan/Kehilangan', 'fas fa-exclamation-triangle', '/incidents/create', $currentPath, $sidebarActive, $sidebarHover, $primaryText, $sidebarIcon) ?>
       <?php endif; ?>
     </div>
-    <!-- User Profile Footer at Sidebar Bottom (Disafa SaaS Style) -->
-    <div class="p-3 border-t <?= $sidebarBorder ?> bg-white dark:bg-slate-900 flex items-center justify-between gap-3 shrink-0">
-      <div class="flex items-center gap-2.5 min-w-0">
-        <?php if ($photo_path): ?>
-          <img src="<?= url('/file?path='.urlencode($photo_path)) ?>" class="w-9 h-9 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700 shrink-0" alt="Foto">
-        <?php else: ?>
-          <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-slate-100 dark:ring-slate-800 shrink-0">
-            <?= strtoupper(substr($userName, 0, 2)) ?>
-          </div>
-        <?php endif; ?>
-        <div class="min-w-0">
-          <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate leading-tight"><?= htmlspecialchars($userName) ?></p>
-          <p class="text-[10px] text-slate-400 dark:text-slate-500 truncate mt-0.5"><?= $roleLabel ?></p>
+    <!-- User Profile Footer at Sidebar Bottom (Navigasi ke Profil, tanpa tombol logout) -->
+    <a href="<?= url('/profile') ?>" class="p-3 border-t <?= $sidebarBorder ?> bg-white dark:bg-slate-900 flex items-center gap-2.5 shrink-0 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors group" title="Lihat Profil Saya">
+      <?php if ($photo_path): ?>
+        <img src="<?= url('/file?path='.urlencode($photo_path)) ?>" class="w-9 h-9 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700 shrink-0" alt="Foto">
+      <?php else: ?>
+        <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-slate-100 dark:ring-slate-800 shrink-0">
+          <?= strtoupper(substr($userName, 0, 2)) ?>
         </div>
+      <?php endif; ?>
+      <div class="min-w-0 flex-1">
+        <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"><?= htmlspecialchars($userName) ?></p>
+        <p class="text-[10px] text-slate-400 dark:text-slate-500 truncate mt-0.5"><?= $roleLabel ?></p>
       </div>
-      <a href="<?= url('/logout') ?>" title="Keluar" class="text-slate-400 hover:text-red-600 dark:hover:text-red-400 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0">
-        <i class="fas fa-sign-out-alt text-sm"></i>
-      </a>
-    </div>
+      <i class="fas fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 group-hover:text-slate-500 transition-colors pr-1"></i>
+    </a>
   </aside>
 
   <div class="lg:ml-64 min-h-screen flex flex-col transition-all">
