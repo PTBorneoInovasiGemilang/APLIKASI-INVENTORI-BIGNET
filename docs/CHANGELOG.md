@@ -22,6 +22,7 @@
 - `resources/views/layouts/app.php`: 
   - Ubah padding shell konten: eliminasi double padding mobile dengan me-reset `padding: 0` pada `.fade-in` dan menyematkan padding responsif kelipatan 4px pada `<main>` (`p-3 sm:p-4 md:p-6 2xl:p-8`).
   - Tambahkan aturan CSS mobile `<640px` untuk padding kartu (`16px = 4 x 4px`) dan input form min-height `40px` (10 x 4px) agar ramah sentuhan jempol.
+  - Global Compact Table (<640px): Font 12px (th 11px), padding sel diperkecil ke 8px x 8px (2 x 4px), badges compact (10px, padding 2px x 6px), min-width tabel disesuaikan ke 580px agar hemat jarak swipe horizontal, scrollbar indikator sentuh halus, dan kolom sticky No serta Aksi dipadatkan.
   - Perbesar touch target tombol hamburger mobile dari `p-1` ke `p-2 rounded-lg`.
   - Sesuaikan tinggi header mobile ke `min-h-[56px] sm:min-h-[64px]` (kelipatan 4px).
 - `resources/views/components/table/toolbar.php`: Buat tombol aksi Cari dan Reset responsif (`flex-1 sm:flex-initial py-2 px-4 rounded-lg`) agar mudah ditekan di layar kecil.

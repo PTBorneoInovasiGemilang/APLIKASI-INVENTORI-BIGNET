@@ -244,9 +244,89 @@ function renderHeader($label, $sidebarGroupText) {
       padding-right: 0 !important;
     }
 
-    /* Mobile UX: optimasi sentuhan jempol & form input (kelipatan 4px) */
+    /* ========================================================
+       MOBILE UX & COMPACT TABLE OPTIMIZATION (< 640px)
+       ======================================================== */
     @media (max-width: 639px) {
-      /* Padding container kartu di mobile disesuaikan agar hemat ruang (16px = 4 x 4px) */
+      /* 1. Global Compact Table Sizing */
+      table {
+        font-size: 12px !important;
+      }
+      table thead th {
+        padding: 8px 8px !important;
+        font-size: 11px !important;
+        line-height: 1.25 !important;
+        white-space: nowrap !important;
+      }
+      table tbody td {
+        padding: 8px 8px !important;
+        font-size: 12px !important;
+        line-height: 1.35 !important;
+      }
+      /* Compact badges di dalam tabel */
+      table .inline-flex[class*="rounded-full"],
+      table span[class*="rounded-full"] {
+        font-size: 10px !important;
+        padding: 2px 6px !important;
+        line-height: 1.15 !important;
+      }
+      /* Min-width tabel proporsional di mobile agar hemat jarak swipe */
+      table[class*="min-w-[800px]"],
+      .overflow-x-auto > table {
+        min-width: 580px !important;
+      }
+      /* Scrollbar tabel halus & jelas di layar sentuh */
+      .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+      }
+      .overflow-x-auto::-webkit-scrollbar {
+        height: 4px !important;
+        display: block !important;
+      }
+      .overflow-x-auto::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.04) !important;
+      }
+      .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.45) !important;
+        border-radius: 4px !important;
+      }
+      .dark .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.3) !important;
+      }
+
+      /* Sticky columns No & Aksi tetap rapi & compact di mobile */
+      .table-sticky thead th:first-child,
+      .table-sticky tbody td:first-child {
+        min-width: 32px !important;
+        max-width: 44px !important;
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+        text-align: center !important;
+      }
+      .table-sticky thead th:last-child,
+      .table-sticky tbody td:last-child {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+      }
+      [data-label="Aksi"] .inline-grid,
+      td:last-child .inline-grid {
+        grid-template-columns: 64px 28px !important;
+        gap: 4px !important;
+      }
+      [data-label="Aksi"] a,
+      td:last-child a.inline-flex {
+        width: 64px !important;
+        height: 28px !important;
+        font-size: 11px !important;
+      }
+      [data-label="Aksi"] button[data-actions-toggle],
+      td:last-child button[data-actions-toggle] {
+        width: 28px !important;
+        height: 28px !important;
+      }
+
+      /* 2. Padding Container Kartu & Layout Responsif (Kelipatan 4px) */
       main .p-6,
       main .p-8 {
         padding: 16px !important;
@@ -259,10 +339,28 @@ function renderHeader($label, $sidebarGroupText) {
         padding-top: 20px !important;
         padding-bottom: 20px !important;
       }
-      /* Input & tombol form di layar kecil min-height 40px (10 x 4px) agar nyaman disentuh */
+      .mb-6 {
+        margin-bottom: 16px !important;
+      }
+
+      /* 3. Form Input & Dropdown Nyaman Disentuh (Min 40px) */
       input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], select, textarea {
-        font-size: 14px;
-        min-height: 40px;
+        font-size: 14px !important;
+        min-height: 40px !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+      }
+      .table-toolbar form > div:not(.flex) {
+        width: 100% !important;
+      }
+      .table-toolbar form select {
+        width: 100% !important;
+      }
+
+      /* 4. Page Title Ringkas di Layar HP */
+      main h1 {
+        font-size: 20px !important;
+        line-height: 1.3 !important;
       }
     }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
