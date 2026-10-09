@@ -534,17 +534,26 @@ function renderHeader($label, $sidebarGroupText) {
     .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
     .table-sticky thead th:first-child,
     .table-sticky tbody td:first-child { position: sticky; left: 0; z-index: 10; background-color: #ffffff; }
-    .table-sticky thead th:first-child { background-color: #f9fafb; }
+    .table-sticky thead th:first-child { background-color: #f8fafc; }
     .table-sticky thead th:last-child,
-    .table-sticky tbody td:last-child { position: sticky; right: 0; z-index: 10; background-color: #ffffff; }
-    .table-sticky thead th:last-child { background-color: #f9fafb; }
-    .dark .table-sticky thead th:first-child,
-    .dark .table-sticky thead th:last-child { background-color: #374151; }
-    .dark .table-sticky tbody td:first-child,
-    .dark .table-sticky tbody td:last-child { background-color: #1f2937; }
-    .dark .table-sticky tbody tr:hover td:first-child,
-    .dark .table-sticky tbody tr:hover td:last-child { background-color: #374151; }
-    .table-sticky tbody tr td:only-child { position: static; left: auto; right: auto; }
+    .table-sticky tbody td:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 10;
+      background-color: #ffffff;
+      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
+    }
+    .table-sticky thead th:last-child { background-color: #f8fafc; }
+    html.dark .table-sticky thead th:first-child,
+    html.dark .table-sticky thead th:last-child { background-color: #1e293b !important; }
+    html.dark .table-sticky tbody td:first-child,
+    html.dark .table-sticky tbody td:last-child {
+      background-color: #0f172a !important;
+      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.4);
+    }
+    html.dark .table-sticky tbody tr:hover td:first-child,
+    html.dark .table-sticky tbody tr:hover td:last-child { background-color: #1e293b !important; }
+    .table-sticky tbody tr td:only-child { position: static; left: auto; right: auto; box-shadow: none !important; }
 
     @media print {
       body { background: #fff !important; }
@@ -787,6 +796,7 @@ function renderHeader($label, $sidebarGroupText) {
         <div class="min-w-0"><h2 class="text-sm sm:text-base md:text-lg font-bold text-slate-800 dark:text-slate-100 truncate"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h2></div>
       </div>
       <div class="flex items-center space-x-1 sm:space-x-3 shrink-0">
+        <button id="togglePageGuideBtn" onclick="togglePageGuide()" class="text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 focus:outline-none p-1.5 sm:p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Buka/Tutup Panduan Halaman" aria-label="Buka/Tutup Panduan"><i class="fas fa-book-open text-xs sm:text-sm"></i></button>
         <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');" class="text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 focus:outline-none p-1.5 sm:p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle dark mode"><i class="fas fa-moon text-xs sm:text-sm"></i></button>
         <div class="flex items-center text-right leading-tight mr-1 sm:mr-2">
           <div>
@@ -828,7 +838,7 @@ function renderHeader($label, $sidebarGroupText) {
       if (!isset($guide) && !isset($guide_content)) $guide = \App\Helpers\PageGuideHelper::forPath($currentPath);
       if (isset($guide) || (isset($guide_content) && !empty($guide_content))):
       ?>
-      <div class="w-full 2xl:w-80 shrink-0 mt-8 2xl:mt-0 mb-6 2xl:mb-0"><div class="sticky top-6 max-h-[calc(100vh-5rem)] overflow-y-auto scrollbar-thin pr-0.5"><?php require __DIR__ . '/../components/page_guide.php'; ?></div></div>
+      <div id="pageGuideSidebar" class="w-full 2xl:w-80 shrink-0 mt-8 2xl:mt-0 mb-6 2xl:mb-0 transition-all duration-200"><div class="sticky top-6 max-h-[calc(100vh-5rem)] overflow-y-auto scrollbar-thin pr-0.5"><?php require __DIR__ . '/../components/page_guide.php'; ?></div></div>
       <?php endif; ?>
     </main>
 
@@ -1155,6 +1165,108 @@ function renderHeader($label, $sidebarGroupText) {
   });
 
   setTimeout(() => { document.querySelectorAll('.toast').forEach(t => t.remove()); }, 5000);
+
+  // === TOGGLE PAGE GUIDE (Buka/Tutup Panduan Halaman) ===
+  function togglePageGuide() {
+    const guide = document.getElementById('pageGuideSidebar');
+    if (!guide) return;
+    const isHidden = guide.classList.toggle('hidden');
+    localStorage.setItem('hide_page_guide', isHidden ? '1' : '0');
+    const btn = document.getElementById('togglePageGuideBtn');
+    if (btn) {
+      btn.classList.toggle('text-blue-600', !isHidden);
+      btn.classList.toggle('dark:text-blue-400', !isHidden);
+      btn.classList.toggle('bg-blue-50', !isHidden);
+      btn.classList.toggle('dark:bg-blue-950/40', !isHidden);
+    }
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 150);
+  }
+
+  // === DUAL HORIZONTAL SCROLLBAR & EASY TABLE SCROLLING ===
+  function initTableScrollbars() {
+    document.querySelectorAll('.overflow-x-auto').forEach(container => {
+      if (container.dataset.hasTopScroll === 'true') return;
+      const table = container.querySelector('table');
+      if (!table) return;
+
+      let topBar = container.previousElementSibling;
+      const hasTopBar = topBar && topBar.classList.contains('table-top-scrollbar');
+
+      function sync() {
+        const needsScroll = table.scrollWidth > (container.clientWidth + 2);
+        if (needsScroll) {
+          if (!hasTopBar) {
+            topBar = document.createElement('div');
+            topBar.className = 'table-top-scrollbar overflow-x-auto overflow-y-hidden mb-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 transition-opacity';
+            topBar.style.height = '12px';
+            const inner = document.createElement('div');
+            inner.style.height = '1px';
+            topBar.appendChild(inner);
+            container.parentNode.insertBefore(topBar, container);
+
+            let isSyncingTop = false;
+            let isSyncingContainer = false;
+
+            topBar.addEventListener('scroll', () => {
+              if (!isSyncingTop) {
+                isSyncingContainer = true;
+                container.scrollLeft = topBar.scrollLeft;
+              }
+              isSyncingTop = false;
+            }, { passive: true });
+
+            container.addEventListener('scroll', () => {
+              if (!isSyncingContainer) {
+                isSyncingTop = true;
+                topBar.scrollLeft = container.scrollLeft;
+              }
+              isSyncingContainer = false;
+            }, { passive: true });
+          }
+          if (topBar && topBar.firstChild) {
+            topBar.firstChild.style.width = table.scrollWidth + 'px';
+            topBar.style.display = 'block';
+          }
+        } else {
+          if (topBar && topBar.classList.contains('table-top-scrollbar')) {
+            topBar.style.display = 'none';
+          }
+        }
+      }
+
+      sync();
+      window.addEventListener('resize', sync);
+      container.dataset.hasTopScroll = 'true';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const guide = document.getElementById('pageGuideSidebar');
+    if (guide) {
+      const userPref = localStorage.getItem('hide_page_guide');
+      // Default tertutup pada layar laptop/desktop < 1600px agar tabel mendapatkan 100% lebar layar
+      if (userPref === '1' || (userPref === null && window.innerWidth < 1600)) {
+        guide.classList.add('hidden');
+      } else {
+        guide.classList.remove('hidden');
+        const btn = document.getElementById('togglePageGuideBtn');
+        if (btn) {
+          btn.classList.add('text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-950/40');
+        }
+      }
+    }
+    initTableScrollbars();
+  });
+
+  // Shift + Wheel horizontal scroll anywhere on tables
+  document.addEventListener('wheel', function(e) {
+    const container = e.target.closest('.overflow-x-auto');
+    if (container && e.deltaY !== 0 && (e.shiftKey || (Math.abs(e.deltaX) === 0 && e.altKey))) {
+      container.scrollLeft += e.deltaY;
+    }
+  }, { passive: true });
   </script>
   <script>
   // Jam ditampilkan berdasarkan waktu server saat halaman dirender, lalu bergerak realtime.

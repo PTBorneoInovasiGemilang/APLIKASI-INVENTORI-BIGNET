@@ -178,14 +178,14 @@ $currentSearch = trim($_GET['search'] ?? '');
   <!-- Data Table Container (Clean Modern SaaS Table) -->
   <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[760px] lg:min-w-full divide-y divide-slate-200/80 dark:divide-slate-800">
+      <table class="w-full min-w-[660px] lg:min-w-full table-sticky divide-y divide-slate-200/80 dark:divide-slate-800">
         <thead class="bg-slate-50 dark:bg-slate-800/60">
           <tr>
             <th class="w-12 px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">No</th>
             <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Gudang</th>
             <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Barang</th>
             <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pelacakan</th>
-            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 min-w-[280px]">Ketersediaan Stok</th>
+            <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 min-w-[200px]">Ketersediaan Stok</th>
             <th class="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
             <th class="w-28 px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Aksi</th>
           </tr>

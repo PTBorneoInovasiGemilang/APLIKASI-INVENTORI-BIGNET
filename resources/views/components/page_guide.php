@@ -25,6 +25,9 @@ $sections = $guide['sections'] ?? [];
         <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Petunjuk & Bantuan Modul</p>
       </div>
     </div>
+    <button type="button" onclick="togglePageGuide()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-xs shrink-0" title="Tutup Panduan (Buka kembali via icon buku di atas)">
+      <i class="fas fa-times"></i>
+    </button>
   </div>
 
   <?php if (!empty($sections)): ?>

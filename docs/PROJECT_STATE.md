@@ -15,6 +15,7 @@
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] Optimalisasi Tabel Resolusi 1366x768 (Laptop) & Dual Top Scrollbar UX: Page Guide collapsible (default closed <1600px), tabel 100% full width, sticky action column kanan di seluruh modul, dan dual top scrollbar auto-sync.
 - [x] Audit & Harmonisasi Panduan Cepat (Seluruh Menu): Desain ulang komponen Page Guide tema Disafa SaaS, pemisahan sub-kartu per section, jarak butir lega (anti-berdempetan), dan penghapusan panel panduan inline duplikat.
 - [x] Penyelarasan Total Dark Mode & Refinement Input Profil Mobile: Eliminasi kebocoran warna kartu putih saat dark mode dan pembersihan tumpang tindih ikon form.
 - [x] Perbaikan Bug Mobile KPI & Tumpang Tindih Ikon Form: Eliminasi pemotongan elipsis kartu metrik pada layar smartphone dan perbaikan padding input pencarian/status dropdown.

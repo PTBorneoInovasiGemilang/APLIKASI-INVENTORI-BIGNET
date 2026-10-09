@@ -15,6 +15,26 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-09 — FIX 1366X768 RESOLUTION TABLE USABILITY & DUAL SCROLLBAR UX
+**Task:** Optimalisasi antarmuka tabel pada resolusi 1366x768 (laptop) agar tidak terhimpit oleh sidebar panduan, serta implementasi Dual Scrollbar & Sticky Action Columns.
+**Goal:** Memungkinkan pengguna di laptop (1366x768) melihat tabel data secara penuh tanpa terpotong horizontal, menghilangkan keharusan scroll ke baris paling bawah untuk menggeser tabel, dan memastikan kolom Aksi selalu tampak di sisi kanan.
+**Changed:**
+- `resources/views/layouts/app.php`:
+  - Page Guide Collapsible & Default Closed (<1600px): Tambahkan tombol toggle di header atas (`#togglePageGuideBtn`) dan tombol close pada kartu panduan. Pada layar <1600px (termasuk 1366x768), panel panduan samping otomatis tertutup sehingga tabel mendapatkan 100% lebar layar penuh.
+  - Dual Top/Bottom Scrollbar Helper: Implementasi auto-sync top scrollbar tipis (12px) di atas tabel kontainer saat terjadi overflow horizontal, sehingga pengguna dapat menggeser tabel langsung dari bagian atas tanpa harus scroll ke bawah layar.
+  - Shift + Wheel Horizontal Scroll: Memungkinkan scroll horizontal langsung di area tabel manapun menggunakan Shift + Mousewheel.
+  - Modern Sticky Table Styling: Pembaharuan CSS `.table-sticky` dengan warna slate Disafa dan drop-shadow elegan pada kolom Aksi kanan.
+- `resources/views/inventory/stocks/index.php`:
+  - Turunkan `min-w-[280px]` kolom Ketersediaan Stok menjadi `min-w-[200px]` dan aktifkan kelas `table-sticky` (`min-w-[660px]`). Tabel kini muat 100% sempurna tanpa overflow horizontal pada resolusi 1366x768.
+- Aktivasi `table-sticky` di Seluruh Tabel Modul:
+  - `inventory/items/index.php`, `transactions/submissions/index.php`, `transactions/incoming/index.php`, `transactions/outgoing/index.php`, `transactions/transfers/index.php`, `transactions/returns/index.php`, `transactions/installations/index.php`, `transactions/incidents/index.php`, `transactions/stock_opnames/index.php`, `transactions/adjustments/index.php`, `users/index.php`.
+**Business impact:** Seluruh pengguna laptop resolusi 1366x768 dapat mengoperasikan tabel stok dan transaksi dengan lancar, kolom aksi selalu terlihat di kanan, tabel tidak terhimpit panduan statis, dan navigasi scroll horizontal menjadi mudah dan instan.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Code review, audit CSS & JS, verifikasi balanced braces (14 file OK), 170 routes OK.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-09 — AUDIT & HARMONIZATION OF PAGE GUIDES (PANDUAN CEPAT)
 **Task:** Audit menyeluruh komponen "Panduan Cepat" di seluruh menu dan eliminasi panel panduan duplikat/berdempetan.
 **Goal:** Memperbaiki tampilan Panduan Cepat agar tidak lagi berdempetan atau menempel sempit pada konten utama, menyelaraskan desain dengan tema Disafa SaaS (light & dark mode), dan menghapus panel panduan inline duplikat yang bertabrakan dengan form atau tabel.
