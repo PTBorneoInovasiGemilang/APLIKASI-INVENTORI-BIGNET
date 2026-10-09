@@ -8,22 +8,6 @@ ob_start();
   <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Temukan barang secara spesifik menggunakan berbagai filter dan kata kunci.</p>
 </div>
 
-<!-- Panel Panduan -->
-<div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 rounded-md text-sm text-blue-700 dark:text-blue-300 mb-6">
-  <p class="font-bold mb-1"><i class="fas fa-info-circle mr-1"></i> Panduan Pencarian Barang</p>
-  <ul class="list-disc pl-5 space-y-1">
-    <li><strong>Fungsi Search:</strong> Mencari berdasar nama, kode, SN, barcode, QR, nama gudang, pemegang, hingga nomor referensi transaksi.</li>
-    <li><strong>Tipe Barang:</strong> 
-      <ul class="list-circle pl-5">
-        <li><span class="font-semibold text-purple-600 dark:text-purple-400">SERIALIZED</span>: Barang yang dilacak satuan (punya Nomor Seri/SN unik).</li>
-        <li><span class="font-semibold text-blue-600 dark:text-blue-400">BULK</span>: Barang curah yang dilacak berdasarkan total kuantitas per gudang.</li>
-      </ul>
-    </li>
-    <li><strong>Stok:</strong> Physical (fisik), Reserved (dipesan), Allocated (dialokasikan untuk instalasi), Available (tersedia digunakan).</li>
-    <li>Klik tombol <strong>Lihat</strong> pada baris barang untuk membuka halaman <strong>Inventory 360</strong> yang menampilkan data riwayat lengkap, foto, dan mutasi.</li>
-  </ul>
-</div>
-
 <!-- Scan Barcode -->
 <div class="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 p-4 border border-gray-200 dark:border-gray-700">
   <div class="flex items-center justify-between mb-3">

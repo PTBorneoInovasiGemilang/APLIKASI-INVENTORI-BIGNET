@@ -102,17 +102,6 @@ ob_start();
   </div>
 </div>
 
-<!-- Panel Panduan -->
-<div class="bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-indigo-500 p-4 rounded-md text-sm text-indigo-700 dark:text-indigo-300 mb-6">
-  <p class="font-bold mb-1"><i class="fas fa-info-circle mr-1"></i> Panduan Inventory 360</p>
-  <ul class="list-disc pl-5 space-y-1">
-    <li><strong>Identitas:</strong> Informasi dasar barang.</li>
-    <li><strong>Stock:</strong> Rincian ketersediaan stok di seluruh gudang. Physical (Fisik di gudang), Available (Siap digunakan).</li>
-    <li><strong>Usage (Instalasi):</strong> Riwayat penggunaan / pemasangan barang ke pelanggan. 1 SN bisa memiliki banyak siklus pemakaian.</li>
-    <li><strong>History:</strong> Jejak transaksi keluar/masuk gudang dan perpindahan tangan antar pengguna.</li>
-  </ul>
-</div>
-
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
   <!-- Identitas Utama -->
   <div class="xl:col-span-1 space-y-6">

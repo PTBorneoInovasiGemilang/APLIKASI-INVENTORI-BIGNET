@@ -15,6 +15,34 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-09 — AUDIT & HARMONIZATION OF PAGE GUIDES (PANDUAN CEPAT)
+**Task:** Audit menyeluruh komponen "Panduan Cepat" di seluruh menu dan eliminasi panel panduan duplikat/berdempetan.
+**Goal:** Memperbaiki tampilan Panduan Cepat agar tidak lagi berdempetan atau menempel sempit pada konten utama, menyelaraskan desain dengan tema Disafa SaaS (light & dark mode), dan menghapus panel panduan inline duplikat yang bertabrakan dengan form atau tabel.
+**Changed:**
+- `resources/views/components/page_guide.php`:
+  - Desain ulang sesuai tema Disafa SaaS (`bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm p-4 sm:p-5`).
+  - Header modern dengan chip ikon buku `fa-book-open` dan subtitle jelas.
+  - Setiap section panduan dipisahkan dalam sub-kartu tersendiri (`rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80 p-3.5`).
+  - Jarak antar butir panduan diperlega menjadi `space-y-2` (8px) dengan dot bullet kustom yang rapi (`w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0`) dan line-height `leading-relaxed text-xs`.
+- `resources/views/layouts/app.php`:
+  - Container sticky pada sidebar 2xl diberi `max-h-[calc(100vh-5rem)] overflow-y-auto scrollbar-thin` agar tidak pernah terpotong di layar pendek.
+  - Jarak di layar laptop dan mobile (<1536px) diberi spasi lega `mt-8 mb-6` agar tidak menempel dengan tabel/konten di atasnya.
+- `app/Helpers/PageGuideHelper.php`:
+  - Tambahkan definisi rute terpusat khusus untuk `/items/show` (Panduan Inventory 360).
+  - Satukan tips filter dan tipe barang ke dalam rute `/search`.
+  - Satukan tips approval pendaftaran ke dalam rute `/users`.
+- Penghapusan Panel Inline Duplikat (Menghilangkan Tampilan Berdempetan):
+  - `resources/views/search/index.php`: Hapus panel inline "Panduan Pencarian Barang" yang menduplikasi Panduan Cepat di atas form scanner.
+  - `resources/views/users/index.php`: Hapus panel inline "Panduan Approval & Manajemen Pengguna" yang menduplikasi Panduan Cepat di atas toolbar.
+  - `resources/views/inventory/items/show.php`: Hapus panel inline "Panduan Inventory 360" yang menumpuk di atas detail barang.
+  - `resources/views/reports/stock_position.php`: Hapus panel inline "Cara membaca laporan" yang menduplikasi panduan di atas form filter.
+**Business impact:** Semua menu pada seluruh role (Superadmin, Admin, Teknisi) memiliki panduan yang rapi, informatif, seragam, tidak lagi tumpang tindih atau berdempetan dengan form/tabel, serta nyaman dibaca di desktop maupun mobile.
+**Database impact:** Tidak ada perubahan skema database.
+**Verification:** Code check, verifikasi balanced braces, dan 170 routes OK.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-09 — COMPLETE DARK MODE HARMONIZATION & MOBILE INPUT REFINEMENT
 **Task:** Penyelarasan total tema Dark Mode (eliminasi kartu putih yang silau) dan pembersihan ikon tumpang tindih pada form profil/filter mobile.
 **Goal:** Menjamin seluruh kartu dan panel di semua modul otomatis menjadi gelap pekat (`slate-900`/`slate-800`) saat Dark Mode aktif tanpa ada yang bocor putih, serta memastikan teks input nama, email, telepon, dan password di halaman profil bersih tanpa gangguan tumpang tindih ikon.

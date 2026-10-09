@@ -49,8 +49,14 @@ class PageGuideHelper
                         'Mencari barang dan nomor seri dari seluruh data yang boleh Anda lihat.',
                     ]],
                     ['icon' => 'fa-search', 'title' => 'Fungsi Utama', 'items' => [
-                        'Gunakan pencarian dan filter secara bersamaan untuk mempersempit hasil.',
-                        'Gunakan tombol Reset untuk kembali ke kondisi awal.',
+                        'Gunakan pencarian kata kunci dan filter secara bersamaan untuk mempersempit hasil.',
+                        'Scanner barcode: langsung arahkan scanner ke input untuk membuka hasil otomatis.',
+                        'Gunakan tombol Reset untuk mengembalikan filter ke kondisi awal.',
+                    ]],
+                    ['icon' => 'fa-tags', 'title' => 'Tipe Barang & Status Stok', 'items' => [
+                        'SERIALIZED: Barang satuan yang dilacak nomor seri uniknya per unit.',
+                        'BULK: Barang curah yang dilacak berdasarkan total kuantitas per gudang.',
+                        'Physical: stok fisik di gudang. Available: siap pakai. Reserved: dialokasikan.',
                     ]],
                     ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
                         'Barang dengan nomor seri dapat ditelusuri sampai nomor serinya.',
@@ -163,6 +169,23 @@ class PageGuideHelper
                         'Master Barang bukan tempat mengubah jumlah stok.',
                         'Jangan menghapus master barang untuk mengurangi stok; gunakan Barang Keluar atau Penyesuaian Stok sesuai kebutuhan.',
                         'Master Barang yang sudah memiliki riwayat atau stok aktif tidak dapat dihapus sembarangan.',
+                    ]],
+                ],
+            ],
+
+            '/items/show' => [
+                'title' => 'Panduan Inventory 360',
+                'sections' => [
+                    ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
+                        'Melihat profil lengkap 360° barang, sebaran stok fisik di seluruh gudang, dan histori pergerakan.',
+                    ]],
+                    ['icon' => 'fa-layer-group', 'title' => 'Rincian Bagian', 'items' => [
+                        'Identitas: Spesifikasi master, kategori, satuan, dan ambang batas stok minimum.',
+                        'Stok: Rincian fisik di gudang, stok tersedia siap pakai, dipinjam, dan dalam pengiriman.',
+                        'Penggunaan & Riwayat: Catatan instalasi pelanggan dan kronologi mutasi barang.',
+                    ]],
+                    ['icon' => 'fa-shield-halved', 'title' => 'Integritas Data', 'items' => [
+                        'Mutasi stok tercatat otomatis dari transaksi sah (Barang Masuk/Keluar/Transfer/Penyesuaian).',
                     ]],
                 ],
             ],
@@ -549,15 +572,17 @@ class PageGuideHelper
                 'title' => 'Panduan Pengguna',
                 'sections' => [
                     ['icon' => 'fa-bullseye', 'title' => 'Tujuan Halaman', 'items' => [
-                        'Mengelola akun, peran, dan status pengguna sistem.',
+                        'Mengelola data akun, peran akses (Superadmin, Admin, Teknisi), dan status pengguna sistem.',
                     ]],
-                    ['icon' => 'fa-route', 'title' => 'Alur Pendaftaran', 'items' => [
-                        'Pendaftaran → pemeriksaan Admin → disetujui atau ditolak → akun aktif atau tidak aktif.',
-                        'Penolakan wajib mempunyai alasan yang jelas.',
+                    ['icon' => 'fa-user-check', 'title' => 'Alur Approval Pendaftaran', 'items' => [
+                        'Pendaftaran publik → berstatus Menunggu Persetujuan.',
+                        'Klik tombol Tinjau untuk menyetujui (Approve) atau menolak (Reject) pendaftaran.',
+                        'Jika menolak pendaftaran, Admin wajib mengisi alasan penolakan.',
                     ]],
-                    ['icon' => 'fa-exclamation-circle', 'title' => 'Aturan Penting', 'items' => [
-                        'Hanya pengguna yang disetujui dan aktif yang dapat masuk ke sistem.',
-                        'Superadmin tidak dibuat melalui pendaftaran publik.',
+                    ['icon' => 'fa-shield-halved', 'title' => 'Aturan Penting & Keamanan', 'items' => [
+                        'Hanya pengguna dengan status Disetujui dan Aktif yang dapat masuk ke sistem.',
+                        'Pengguna yang memiliki riwayat transaksi dinonaktifkan, bukan dihapus permanen demi audit trail.',
+                        'Superadmin tidak dapat dibuat melalui pendaftaran publik.',
                     ]],
                 ],
             ],

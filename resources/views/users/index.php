@@ -24,18 +24,6 @@ ob_start();
     </div>
   <?php endif; ?>
 
-  <!-- Panel Panduan Approval User (Modern Disafa Style) -->
-  <div class="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 rounded-2xl p-4 sm:p-5 text-xs text-blue-900 dark:text-blue-200">
-    <p class="font-bold text-sm mb-2 flex items-center gap-2 text-blue-800 dark:text-blue-300">
-      <i class="fas fa-info-circle text-blue-600"></i> Panduan Approval & Manajemen Pengguna
-    </p>
-    <ul class="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
-      <li>Pengguna baru yang mendaftar secara publik akan berstatus <strong>Menunggu Persetujuan</strong>.</li>
-      <li>Klik tombol <strong>Tinjau</strong> untuk menyetujui (Approve) atau menolak (Reject) pendaftaran.</li>
-      <li>Hanya pengguna dengan status <strong>Aktif</strong> dan <strong>Disetujui</strong> yang dapat masuk ke dalam sistem.</li>
-    </ul>
-  </div>
-
   <?php
   $toolbarAction = url('/users');
   $searchPlaceholder ="Cari Nama / Email...";

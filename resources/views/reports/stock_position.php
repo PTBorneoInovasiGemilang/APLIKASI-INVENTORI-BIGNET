@@ -42,16 +42,6 @@ $reportAppName = \App\Helpers\SettingsHelper::get('app_name', 'Sistem Gudang');
   </button>
 </div>
 
-<div class="mb-6 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-4 text-sm text-blue-800 dark:border-blue-900/50 dark:bg-blue-950/20 dark:text-blue-200">
-  <div class="flex items-start gap-3">
-    <i class="fas fa-circle-info mt-0.5 text-blue-500"></i>
-    <div>
-      <div class="font-bold">Cara membaca laporan</div>
-      <div class="mt-1">Stok Fisik menunjukkan barang yang masih berada di gudang. Barang yang sedang dipinjam dan sedang dikirim ditampilkan terpisah agar posisi inventory mudah dipahami.</div>
-    </div>
-  </div>
-</div>
-
 <form method="get" class="mb-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 print:hidden">
   <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
     <div>

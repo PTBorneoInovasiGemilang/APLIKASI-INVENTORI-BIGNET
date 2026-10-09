@@ -15,6 +15,7 @@
 - Status: COMPLETED.
 
 ## COMPLETED
+- [x] Audit & Harmonisasi Panduan Cepat (Seluruh Menu): Desain ulang komponen Page Guide tema Disafa SaaS, pemisahan sub-kartu per section, jarak butir lega (anti-berdempetan), dan penghapusan panel panduan inline duplikat.
 - [x] Penyelarasan Total Dark Mode & Refinement Input Profil Mobile: Eliminasi kebocoran warna kartu putih saat dark mode dan pembersihan tumpang tindih ikon form.
 - [x] Perbaikan Bug Mobile KPI & Tumpang Tindih Ikon Form: Eliminasi pemotongan elipsis kartu metrik pada layar smartphone dan perbaikan padding input pencarian/status dropdown.
 - [x] Harmonisasi Menyeluruh UI & Tema Aplikasi (Seluruh Menu & Seluruh Role): Penyelarasan tema Disafa modern SaaS di seluruh modul transaksi, master data, laporan, utilitas, dan sistem, bebas double padding, dan responsif optimal di desktop & mobile.
