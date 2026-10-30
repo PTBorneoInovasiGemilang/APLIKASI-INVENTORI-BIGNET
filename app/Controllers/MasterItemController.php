@@ -762,6 +762,28 @@ class MasterItemController {
         $stmt->execute([$id]);
         $attachments = $stmt->fetchAll();
 
+        // Cek apakah barang sudah pernah memiliki transaksi hilir (keluar/pakai)
+        $downstreamStmt = $pdo->prepare("SELECT COUNT(*) FROM (
+            SELECT master_item_id FROM outgoing_items WHERE master_item_id = ?
+            UNION SELECT master_item_id FROM return_items WHERE master_item_id = ?
+            UNION SELECT master_item_id FROM loan_items WHERE master_item_id = ?
+            UNION SELECT master_item_id FROM installation_items WHERE master_item_id = ?
+            UNION SELECT master_item_id FROM transfer_items WHERE master_item_id = ?
+            UNION SELECT master_item_id FROM stock_adjustment_items WHERE master_item_id = ?
+            UNION SELECT master_item_id FROM incident_items WHERE master_item_id = ?
+        ) as t");
+        $downstreamStmt->execute([$id, $id, $id, $id, $id, $id, $id]);
+        $hasDownstream = (int)$downstreamStmt->fetchColumn() > 0;
+
+        // Ambil stok saat ini per gudang
+        $stocksStmt = $pdo->prepare("SELECT s.warehouse_id, w.name AS warehouse_name, s.quantity 
+            FROM stocks s 
+            JOIN warehouses w ON s.warehouse_id = w.id 
+            WHERE s.master_item_id = ? AND s.quantity > 0 
+            ORDER BY w.name ASC");
+        $stocksStmt->execute([$id]);
+        $currentStocks = $stocksStmt->fetchAll();
+
         require __DIR__ . '/../../resources/views/inventory/items/edit.php';
     }
 
@@ -847,9 +869,90 @@ class MasterItemController {
 
                 $isLocked = ($hasStock > 0 || $hasSerials > 0 || $hasTransactions > 0);
 
-                if ((int)$oldItemData['is_serialized'] !== (int)$is_serialized && $isLocked) {
-                    throw new \Exception("Tidak dapat mengubah tipe barang (Serial/Non-Serial) karena barang ini sudah memiliki stok, histori nomor seri, atau transaksi.");
+                // Cek apakah barang sudah pernah memiliki transaksi hilir (keluar/pakai)
+                $downstreamStmt = $pdo->prepare("SELECT COUNT(*) FROM (
+                    SELECT master_item_id FROM outgoing_items WHERE master_item_id = ?
+                    UNION SELECT master_item_id FROM return_items WHERE master_item_id = ?
+                    UNION SELECT master_item_id FROM loan_items WHERE master_item_id = ?
+                    UNION SELECT master_item_id FROM installation_items WHERE master_item_id = ?
+                    UNION SELECT master_item_id FROM transfer_items WHERE master_item_id = ?
+                    UNION SELECT master_item_id FROM stock_adjustment_items WHERE master_item_id = ?
+                    UNION SELECT master_item_id FROM incident_items WHERE master_item_id = ?
+                ) as t");
+                $downstreamStmt->execute([$id, $id, $id, $id, $id, $id, $id]);
+                $hasDownstream = (int)$downstreamStmt->fetchColumn() > 0;
+
+                $registeredSnsCount = 0;
+
+                if ((int)$oldItemData['is_serialized'] !== (int)$is_serialized) {
+                    if ($hasDownstream) {
+                        throw new \Exception("Tidak dapat mengubah tipe barang (Serial/Non-Serial) karena barang ini sudah memiliki transaksi keluar, peminjaman, transfer, atau instalasi.");
+                    }
+
+                    if ((int)$oldItemData['is_serialized'] === 0 && (int)$is_serialized === 1) {
+                        // Konversi dari Non-Serial ke Serial (misal salah input saat awal dan baru masuk stok)
+                        $stkStmt = $pdo->prepare("SELECT s.warehouse_id, w.name AS warehouse_name, s.quantity 
+                            FROM stocks s 
+                            JOIN warehouses w ON s.warehouse_id = w.id 
+                            WHERE s.master_item_id = ? AND s.quantity > 0");
+                        $stkStmt->execute([$id]);
+                        $whStocks = $stkStmt->fetchAll();
+
+                        $conversionSerials = $_POST['conversion_serials'] ?? [];
+                        $userId = AuthHelper::user()['id'] ?? null;
+
+                        $incStmt = $pdo->prepare("SELECT incoming_id FROM incoming_items WHERE master_item_id = ? ORDER BY id DESC LIMIT 1");
+                        $incStmt->execute([$id]);
+                        $refIncomingId = $incStmt->fetchColumn() ?: null;
+
+                        $chkSn = $pdo->prepare("SELECT id FROM serial_numbers WHERE serial_number = ?");
+                        $insSn = $pdo->prepare("INSERT INTO serial_numbers (master_item_id, serial_number, status, current_warehouse_id) VALUES (?, ?, 'AVAILABLE', ?)");
+                        $insMov = $pdo->prepare("INSERT INTO serial_movements (serial_number_id, from_status, to_status, from_warehouse_id, to_warehouse_id, reference_type, reference_id, performed_by, notes) VALUES (?, NULL, 'AVAILABLE', NULL, ?, 'incoming', ?, ?, ?)");
+
+                        $allSns = [];
+                        foreach ($whStocks as $ws) {
+                            $whId = (int)$ws['warehouse_id'];
+                            $needed = (int)$ws['quantity'];
+                            $whName = $ws['warehouse_name'];
+                            $rawSn = trim($conversionSerials[$whId] ?? '');
+
+                            $sns = array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/', $rawSn))));
+
+                            if (count($sns) !== $needed) {
+                                throw new \Exception("Jumlah nomor seri untuk gudang '$whName' harus tepat $needed unit (terisi: " . count($sns) . ").");
+                            }
+
+                            if (count($sns) !== count(array_unique($sns))) {
+                                throw new \Exception("Terdapat nomor seri duplikat pada input untuk gudang '$whName'.");
+                            }
+
+                            foreach ($sns as $sn) {
+                                if (in_array($sn, $allSns, true)) {
+                                    throw new \Exception("Nomor seri '$sn' diinput lebih dari satu kali antar gudang.");
+                                }
+                                $allSns[] = $sn;
+
+                                $chkSn->execute([$sn]);
+                                if ($chkSn->fetch()) {
+                                    throw new \Exception("Nomor seri '$sn' sudah terdaftar di sistem.");
+                                }
+                                $insSn->execute([$id, $sn, $whId]);
+                                $snId = $pdo->lastInsertId();
+                                $insMov->execute([$snId, $whId, $refIncomingId, $userId, "Konversi Master Barang ke Serial"]);
+                            }
+                        }
+                        $registeredSnsCount = count($allSns);
+                    } elseif ((int)$oldItemData['is_serialized'] === 1 && (int)$is_serialized === 0) {
+                        // Konversi dari Serial ke Non-Serial
+                        $nonAvail = (int)$pdo->query("SELECT COUNT(*) FROM serial_numbers WHERE master_item_id = $id AND status != 'AVAILABLE'")->fetchColumn();
+                        if ($nonAvail > 0) {
+                            throw new \Exception("Tidak dapat mengubah ke Non-Serial karena ada nomor seri yang sedang tidak berstatus AVAILABLE.");
+                        }
+                        $pdo->prepare("DELETE sm FROM serial_movements sm JOIN serial_numbers sn ON sm.serial_number_id = sn.id WHERE sn.master_item_id = ?")->execute([$id]);
+                        $pdo->prepare("DELETE FROM serial_numbers WHERE master_item_id = ?")->execute([$id]);
+                    }
                 }
+
                 if ((int)$oldItemData['unit_id'] !== (int)$unit_id && $isLocked) {
                     throw new \Exception("Tidak dapat mengubah Satuan karena barang ini sudah memiliki histori transaksi.");
                 }
@@ -875,10 +978,12 @@ class MasterItemController {
             $auditStmt->execute([AuthHelper::user()['id'], $id]);
             
             $pdo->commit();
-            $_SESSION['success'] = "Item updated successfully.";
+            $_SESSION['success'] = "Master barang berhasil diperbarui" . ($registeredSnsCount > 0 ? " dan $registeredSnsCount nomor seri berhasil didaftarkan." : ".");
         } catch (\Exception $e) {
             $pdo->rollBack();
-            $_SESSION['error'] = "Failed to update item: " . $e->getMessage();
+            $_SESSION['error'] = "Gagal memperbarui barang: " . $e->getMessage();
+            header("Location: " . url('/items/edit/' . $id));
+            exit;
         }
 
         header("Location: " . url('/items'));

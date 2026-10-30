@@ -64,10 +64,56 @@ if (empty($_SESSION['csrf_token'])) {
       </div>
       
       <div>
-        <label class="flex items-center cursor-pointer">
-          <input type="checkbox" name="is_serialized" <?= $item['is_serialized'] ? 'checked' : '' ?> class="form-checkbox h-4 w-4 text-purple-600 border-slate-300 dark:border-slate-700 rounded">
-          <span class="ml-2.5 text-xs font-bold text-slate-700 dark:text-slate-300">Barang Berseri (Lacak Nomor Seri unik per unit)</span>
-        </label>
+        <?php if (!empty($hasDownstream)): ?>
+          <input type="hidden" name="is_serialized" value="<?= $item['is_serialized'] ? '1' : '0' ?>">
+          <div class="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700 text-xs">
+            <i class="fas fa-lock text-slate-400"></i>
+            <span class="font-bold text-slate-700 dark:text-slate-300">
+              Tipe: <?= $item['is_serialized'] ? 'Barang Berseri (Serial)' : 'Non-Serial (Bulk)' ?>
+            </span>
+            <span class="text-slate-400 dark:text-slate-500">— Terkunci karena sudah memiliki transaksi keluar, peminjaman, transfer, atau instalasi.</span>
+          </div>
+        <?php else: ?>
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" id="is_serialized_cb" name="is_serialized" value="1" <?= $item['is_serialized'] ? 'checked' : '' ?> onchange="toggleConversionSerials()" class="form-checkbox h-4 w-4 text-purple-600 border-slate-300 dark:border-slate-700 rounded">
+            <span class="ml-2.5 text-xs font-bold text-slate-700 dark:text-slate-300">Barang Berseri (Lacak Nomor Seri unik per unit)</span>
+          </label>
+
+          <?php if (!(int)$item['is_serialized'] && !empty($currentStocks)): ?>
+            <div id="conversion-serials-container" class="hidden mt-3 p-4 bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-800 rounded-2xl space-y-3">
+              <div class="flex items-start gap-2.5 text-xs text-purple-900 dark:text-purple-200">
+                <i class="fas fa-barcode mt-0.5 text-purple-600 dark:text-purple-400 text-sm shrink-0"></i>
+                <div>
+                  <p class="font-bold">Input Nomor Seri Stok Saat Ini</p>
+                  <p class="text-[11px] text-purple-700 dark:text-purple-300 mt-0.5">
+                    Barang ini sudah memiliki stok fisik dari Barang Masuk. Masukkan nomor seri untuk masing-masing unit stok (pisahkan dengan enter atau koma) agar stok dapat dilacak per nomor seri:
+                  </p>
+                </div>
+              </div>
+
+              <?php foreach ($currentStocks as $cs): ?>
+                <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-purple-100 dark:border-purple-900/50 space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                      <?= htmlspecialchars($cs['warehouse_name']) ?>
+                    </label>
+                    <span class="text-[11px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-md">
+                      Dibutuhkan: <?= number_format((int)$cs['quantity']) ?> Serial
+                    </span>
+                  </div>
+                  <textarea name="conversion_serials[<?= (int)$cs['warehouse_id'] ?>]" data-needed="<?= (int)$cs['quantity'] ?>" data-wh="<?= htmlspecialchars($cs['warehouse_name']) ?>" rows="3" class="w-full py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 font-mono focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="SN001&#10;SN002&#10;SN003..." oninput="updateConversionSnCount(this, <?= (int)$cs['quantity'] ?>, 'sn-count-<?= (int)$cs['warehouse_id'] ?>')"></textarea>
+                  <div id="sn-count-<?= (int)$cs['warehouse_id'] ?>" class="text-[11px] font-semibold text-slate-400">
+                    SN Terisi: 0 / <?= (int)$cs['quantity'] ?>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          <?php elseif ((int)$item['is_serialized']): ?>
+            <p id="serial-uncheck-warning" class="hidden text-[11px] text-amber-600 dark:text-amber-400 mt-1.5">
+              <i class="fas fa-triangle-exclamation mr-1"></i> Perhatian: Menonaktifkan serial akan menghapus seluruh data nomor seri yang tersimpan di gudang dan mengubahnya menjadi stok curah (bulk).
+            </p>
+          <?php endif; ?>
+        <?php endif; ?>
       </div>
 
       <div>
@@ -129,6 +175,68 @@ if (empty($_SESSION['csrf_token'])) {
     <?php endif; ?>
   </div>
 </div>
+
+<script>
+function toggleConversionSerials() {
+  const cb = document.getElementById('is_serialized_cb');
+  const box = document.getElementById('conversion-serials-container');
+  const warn = document.getElementById('serial-uncheck-warning');
+  if (box && cb) {
+    if (cb.checked) {
+      box.classList.remove('hidden');
+    } else {
+      box.classList.add('hidden');
+    }
+  }
+  if (warn && cb) {
+    if (!cb.checked) {
+      warn.classList.remove('hidden');
+    } else {
+      warn.classList.add('hidden');
+    }
+  }
+}
+
+function updateConversionSnCount(textarea, needed, counterId) {
+  const counter = document.getElementById(counterId);
+  if (!counter) return;
+  const val = textarea.value.trim();
+  const count = val ? val.split(/[\r\n,]+/).map(s => s.trim()).filter(Boolean).length : 0;
+  counter.textContent = 'SN Terisi: ' + count + ' / ' + needed;
+  if (count === needed) {
+    counter.className = 'text-[11px] font-semibold text-emerald-600 dark:text-emerald-400';
+  } else if (count > needed) {
+    counter.className = 'text-[11px] font-semibold text-red-500';
+  } else {
+    counter.className = 'text-[11px] font-semibold text-amber-600 dark:text-amber-400';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const editForm = document.querySelector('form[action*="/items/update"]');
+  if (editForm) {
+    editForm.addEventListener('submit', function(e) {
+      const cb = document.getElementById('is_serialized_cb');
+      const box = document.getElementById('conversion-serials-container');
+      if (cb && cb.checked && box && !box.classList.contains('hidden')) {
+        const textareas = box.querySelectorAll('textarea[name^="conversion_serials"]');
+        for (const ta of textareas) {
+          const needed = parseInt(ta.getAttribute('data-needed') || '0', 10);
+          const wh = ta.getAttribute('data-wh') || 'Gudang';
+          const val = ta.value.trim();
+          const count = val ? val.split(/[\r\n,]+/).map(s => s.trim()).filter(Boolean).length : 0;
+          if (count !== needed) {
+            e.preventDefault();
+            alert('Jumlah nomor seri untuk ' + wh + ' harus tepat ' + needed + ' unit. Saat ini terisi: ' + count);
+            ta.focus();
+            return;
+          }
+        }
+      }
+    });
+  }
+});
+</script>
 
 <?php
 $content = ob_get_clean();

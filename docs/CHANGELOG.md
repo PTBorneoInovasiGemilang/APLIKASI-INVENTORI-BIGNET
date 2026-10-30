@@ -15,6 +15,28 @@
 **Remaining:**
 **Next:**
 
+## 2026-10-30 — ALLOW MASTER ITEM SERIAL/NON-SERIAL EDIT WHEN UNUSED
+**Task:** Memungkinkan perubahan tipe Master Barang dari Non-Serial ke Serial (atau sebaliknya) pada barang yang sudah memiliki stok dari Barang Masuk namun belum pernah ada transaksi pengeluaran/pemakaian.
+**Goal:** Membantu Admin memperbaiki human error ketika salah input tipe barang di awal dan sudah terlanjur diproses di Barang Masuk, dengan memvalidasi input nomor seri untuk stok yang ada di gudang secara otomatis tanpa merusak integritas data.
+**Changed:**
+- `app/Controllers/MasterItemController.php`:
+  - `edit($id)`: Cek transaksi hilir (`outgoing_items`, `loan_items`, `installation_items`, `transfer_items`, `return_items`, `stock_adjustment_items`, `incident_items`) dan ambil data stok aktif per gudang (`$currentStocks`).
+  - `update($id)`:
+    - Izinkan perubahan `is_serialized` jika barang belum memiliki transaksi hilir (`!$hasDownstream`).
+    - Jika mengubah dari Non-Serial ke Serial dan stok > 0: wajibkan input nomor seri per gudang sesuai jumlah stok fisik. Validasi jumlah, keunikan, dan ketiadaan duplikat di DB, lalu insert ke `serial_numbers` (status `AVAILABLE`) dan `serial_movements` (ref `incoming`).
+    - Jika mengubah dari Serial ke Non-Serial: pastikan seluruh nomor seri masih berstatus `AVAILABLE` di gudang, lalu bersihkan nomor seri dan ubah status menjadi Non-Serial.
+    - Redirect ke `/items/edit/{id}` jika terjadi error validasi agar input tidak hilang.
+- `resources/views/inventory/items/edit.php`:
+  - Jika barang sudah pernah keluar/dipakai: kunci checkbox `is_serialized` dengan indikator terkunci yang jelas.
+  - Jika barang belum pernah keluar/dipakai dan memiliki stok fisik: saat checkbox "Barang Berseri" dicentang, tampilkan form textarea nomor seri per gudang dengan indikator counter real-time (`SN Terisi: X / Y`).
+  - Validasi JavaScript saat submit form sebelum kirim ke server.
+**Business impact:** Admin dapat segera mengoreksi kesalahan pemilihan tipe barang tanpa perlu manipulasi database manual atau membuat barang ganda, sementara riwayat stok fisik dan audit trail tetap 100% konsisten.
+**Database impact:** Tidak ada perubahan skema database; menggunakan tabel `serial_numbers` dan `serial_movements` yang sudah ada.
+**Verification:** Code review, audit SQL query, verifikasi balanced braces, dan sintaks file.
+**Result:** PASS.
+**Remaining:** -
+**Next:** -
+
 ## 2026-10-09 — FIX 1366X768 RESOLUTION TABLE USABILITY & DUAL SCROLLBAR UX
 **Task:** Optimalisasi antarmuka tabel pada resolusi 1366x768 (laptop) agar tidak terhimpit oleh sidebar panduan, serta implementasi Dual Scrollbar & Sticky Action Columns.
 **Goal:** Memungkinkan pengguna di laptop (1366x768) melihat tabel data secara penuh tanpa terpotong horizontal, menghilangkan keharusan scroll ke baris paling bawah untuk menggeser tabel, dan memastikan kolom Aksi selalu tampak di sisi kanan.
