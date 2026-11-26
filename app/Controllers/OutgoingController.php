@@ -207,7 +207,7 @@ class OutgoingController {
 
             foreach ($item_ids as $index => $item_id) {
                 if (!array_key_exists($index, $quantities)) {
-                    throw new \\Exception("Data kuantitas barang tidak cocok dengan baris form. Muat ulang halaman lalu coba kembali.");
+                    throw new \Exception("Data kuantitas barang tidak cocok dengan baris form. Muat ulang halaman lalu coba kembali.");
                 }
                 $qty = (int)$quantities[$index];
                 if ($qty <= 0) continue;
