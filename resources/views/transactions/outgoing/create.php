@@ -130,6 +130,9 @@ if (empty($_SESSION['csrf_token'])) {
     const counter = document.getElementById(`sn-counter-${rowIndex}`);
     if (!wrap || !textarea || !counter) return;
 
+    const reqToken = String((parseInt(wrap.dataset.reqToken || '0', 10) || 0) + 1);
+    wrap.dataset.reqToken = reqToken;
+
     if (!serialized) {
       wrap.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400 italic py-2">Bukan barang serial.</div>';
       textarea.value = '';
@@ -164,7 +167,8 @@ if (empty($_SESSION['csrf_token'])) {
     let selected = (textarea.value || '').replace(/,/g, '\n').split('\n').map(sn => sn.trim()).filter(Boolean);
 
     function sync() {
-      textarea.value = selected.join('\n');
+      if (wrap.dataset.reqToken !== reqToken) return;
+      textarea.value = selected.join(',');
       const qty = maxQty();
       selectedLabel.textContent = `${selected.length} / ${qty} dipilih`;
       counter.textContent = `SN Dipilih: ${selected.length} / ${qty}`;
@@ -187,6 +191,7 @@ if (empty($_SESSION['csrf_token'])) {
     }
 
     function renderOptions() {
+      if (wrap.dataset.reqToken !== reqToken) return;
       const q = search.value.trim().toLowerCase();
       const filtered = available.filter(sn => !q || sn.toLowerCase().includes(q));
       if (filtered.length === 0) {
@@ -226,6 +231,7 @@ if (empty($_SESSION['csrf_token'])) {
 
     async function load() {
       if (!masterItemId || !warehouseId) {
+        if (wrap.dataset.reqToken !== reqToken) return;
         available = [];
         selected = [];
         textarea.value = '';
@@ -237,17 +243,22 @@ if (empty($_SESSION['csrf_token'])) {
       try {
         const response = await fetch(`<?= url('/api/stock') ?>?item_id=${encodeURIComponent(masterItemId)}&warehouse_id=${encodeURIComponent(warehouseId)}`, { headers: { 'Accept': 'application/json' } });
         const data = await response.json();
+        if (wrap.dataset.reqToken !== reqToken) return;
         available = Array.isArray(data.serials) ? data.serials.map(x => x.serial_number) : [];
-        selected = selected.filter(sn => available.includes(sn));
+        // Merge existing input value in case user interacted while request was resolving
+        const currentInput = (textarea.value || '').replace(/,/g, '\n').split('\n').map(sn => sn.trim()).filter(Boolean);
+        const merged = Array.from(new Set([...selected, ...currentInput]));
+        selected = merged.filter(sn => available.includes(sn));
         renderOptions();
         sync();
       } catch (err) {
+        if (wrap.dataset.reqToken !== reqToken) return;
         available = [];
         renderOptions();
         sync();
         if (typeof AppToast !== 'undefined' && AppToast.error) AppToast.error('Gagal memuat Serial Number dari stok gudang.');
       } finally {
-        loadLabel.classList.add('hidden');
+        if (wrap.dataset.reqToken === reqToken) loadLabel.classList.add('hidden');
       }
     }
 
@@ -378,7 +389,7 @@ if (empty($_SESSION['csrf_token'])) {
           return;
         }
 
-        data.forEach(item => addSubItemRow(item));
+        data.forEach(item => addSubItemRow(item, true));
 
         const whSelect = document.getElementById('warehouse_id');
         const whHint = document.getElementById('whHint');
@@ -386,7 +397,6 @@ if (empty($_SESSION['csrf_token'])) {
         if (whSet.size === 1) {
           whSelect.value = [...whSet][0];
           whHint.textContent = '(otomatis: Gudang Pemenuhan pengajuan)';
-          document.querySelectorAll('#itemsBody tr[data-index]').forEach(tr => refreshSerialPicker(tr.dataset.index));
         } else if (whSet.size > 1) {
           whSelect.value = '';
           whHint.textContent = '(item memakai gudang berbeda — proses per gudang)';
@@ -395,13 +405,14 @@ if (empty($_SESSION['csrf_token'])) {
           whSelect.value = '';
           whHint.textContent = '(pengajuan lama tanpa gudang — pilih gudang eksplisit)';
         }
+        document.querySelectorAll('#itemsBody tr[data-index]').forEach(tr => refreshSerialPicker(tr.dataset.index));
       })
       .catch(() => {
         if (typeof AppToast !== 'undefined' && AppToast.error) AppToast.error('Gagal mengambil data pengajuan.');
       });
   }
 
-  function addSubItemRow(item) {
+  function addSubItemRow(item, deferRefresh = false) {
     const tbody = document.getElementById('itemsBody');
     const rowIndex = rowCount++;
     const tr = document.createElement('tr');
@@ -430,7 +441,7 @@ if (empty($_SESSION['csrf_token'])) {
       </td>`;
 
     tbody.appendChild(tr);
-    refreshSerialPicker(rowIndex);
+    if (!deferRefresh) refreshSerialPicker(rowIndex);
   }
 
   function validateQty(qtyElem, rowIndex) {
@@ -440,14 +451,17 @@ if (empty($_SESSION['csrf_token'])) {
     if (picker && tr.dataset.serialized === '1') {
       const selectedButtons = picker.querySelectorAll('button[data-sn]');
       const counter = document.getElementById(`sn-counter-${rowIndex}`);
+      const selectedLabel = document.getElementById(`sn-selected-${rowIndex}`);
       const qty = parseInt(qtyElem.value, 10) || 0;
-      const selected = selectedButtons.length;
+      const selectedCount = selectedButtons.length;
+      if (selectedLabel) {
+        selectedLabel.textContent = `${selectedCount} / ${qty} dipilih`;
+      }
       if (counter) {
-        counter.textContent = `SN Dipilih: ${selected} / ${qty}`;
-        counter.className = selected === qty ? 'text-xs font-bold text-green-600 mt-1' : (selected > qty ? 'text-xs font-bold text-red-600 mt-1' : 'text-xs font-bold text-orange-500 mt-1');
+        counter.textContent = `SN Dipilih: ${selectedCount} / ${qty}`;
+        counter.className = selectedCount === qty ? 'text-xs font-bold text-green-600 mt-1' : (selectedCount > qty ? 'text-xs font-bold text-red-600 mt-1' : 'text-xs font-bold text-orange-500 mt-1');
       }
     }
-    if (tr.dataset.serialized === '1') refreshSerialPicker(rowIndex);
   }
 
 
@@ -456,7 +470,18 @@ if (empty($_SESSION['csrf_token'])) {
     for (const tr of rows) {
       if (tr.dataset.serialized !== '1') continue;
       const qty = parseInt(tr.querySelector('.qty-input')?.value || '0', 10) || 0;
-      const raw = tr.querySelector('input[id^="sn-input-"]')?.value || '';
+      const snInput = tr.querySelector('input[id^="sn-input-"]');
+      const chipSns = Array.from(tr.querySelectorAll('button[data-sn]'))
+        .map(btn => (btn.dataset.sn || '').trim())
+        .filter(Boolean);
+      const checkedSns = Array.from(tr.querySelectorAll('.sn-check:checked'))
+        .map(cb => (cb.value || '').trim())
+        .filter(Boolean);
+      const uiSns = chipSns.length > 0 ? chipSns : checkedSns;
+      if (snInput && uiSns.length > 0) {
+        snInput.value = Array.from(new Set(uiSns)).join(',');
+      }
+      const raw = snInput?.value || '';
       const sns = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
       if (sns.length !== qty) {
         e.preventDefault();
