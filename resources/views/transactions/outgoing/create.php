@@ -133,7 +133,7 @@ if (empty($_SESSION['csrf_token'])) {
     if (!serialized) {
       wrap.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400 italic py-2">Bukan barang serial.</div>';
       textarea.value = '';
-      textarea.disabled = true;
+      textarea.disabled = false;
       counter.textContent = '';
       return;
     }
@@ -317,7 +317,7 @@ if (empty($_SESSION['csrf_token'])) {
     tr.dataset.masterItemId = '';
     tr.dataset.serialized = '0';
 
-    let selectHtml = `<select name="item_ids[]" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 item-select" onchange="handleItemChange(this, ${rowIndex})">
+    let selectHtml = `<select name="item_ids[${rowIndex}]" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 item-select" onchange="handleItemChange(this, ${rowIndex})">
       <option value="">Pilih Barang</option>`;
     itemsData.forEach(item => {
       selectHtml += `<option value="${esc(item.id)}" data-master-item-id="${esc(item.id)}" data-serialized="${esc(item.is_serialized)}">${esc(item.nama)}</option>`;
@@ -327,11 +327,11 @@ if (empty($_SESSION['csrf_token'])) {
     tr.innerHTML = `
       <td class="px-4 py-3 align-top">${selectHtml}</td>
       <td class="px-4 py-3 align-top">
-        <input type="number" name="quantities[]" min="1" value="1" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 qty-input" onchange="validateQty(this, ${rowIndex})" oninput="validateQty(this, ${rowIndex})">
+        <input type="number" name="quantities[${rowIndex}]" min="1" value="1" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 qty-input" onchange="validateQty(this, ${rowIndex})" oninput="validateQty(this, ${rowIndex})">
       </td>
       <td class="px-4 py-3 align-top">
         <div id="serial-picker-${rowIndex}"></div>
-        <input type="hidden" name="sn_list[]" id="sn-input-${rowIndex}" value="" disabled>
+        <input type="hidden" name="sn_list[${rowIndex}]" id="sn-input-${rowIndex}" value="">
         <div id="sn-counter-${rowIndex}" class="text-xs font-bold text-gray-500 dark:text-gray-400 mt-1"></div>
       </td>
       <td class="px-4 py-3 text-center align-top">
@@ -403,7 +403,7 @@ if (empty($_SESSION['csrf_token'])) {
     tr.dataset.serialized = item.is_serialized == 1 ? '1' : '0';
 
     const itemLabel = `
-      <input type="hidden" name="item_ids[]" value="${esc(item.submission_item_id)}">
+      <input type="hidden" name="item_ids[${rowIndex}]" value="${esc(item.submission_item_id)}">
       <div class="font-medium text-gray-900 dark:text-gray-100">${esc(item.nama)}</div>
       <div class="text-xs text-blue-600 mt-1">Disetujui: ${esc(item.approved_quantity)} | Sisa: ${esc(item.remaining_quantity)}</div>
       ${item.warehouse_id ? `<div class="text-xs text-gray-500 dark:text-gray-400"><i class="fas fa-warehouse mr-1"></i>Gudang Pemenuhan: ${esc(warehouseMap[item.warehouse_id] || 'Gudang tidak diketahui')}</div>` : ''}`;
@@ -411,11 +411,11 @@ if (empty($_SESSION['csrf_token'])) {
     tr.innerHTML = `
       <td class="px-4 py-3 align-top">${itemLabel}</td>
       <td class="px-4 py-3 align-top">
-        <input type="number" name="quantities[]" min="1" max="${esc(item.remaining_quantity)}" value="${esc(item.remaining_quantity)}" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:bg-gray-700 dark:text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500 qty-input" onchange="validateQty(this, ${rowIndex})" oninput="validateQty(this, ${rowIndex})">
+        <input type="number" name="quantities[${rowIndex}]" min="1" max="${esc(item.remaining_quantity)}" value="${esc(item.remaining_quantity)}" required class="shadow appearance-none border border-gray-300 dark:border-gray-600 rounded w-full py-2 px-3 text-gray-700 dark:bg-gray-700 dark:text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500 qty-input" onchange="validateQty(this, ${rowIndex})" oninput="validateQty(this, ${rowIndex})">
       </td>
       <td class="px-4 py-3 align-top">
         <div id="serial-picker-${rowIndex}"></div>
-        <input type="hidden" name="sn_list[]" id="sn-input-${rowIndex}" value="" ${item.is_serialized == 1 ? '' : 'disabled'}>
+        <input type="hidden" name="sn_list[${rowIndex}]" id="sn-input-${rowIndex}" value="" >
         <div id="sn-counter-${rowIndex}" class="text-xs font-bold text-gray-500 dark:text-gray-400 mt-1"></div>
       </td>
       <td class="px-4 py-3 text-center align-top">
@@ -449,7 +449,7 @@ if (empty($_SESSION['csrf_token'])) {
     for (const tr of rows) {
       if (tr.dataset.serialized !== '1') continue;
       const qty = parseInt(tr.querySelector('.qty-input')?.value || '0', 10) || 0;
-      const raw = tr.querySelector('input[name="sn_list[]"]')?.value || '';
+      const raw = tr.querySelector('input[name="sn_list[${rowIndex}]"]')?.value || '';
       const sns = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
       if (sns.length !== qty) {
         e.preventDefault();
