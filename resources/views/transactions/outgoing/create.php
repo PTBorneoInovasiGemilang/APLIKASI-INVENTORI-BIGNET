@@ -161,7 +161,7 @@ if (empty($_SESSION['csrf_token'])) {
     let available = [];
     const maxQty = () => parseInt(document.querySelector(`tr[data-index="${rowIndex}"] .qty-input`)?.value || quantity || 0, 10) || 0;
     // Pertahankan pilihan SN ketika kuantitas/gudang di-refresh; server tetap memvalidasi jumlah akhirnya.
-    let selected = (textarea.value || '').split(/[\\n,]+/).map(sn => sn.trim()).filter(Boolean);
+    let selected = (textarea.value || '').replace(/,/g, '\n').split('\n').map(sn => sn.trim()).filter(Boolean);
 
     function sync() {
       textarea.value = selected.join('\n');
