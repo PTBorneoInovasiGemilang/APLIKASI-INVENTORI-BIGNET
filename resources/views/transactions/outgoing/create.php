@@ -456,7 +456,7 @@ if (empty($_SESSION['csrf_token'])) {
     for (const tr of rows) {
       if (tr.dataset.serialized !== '1') continue;
       const qty = parseInt(tr.querySelector('.qty-input')?.value || '0', 10) || 0;
-      const raw = tr.querySelector('input[name="sn_list[${rowIndex}]"]')?.value || '';
+      const raw = tr.querySelector('input[id^="sn-input-"]')?.value || '';
       const sns = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
       if (sns.length !== qty) {
         e.preventDefault();
