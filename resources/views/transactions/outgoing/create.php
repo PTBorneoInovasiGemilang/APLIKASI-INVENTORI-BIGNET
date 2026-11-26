@@ -159,9 +159,9 @@ if (empty($_SESSION['csrf_token'])) {
     const selectedLabel = document.getElementById(`sn-selected-${rowIndex}`);
     const chips = document.getElementById(`sn-chips-${rowIndex}`);
     let available = [];
-    let selected = [];
-
     const maxQty = () => parseInt(document.querySelector(`tr[data-index="${rowIndex}"] .qty-input`)?.value || quantity || 0, 10) || 0;
+    // Pertahankan pilihan SN ketika kuantitas/gudang di-refresh; server tetap memvalidasi jumlah akhirnya.
+    let selected = (textarea.value || '').split(/[\\n,]+/).map(sn => sn.trim()).filter(Boolean);
 
     function sync() {
       textarea.value = selected.join('\n');
@@ -227,6 +227,8 @@ if (empty($_SESSION['csrf_token'])) {
     async function load() {
       if (!masterItemId || !warehouseId) {
         available = [];
+        selected = [];
+        textarea.value = '';
         renderOptions();
         sync();
         return;
@@ -344,7 +346,12 @@ if (empty($_SESSION['csrf_token'])) {
     const option = selectElem.options[selectElem.selectedIndex];
     const tr = document.querySelector(`tr[data-index="${rowIndex}"]`);
     if (!tr) return;
-    tr.dataset.masterItemId = option?.dataset?.masterItemId || '';
+    const nextMasterItemId = option?.dataset?.masterItemId || '';
+    if (String(tr.dataset.masterItemId || '') !== String(nextMasterItemId)) {
+      const snInput = document.getElementById(`sn-input-${rowIndex}`);
+      if (snInput) snInput.value = '';
+    }
+    tr.dataset.masterItemId = nextMasterItemId;
     tr.dataset.serialized = option?.dataset?.serialized || '0';
     refreshSerialPicker(rowIndex);
   }
