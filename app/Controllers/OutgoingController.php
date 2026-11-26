@@ -125,9 +125,11 @@ class OutgoingController {
         $warehouse_id = (int)$_POST['warehouse_id'];
         $submission_id = !empty($_POST['submission_id']) ? (int)$_POST['submission_id'] : null;
         $notes = trim($_POST['notes']);
-        $item_ids = $_POST['item_ids'] ?? [];
-        $quantities = $_POST['quantities'] ?? [];
-        $sn_list = $_POST['sn_list'] ?? [];
+        // Ketiga array memakai row index yang sama (item_ids[n], quantities[n], sn_list[n]).
+        // Jangan mengindeks ulang dengan array_values karena baris dapat dihapus di browser.
+        $item_ids = is_array($_POST['item_ids'] ?? null) ? $_POST['item_ids'] : [];
+        $quantities = is_array($_POST['quantities'] ?? null) ? $_POST['quantities'] : [];
+        $sn_list = is_array($_POST['sn_list'] ?? null) ? $_POST['sn_list'] : [];
         $evidenceFiles = $_FILES['evidence'] ?? [];
 
         $evidenceCount = 0;
@@ -204,6 +206,9 @@ class OutgoingController {
             $itemStmt = $pdo->prepare("INSERT INTO outgoing_items (outgoing_id, master_item_id, submission_item_id, quantity) VALUES (?, ?, ?, ?)");
 
             foreach ($item_ids as $index => $item_id) {
+                if (!array_key_exists($index, $quantities)) {
+                    throw new \\Exception("Data kuantitas barang tidak cocok dengan baris form. Muat ulang halaman lalu coba kembali.");
+                }
                 $qty = (int)$quantities[$index];
                 if ($qty <= 0) continue;
 
